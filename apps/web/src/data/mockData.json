@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    { "id": "n1", "title": "New client request", "body": "Jessica Pearson wants to join your roster.", "time": "2m ago", "read": false, "icon": "person_add" },
+    { "id": "n2", "title": "Workout completed", "body": "Mike Ross finished Legs Heavy.", "time": "15m ago", "read": false, "icon": "task_alt" },
+    { "id": "n3", "title": "Form check uploaded", "body": "David Chen uploaded a squat video.", "time": "1h ago", "read": false, "icon": "videocam" },
+    { "id": "n4", "title": "Session reminder", "body": "Sarah Miller's session starts in 30 min.", "time": "28m ago", "read": true, "icon": "schedule" },
+    { "id": "n5", "title": "Weekly report ready", "body": "Your weekly performance report is available.", "time": "3h ago", "read": true, "icon": "assessment" }
+  ],
+  "quickActions": [
+    { "id": "qa1", "label": "Schedule Workout", "icon": "fitness_center", "route": "/planner" },
+    { "id": "qa2", "label": "Add New Client", "icon": "person_add", "route": null },
+    { "id": "qa3", "label": "Send Message", "icon": "chat", "route": "/chat" },
+    { "id": "qa4", "label": "View Reports", "icon": "assessment", "route": "/" },
+    { "id": "qa5", "label": "Create Template", "icon": "note_add", "route": "/planner" },
+    { "id": "qa6", "label": "Export Data", "icon": "download", "route": null }
+  ],
+  "helpTopics": [
+    { "id": "h1", "title": "Getting Started", "desc": "Learn how to set up your trainer profile and add clients." },
+    { "id": "h2", "title": "Workout Templates", "desc": "Create and manage reusable workout programs." },
+    { "id": "h3", "title": "Client Management", "desc": "Track progress, set goals, and manage your roster." },
+    { "id": "h4", "title": "Billing & Plans", "desc": "Manage your subscription and payment methods." },
+    { "id": "h5", "title": "Contact Support", "desc": "Reach our team via live chat or email." }
+  ],
+  "alerts": [
+    { "id": "a1", "clientId": "u-client-2", "type": "missed_set", "message": "Missed Set: Deadlift", "createdAt": "2026-05-14T12:00:00Z" },
+    { "id": "a2", "clientId": "u-client-3", "type": "form_check", "message": "Form Check Requested", "createdAt": "2026-05-14T10:30:00Z" },
+    { "id": "a3", "clientId": "u-client-4", "type": "plateau", "message": "Bench Press plateau – 3 weeks", "createdAt": "2026-05-13T16:00:00Z" }
+  ],
+  "recentWorkouts": [
+    { "id": "rw1", "clientId": "u-client-4", "workoutPlanId": "wp-3", "completedAt": "2026-05-14T08:30:00Z", "notes": "Completed 5 exercises. Squat volume increased by 5%.", "tags": ["Volume PR", "Legs"] },
+    { "id": "rw2", "clientId": "u-client-5", "workoutPlanId": "wp-4", "completedAt": "2026-05-14T10:15:00Z", "notes": "Struggled with final set of overhead press. Adjusted weight down.", "tags": ["Upper Body"] },
+    { "id": "rw3", "clientId": "u-client-1", "workoutPlanId": "wp-1", "completedAt": "2026-05-13T09:00:00Z", "notes": "Strong session. All sets completed at target weight.", "tags": ["Push", "PR"] },
+    { "id": "rw4", "clientId": "u-client-3", "workoutPlanId": "wp-2", "completedAt": "2026-05-12T14:00:00Z", "notes": "Form check requested on deadlift. Good progress on rows.", "tags": ["Pull"] }
+  ],
+  "clientVolumeData": {
+    "u-client-1": { "weeks": [{"week":"W1","planned":10500,"actual":11200},{"week":"W2","planned":12000,"actual":11800},{"week":"W3","planned":13500,"actual":14200},{"week":"W4","planned":15000,"actual":4500}], "notes": "Responding well to increased volume on leg days. Monitor lower back fatigue during Pull Day B. Suggested deload in W5." },
+    "u-client-2": { "weeks": [{"week":"W1","planned":8000,"actual":8200},{"week":"W2","planned":9000,"actual":8800},{"week":"W3","planned":9500,"actual":9900},{"week":"W4","planned":10000,"actual":3200}], "notes": "Strength gains are consistent. Bench press stalling — consider periodization change." },
+    "u-client-3": { "weeks": [{"week":"W1","planned":7000,"actual":7500},{"week":"W2","planned":7500,"actual":7200},{"week":"W3","planned":8000,"actual":8500},{"week":"W4","planned":8500,"actual":2000}], "notes": "Good adherence to nutrition plan. Cardio sessions on off-days are helping recovery." },
+    "u-client-4": { "weeks": [{"week":"W1","planned":11000,"actual":11500},{"week":"W2","planned":12500,"actual":12000},{"week":"W3","planned":14000,"actual":14800},{"week":"W4","planned":15500,"actual":5000}], "notes": "Volume PRs consistently. Consider reducing accessory work to avoid overtraining." }
+  },
+  "stats": {
+    "activeClients": 42,
+    "pendingRequests": 5,
+    "workoutsCompletedToday": 12,
+    "averageRating": 4.9,
+    "totalReviews": 128,
+    "weeklyClientGrowth": 3
+  }
+}

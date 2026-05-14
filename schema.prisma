@@ -1,0 +1,214 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ================= ENUMS =================
+
+enum Role {
+  USER
+  TRAINER
+}
+
+enum SetStatus {
+  PENDING
+  COMPLETED
+  MODIFIED
+  SKIPPED
+}
+
+enum MuscleTargetType {
+  PRIMARY
+  SECONDARY
+}
+
+enum WeightUnit {
+  KG
+  LB
+}
+
+enum LengthUnit {
+  CM
+  IN
+}
+
+// ================= USER & PROFILE =================
+
+model User {
+  id                      String          @id @default(uuid())
+  email                   String          @unique
+  username                String          @unique
+  passwordHash            String
+  fullName                String
+  bio                     String?
+  role                    Role            @default(USER)
+  
+  // Custom Measurement Units
+  weightUnit              WeightUnit      @default(KG)
+  lengthUnit              LengthUnit      @default(CM)
+  
+  // Notifications
+  notificationLeadMinutes Int             @default(60)
+
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  // Trainer/Client Relationship (Self-reference)
+  trainerId               String?
+  trainer                 User?           @relation("TrainerClients", fields: [trainerId], references: [id])
+  clients                 User[]          @relation("TrainerClients")
+
+  // App Modules
+  trainerProfile          TrainerProfile?
+  biometrics              BiometricLog[]
+  workoutPlans            WorkoutPlan[]   @relation("ClientWorkouts")
+  createdPlans            WorkoutPlan[]   @relation("CreatedWorkouts")
+  sentMessages            Message[]       @relation("SentMessages")
+  receivedMessages        Message[]       @relation("ReceivedMessages")
+}
+
+model TrainerProfile {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio               String?
+  education         String?   // Added per requirement
+  certifications    String[]
+  specialties       String[]
+  rating            Float     @default(0.0)
+  reviewCount       Int       @default(0)
+  marketplaceActive Boolean   @default(true)
+}
+
+// ================= EXERCISE DICTIONARY =================
+
+model Equipment {
+  id        String     @id @default(uuid())
+  name      String     @unique // e.g., Barbell, Cable Machine
+  exercises Exercise[]
+}
+
+model Muscle {
+  id        String           @id @default(uuid())
+  name      String           @unique // e.g., Pectoralis Major
+  category  String           // e.g., Chest, Back, Legs
+  exercises ExerciseMuscle[]
+}
+
+model Exercise {
+  id          String            @id @default(uuid())
+  name        String            @unique
+  description String?
+  steps       String[]          // Sequential instructions
+  equipmentId String?
+  equipment   Equipment?        @relation(fields: [equipmentId], references: [id])
+  muscles     ExerciseMuscle[]
+  workouts    WorkoutExercise[]
+}
+
+model ExerciseMuscle {
+  exerciseId String
+  muscleId   String
+  targetType MuscleTargetType  // PRIMARY | SECONDARY
+  exercise   Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  muscle     Muscle            @relation(fields: [muscleId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseId, muscleId])
+}
+
+// ================= WORKOUT LOGIC =================
+
+model WorkoutPlan {
+  id             String            @id @default(uuid())
+  title          String            // e.g., "Monday Pull Day"
+  description    String?
+  scheduledDate  DateTime?         // Specific date/time
+  isRecurring    Boolean           @default(false)
+  recurrenceRule String?           // RRULE format
+  
+  createdById    String
+  createdBy      User              @relation("CreatedWorkouts", fields: [createdById], references: [id], onDelete: Cascade)
+  
+  clientId       String
+  client         User              @relation("ClientWorkouts", fields: [clientId], references: [id], onDelete: Cascade)
+  
+  exercises      WorkoutExercise[]
+  session        WorkoutSession?
+  createdAt      DateTime          @default(now())
+}
+
+model WorkoutExercise {
+  id            String       @id @default(uuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan  @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  exerciseId    String
+  exercise      Exercise     @relation(fields: [exerciseId], references: [id])
+  
+  orderIndex    Int          // Sequence: 1, 2, 3...
+  restTimeSec   Int?         // Added per requirement (Break time)
+  notes         String?
+  
+  sets          WorkoutSet[]
+}
+
+model WorkoutSet {
+  id                 String          @id @default(uuid())
+  workoutExerciseId  String
+  workoutExercise    WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+  setIndex           Int
+
+  // The Plan (Targets)
+  expectedReps       Int
+  expectedWeight     Float           
+  
+  // The Execution (Actuals)
+  actualReps         Int?
+  actualWeight       Float?
+  status             SetStatus       @default(PENDING)
+  
+  // Link to specific session execution
+  workoutSessionId   String?
+  workoutSession     WorkoutSession? @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+}
+
+model WorkoutSession {
+  id              String       @id @default(uuid())
+  workoutPlanId   String       @unique
+  workoutPlan     WorkoutPlan  @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  
+  startedAt       DateTime     @default(now())
+  completedAt     DateTime?
+  
+  totalVolume     Float        @default(0.0)
+  clientNotes     String?      // Struggles / Comments
+  trainerFeedback String?
+  trainerRating   Int?         // 1-5 Scale
+  
+  loggedSets      WorkoutSet[]
+}
+
+// ================= BIOMETRICS & CHAT =================
+
+model BiometricLog {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight   Float    
+  height   Float?   
+  loggedAt DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}

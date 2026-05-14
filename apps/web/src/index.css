@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/* ─── FitSync Pro Design System (Stitch "Midnight Performance") ─── */
+@theme {
+  --color-primary: #d0bcff;
+  --color-on-primary: #3c0091;
+  --color-primary-container: #a078ff;
+  --color-secondary: #c8c6c3;
+  --color-secondary-container: #474744;
+  --color-tertiary: #ffb869;
+  --color-tertiary-container: #ca801e;
+  --color-background: #091421;
+  --color-on-background: #d9e3f6;
+  --color-surface: #091421;
+  --color-surface-bright: #303a48;
+  --color-surface-dim: #091421;
+  --color-surface-container: #16202e;
+  --color-surface-container-low: #121c2a;
+  --color-surface-container-high: #212b39;
+  --color-surface-container-highest: #2b3544;
+  --color-on-surface: #d9e3f6;
+  --color-on-surface-variant: #cbc3d7;
+  --color-outline: #958ea0;
+  --color-outline-variant: #494454;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-ivory: #fdfbf7;
+  --radius-md: 20px;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Base ─── */
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans antialiased min-h-screen;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* ─── Light Mode Override ─── */
+html.light {
+  --color-background: #f4f2f7;
+  --color-on-background: #1c1b1f;
+  --color-surface: #fdfbff;
+  --color-surface-bright: #e8e5ec;
+  --color-surface-dim: #ece9f0;
+  --color-surface-container: #efedf4;
+  --color-surface-container-low: #f5f3fa;
+  --color-surface-container-high: #e4e1e8;
+  --color-surface-container-highest: #d9d6dd;
+  --color-on-surface: #1c1b1f;
+  --color-on-surface-variant: #49454f;
+  --color-outline: #7a757f;
+  --color-outline-variant: #cac4d0;
+  --color-primary: #6750a4;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #e9ddff;
+  --color-tertiary: #9c6d1b;
+  --color-tertiary-container: #ffddb3;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-ivory: #1c1b1f;
+}
+
+/* ─── Reusable component classes ─── */
+@layer components {
+  .glass-card {
+    @apply bg-gradient-to-br from-surface-container to-surface
+           border border-outline-variant/20 rounded-[20px]
+           transition-all duration-300
+           relative overflow-hidden;
+    backdrop-filter: blur(12px);
+  }
+  .glass-card:hover {
+    @apply border-primary/30 -translate-y-0.5;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .btn-primary {
+    @apply bg-primary text-on-primary rounded-full
+           px-6 py-3 font-semibold
+           hover:brightness-110 active:scale-95
+           transition-all
+           flex items-center justify-center gap-2;
+    box-shadow: 0 0 20px rgba(208, 188, 255, 0.25);
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl
+           text-on-surface-variant/70
+           hover:bg-surface-container-highest hover:text-on-surface
+           transition-all cursor-pointer;
+  }
+  .nav-item.active {
+    @apply bg-primary/10 text-primary font-bold;
+    box-shadow: inset 3px 0 0 var(--color-primary);
+  }
+}
+
+/* ─── Material Symbols ─── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ─── Animations ─── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-outline-variant); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+
+/* Select dropdown styling */
+select option {
+  background: var(--color-surface-container);
+  color: var(--color-on-surface);
+}

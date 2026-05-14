@@ -1,0 +1,77 @@
+[
+  {
+    "id": "t1",
+    "name": "Push Day A",
+    "exercises": 6,
+    "duration": "60m",
+    "accentColor": "primary",
+    "exerciseList": [
+      { "name": "Bench Press", "sets": 4, "reps": "8-10", "weight": "80kg" },
+      { "name": "Overhead Press", "sets": 3, "reps": "10-12", "weight": "40kg" },
+      { "name": "Incline DB Press", "sets": 3, "reps": "10-12", "weight": "28kg" },
+      { "name": "Lateral Raises", "sets": 4, "reps": "12-15", "weight": "10kg" },
+      { "name": "Tricep Pushdown", "sets": 3, "reps": "12-15", "weight": "25kg" },
+      { "name": "Overhead Tricep Ext", "sets": 3, "reps": "12-15", "weight": "20kg" }
+    ]
+  },
+  {
+    "id": "t2",
+    "name": "Pull Day B",
+    "exercises": 7,
+    "duration": "75m",
+    "accentColor": "tertiary",
+    "exerciseList": [
+      { "name": "Deadlift", "sets": 4, "reps": "5-6", "weight": "140kg" },
+      { "name": "Barbell Rows", "sets": 4, "reps": "8-10", "weight": "70kg" },
+      { "name": "Lat Pulldown", "sets": 3, "reps": "10-12", "weight": "55kg" },
+      { "name": "Face Pulls", "sets": 3, "reps": "15-20", "weight": "15kg" },
+      { "name": "Barbell Curl", "sets": 3, "reps": "10-12", "weight": "25kg" },
+      { "name": "Hammer Curls", "sets": 3, "reps": "10-12", "weight": "14kg" },
+      { "name": "Reverse Curls", "sets": 2, "reps": "12-15", "weight": "15kg" }
+    ]
+  },
+  {
+    "id": "t3",
+    "name": "Legs Heavy",
+    "exercises": 5,
+    "duration": "90m",
+    "accentColor": "error",
+    "exerciseList": [
+      { "name": "Back Squat", "sets": 5, "reps": "5-6", "weight": "120kg" },
+      { "name": "Romanian Deadlift", "sets": 4, "reps": "8-10", "weight": "90kg" },
+      { "name": "Leg Press", "sets": 4, "reps": "10-12", "weight": "180kg" },
+      { "name": "Leg Curl", "sets": 3, "reps": "12-15", "weight": "45kg" },
+      { "name": "Calf Raises", "sets": 4, "reps": "15-20", "weight": "60kg" }
+    ]
+  },
+  {
+    "id": "t4",
+    "name": "Upper Body Power",
+    "exercises": 6,
+    "duration": "65m",
+    "accentColor": "primary",
+    "exerciseList": [
+      { "name": "Weighted Pull-ups", "sets": 4, "reps": "6-8", "weight": "+15kg" },
+      { "name": "Dumbbell Bench", "sets": 4, "reps": "8-10", "weight": "34kg" },
+      { "name": "Seated OHP", "sets": 3, "reps": "8-10", "weight": "30kg" },
+      { "name": "Cable Rows", "sets": 3, "reps": "10-12", "weight": "50kg" },
+      { "name": "DB Flyes", "sets": 3, "reps": "12-15", "weight": "16kg" },
+      { "name": "EZ Bar Curl", "sets": 3, "reps": "10-12", "weight": "25kg" }
+    ]
+  },
+  {
+    "id": "t5",
+    "name": "Legs Volume",
+    "exercises": 6,
+    "duration": "80m",
+    "accentColor": "tertiary",
+    "exerciseList": [
+      { "name": "Front Squat", "sets": 4, "reps": "8-10", "weight": "80kg" },
+      { "name": "Walking Lunges", "sets": 3, "reps": "12 each", "weight": "20kg" },
+      { "name": "Leg Extension", "sets": 4, "reps": "12-15", "weight": "40kg" },
+      { "name": "Leg Curl", "sets": 4, "reps": "12-15", "weight": "40kg" },
+      { "name": "Hip Thrust", "sets": 3, "reps": "10-12", "weight": "100kg" },
+      { "name": "Calf Raises", "sets": 4, "reps": "15-20", "weight": "50kg" }
+    ]
+  }
+]

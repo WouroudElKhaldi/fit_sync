@@ -1,0 +1,102 @@
+[
+  {
+    "id": "wp-1",
+    "title": "Push Day A",
+    "description": "Upper body push focus – chest, shoulders, triceps",
+    "scheduledDate": "2026-05-13T09:00:00Z",
+    "isRecurring": false,
+    "recurrenceRule": null,
+    "createdById": "u-trainer-1",
+    "clientId": "u-client-1",
+    "accentColor": "primary",
+    "createdAt": "2026-05-10T08:00:00Z",
+    "exercises": [
+      { "id": "we-1", "exerciseId": "ex-1", "orderIndex": 0, "restTimeSec": 120, "notes": "Warm up with bar first", "sets": [{"setIndex":0,"expectedReps":10,"expectedWeight":80},{"setIndex":1,"expectedReps":8,"expectedWeight":80},{"setIndex":2,"expectedReps":8,"expectedWeight":80},{"setIndex":3,"expectedReps":6,"expectedWeight":85}] },
+      { "id": "we-2", "exerciseId": "ex-2", "orderIndex": 1, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":40},{"setIndex":1,"expectedReps":10,"expectedWeight":40},{"setIndex":2,"expectedReps":10,"expectedWeight":40}] },
+      { "id": "we-3", "exerciseId": "ex-3", "orderIndex": 2, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":28},{"setIndex":1,"expectedReps":10,"expectedWeight":28},{"setIndex":2,"expectedReps":10,"expectedWeight":28}] },
+      { "id": "we-4", "exerciseId": "ex-4", "orderIndex": 3, "restTimeSec": 60, "notes": "Keep controlled", "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":10},{"setIndex":1,"expectedReps":12,"expectedWeight":10},{"setIndex":2,"expectedReps":12,"expectedWeight":10},{"setIndex":3,"expectedReps":12,"expectedWeight":10}] },
+      { "id": "we-5", "exerciseId": "ex-5", "orderIndex": 4, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":25},{"setIndex":1,"expectedReps":12,"expectedWeight":25},{"setIndex":2,"expectedReps":12,"expectedWeight":25}] },
+      { "id": "we-6", "exerciseId": "ex-6", "orderIndex": 5, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":20},{"setIndex":1,"expectedReps":12,"expectedWeight":20},{"setIndex":2,"expectedReps":12,"expectedWeight":20}] }
+    ]
+  },
+  {
+    "id": "wp-2",
+    "title": "Pull Day B",
+    "description": "Upper body pull focus – back, biceps, rear delts",
+    "scheduledDate": "2026-05-15T09:00:00Z",
+    "isRecurring": false,
+    "recurrenceRule": null,
+    "createdById": "u-trainer-1",
+    "clientId": "u-client-1",
+    "accentColor": "tertiary",
+    "createdAt": "2026-05-10T08:00:00Z",
+    "exercises": [
+      { "id": "we-7", "exerciseId": "ex-7", "orderIndex": 0, "restTimeSec": 180, "notes": "Belt up for working sets", "sets": [{"setIndex":0,"expectedReps":6,"expectedWeight":140},{"setIndex":1,"expectedReps":5,"expectedWeight":140},{"setIndex":2,"expectedReps":5,"expectedWeight":140},{"setIndex":3,"expectedReps":5,"expectedWeight":140}] },
+      { "id": "we-8", "exerciseId": "ex-8", "orderIndex": 1, "restTimeSec": 120, "notes": null, "sets": [{"setIndex":0,"expectedReps":10,"expectedWeight":70},{"setIndex":1,"expectedReps":8,"expectedWeight":70},{"setIndex":2,"expectedReps":8,"expectedWeight":70},{"setIndex":3,"expectedReps":8,"expectedWeight":70}] },
+      { "id": "we-9", "exerciseId": "ex-9", "orderIndex": 2, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":55},{"setIndex":1,"expectedReps":10,"expectedWeight":55},{"setIndex":2,"expectedReps":10,"expectedWeight":55}] },
+      { "id": "we-10", "exerciseId": "ex-10", "orderIndex": 3, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":20,"expectedWeight":15},{"setIndex":1,"expectedReps":15,"expectedWeight":15},{"setIndex":2,"expectedReps":15,"expectedWeight":15}] },
+      { "id": "we-11", "exerciseId": "ex-11", "orderIndex": 4, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":25},{"setIndex":1,"expectedReps":10,"expectedWeight":25},{"setIndex":2,"expectedReps":10,"expectedWeight":25}] },
+      { "id": "we-12", "exerciseId": "ex-12", "orderIndex": 5, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":14},{"setIndex":1,"expectedReps":10,"expectedWeight":14},{"setIndex":2,"expectedReps":10,"expectedWeight":14}] },
+      { "id": "we-13", "exerciseId": "ex-13", "orderIndex": 6, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":15},{"setIndex":1,"expectedReps":12,"expectedWeight":15}] }
+    ]
+  },
+  {
+    "id": "wp-3",
+    "title": "Legs Heavy",
+    "description": "Lower body strength – squats, RDLs, accessories",
+    "scheduledDate": "2026-05-17T10:00:00Z",
+    "isRecurring": false,
+    "recurrenceRule": null,
+    "createdById": "u-trainer-1",
+    "clientId": "u-client-1",
+    "accentColor": "error",
+    "createdAt": "2026-05-10T08:00:00Z",
+    "exercises": [
+      { "id": "we-14", "exerciseId": "ex-14", "orderIndex": 0, "restTimeSec": 180, "notes": "Hit depth every rep", "sets": [{"setIndex":0,"expectedReps":6,"expectedWeight":120},{"setIndex":1,"expectedReps":5,"expectedWeight":120},{"setIndex":2,"expectedReps":5,"expectedWeight":120},{"setIndex":3,"expectedReps":5,"expectedWeight":120},{"setIndex":4,"expectedReps":5,"expectedWeight":120}] },
+      { "id": "we-15", "exerciseId": "ex-15", "orderIndex": 1, "restTimeSec": 120, "notes": null, "sets": [{"setIndex":0,"expectedReps":10,"expectedWeight":90},{"setIndex":1,"expectedReps":8,"expectedWeight":90},{"setIndex":2,"expectedReps":8,"expectedWeight":90},{"setIndex":3,"expectedReps":8,"expectedWeight":90}] },
+      { "id": "we-16", "exerciseId": "ex-16", "orderIndex": 2, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":180},{"setIndex":1,"expectedReps":10,"expectedWeight":180},{"setIndex":2,"expectedReps":10,"expectedWeight":180},{"setIndex":3,"expectedReps":10,"expectedWeight":180}] },
+      { "id": "we-17", "exerciseId": "ex-17", "orderIndex": 3, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":45},{"setIndex":1,"expectedReps":12,"expectedWeight":45},{"setIndex":2,"expectedReps":12,"expectedWeight":45}] },
+      { "id": "we-18", "exerciseId": "ex-18", "orderIndex": 4, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":20,"expectedWeight":60},{"setIndex":1,"expectedReps":15,"expectedWeight":60},{"setIndex":2,"expectedReps":15,"expectedWeight":60},{"setIndex":3,"expectedReps":15,"expectedWeight":60}] }
+    ]
+  },
+  {
+    "id": "wp-4",
+    "title": "Upper Body Power",
+    "description": "Full upper body session – strength focus",
+    "scheduledDate": "2026-05-19T09:00:00Z",
+    "isRecurring": false,
+    "recurrenceRule": null,
+    "createdById": "u-trainer-1",
+    "clientId": "u-client-2",
+    "accentColor": "primary",
+    "createdAt": "2026-05-10T08:00:00Z",
+    "exercises": [
+      { "id": "we-19", "exerciseId": "ex-19", "orderIndex": 0, "restTimeSec": 120, "notes": "+15kg belt", "sets": [{"setIndex":0,"expectedReps":8,"expectedWeight":15},{"setIndex":1,"expectedReps":6,"expectedWeight":15},{"setIndex":2,"expectedReps":6,"expectedWeight":15},{"setIndex":3,"expectedReps":6,"expectedWeight":15}] },
+      { "id": "we-20", "exerciseId": "ex-20", "orderIndex": 1, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":10,"expectedWeight":34},{"setIndex":1,"expectedReps":8,"expectedWeight":34},{"setIndex":2,"expectedReps":8,"expectedWeight":34},{"setIndex":3,"expectedReps":8,"expectedWeight":34}] },
+      { "id": "we-21", "exerciseId": "ex-21", "orderIndex": 2, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":10,"expectedWeight":30},{"setIndex":1,"expectedReps":8,"expectedWeight":30},{"setIndex":2,"expectedReps":8,"expectedWeight":30}] },
+      { "id": "we-22", "exerciseId": "ex-22", "orderIndex": 3, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":50},{"setIndex":1,"expectedReps":10,"expectedWeight":50},{"setIndex":2,"expectedReps":10,"expectedWeight":50}] },
+      { "id": "we-23", "exerciseId": "ex-23", "orderIndex": 4, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":16},{"setIndex":1,"expectedReps":12,"expectedWeight":16},{"setIndex":2,"expectedReps":12,"expectedWeight":16}] },
+      { "id": "we-24", "exerciseId": "ex-24", "orderIndex": 5, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":25},{"setIndex":1,"expectedReps":10,"expectedWeight":25},{"setIndex":2,"expectedReps":10,"expectedWeight":25}] }
+    ]
+  },
+  {
+    "id": "wp-5",
+    "title": "Legs Volume",
+    "description": "Lower body hypertrophy – higher rep ranges",
+    "scheduledDate": "2026-05-14T10:00:00Z",
+    "isRecurring": false,
+    "recurrenceRule": null,
+    "createdById": "u-trainer-1",
+    "clientId": "u-client-3",
+    "accentColor": "tertiary",
+    "createdAt": "2026-05-10T08:00:00Z",
+    "exercises": [
+      { "id": "we-25", "exerciseId": "ex-25", "orderIndex": 0, "restTimeSec": 120, "notes": null, "sets": [{"setIndex":0,"expectedReps":10,"expectedWeight":80},{"setIndex":1,"expectedReps":8,"expectedWeight":80},{"setIndex":2,"expectedReps":8,"expectedWeight":80},{"setIndex":3,"expectedReps":8,"expectedWeight":80}] },
+      { "id": "we-26", "exerciseId": "ex-26", "orderIndex": 1, "restTimeSec": 90, "notes": "12 each leg", "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":20},{"setIndex":1,"expectedReps":12,"expectedWeight":20},{"setIndex":2,"expectedReps":12,"expectedWeight":20}] },
+      { "id": "we-27", "exerciseId": "ex-27", "orderIndex": 2, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":40},{"setIndex":1,"expectedReps":12,"expectedWeight":40},{"setIndex":2,"expectedReps":12,"expectedWeight":40},{"setIndex":3,"expectedReps":12,"expectedWeight":40}] },
+      { "id": "we-28", "exerciseId": "ex-17", "orderIndex": 3, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":15,"expectedWeight":40},{"setIndex":1,"expectedReps":12,"expectedWeight":40},{"setIndex":2,"expectedReps":12,"expectedWeight":40},{"setIndex":3,"expectedReps":12,"expectedWeight":40}] },
+      { "id": "we-29", "exerciseId": "ex-28", "orderIndex": 4, "restTimeSec": 90, "notes": null, "sets": [{"setIndex":0,"expectedReps":12,"expectedWeight":100},{"setIndex":1,"expectedReps":10,"expectedWeight":100},{"setIndex":2,"expectedReps":10,"expectedWeight":100}] },
+      { "id": "we-30", "exerciseId": "ex-18", "orderIndex": 5, "restTimeSec": 60, "notes": null, "sets": [{"setIndex":0,"expectedReps":20,"expectedWeight":50},{"setIndex":1,"expectedReps":15,"expectedWeight":50},{"setIndex":2,"expectedReps":15,"expectedWeight":50},{"setIndex":3,"expectedReps":15,"expectedWeight":50}] }
+    ]
+  }
+]

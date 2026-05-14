@@ -1,0 +1,108 @@
+{
+    "muscles": [
+        {
+            "name": "Pectoralis Major",
+            "category": "Chest"
+        },
+        {
+            "name": "Triceps Brachii",
+            "category": "Arms"
+        },
+        {
+            "name": "Latissimus Dorsi",
+            "category": "Back"
+        },
+        {
+            "name": "Biceps Brachii",
+            "category": "Arms"
+        },
+        {
+            "name": "Quadriceps",
+            "category": "Legs"
+        },
+        {
+            "name": "Hamstrings",
+            "category": "Legs"
+        },
+        {
+            "name": "Deltoids",
+            "category": "Shoulders"
+        }
+    ],
+    "equipment": [
+        "Barbell",
+        "Dumbbell",
+        "Cable Machine",
+        "Leg Press Machine",
+        "Bench"
+    ],
+    "exercises": [
+        {
+            "name": "Barbell Bench Press",
+            "description": "The fundamental chest pressing movement.",
+            "equipment": "Barbell",
+            "steps": [
+                "Lie on the bench with eyes under the bar.",
+                "Grip the bar with hands slightly wider than shoulders.",
+                "Lower the bar to mid-chest while tucking elbows.",
+                "Press upward until arms are locked."
+            ],
+            "muscles": [
+                {
+                    "name": "Pectoralis Major",
+                    "type": "PRIMARY"
+                },
+                {
+                    "name": "Triceps Brachii",
+                    "type": "SECONDARY"
+                },
+                {
+                    "name": "Deltoids",
+                    "type": "SECONDARY"
+                }
+            ]
+        },
+        {
+            "name": "Lat Pulldown",
+            "description": "A vertical pull for back width.",
+            "equipment": "Cable Machine",
+            "steps": [
+                "Adjust the thigh pad to lock yourself in.",
+                "Grip the bar with a wide, overhand grip.",
+                "Pull the bar down to your upper chest.",
+                "Control the weight as it returns to the top."
+            ],
+            "muscles": [
+                {
+                    "name": "Latissimus Dorsi",
+                    "type": "PRIMARY"
+                },
+                {
+                    "name": "Biceps Brachii",
+                    "type": "SECONDARY"
+                }
+            ]
+        },
+        {
+            "name": "Leg Press",
+            "description": "Compound leg exercise using a machine.",
+            "equipment": "Leg Press Machine",
+            "steps": [
+                "Sit in the machine and place feet hip-width apart.",
+                "Lower the platform until knees are at 90 degrees.",
+                "Push the platform back up without locking your knees.",
+                "Keep your back flat against the seat."
+            ],
+            "muscles": [
+                {
+                    "name": "Quadriceps",
+                    "type": "PRIMARY"
+                },
+                {
+                    "name": "Hamstrings",
+                    "type": "SECONDARY"
+                }
+            ]
+        }
+    ]
+}

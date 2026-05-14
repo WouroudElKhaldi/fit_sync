@@ -1,0 +1,21 @@
+{
+  "name": "@fitsync/database",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "db:generate": "prisma generate",
+    "studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "5.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "prisma": "5.13.0",
+    "typescript": "^5.4.5"
+  }
+}
