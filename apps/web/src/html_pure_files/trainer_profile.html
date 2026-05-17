@@ -1,0 +1,1080 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #091421;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .chart-gradient {
+        background: linear-gradient(
+          to bottom,
+          rgba(208, 188, 255, 0.3),
+          transparent
+        );
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#2b3544",
+              outline: "#958ea0",
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary-container": "#b6b5b1",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-container-highest": "#2b3544",
+              "surface-bright": "#303a48",
+              "inverse-primary": "#6d3bd7",
+              "on-secondary": "#30312e",
+              "on-tertiary": "#482900",
+              "inverse-on-surface": "#27313f",
+              secondary: "#c8c6c3",
+              "on-error-container": "#ffdad6",
+              "primary-fixed-dim": "#d0bcff",
+              "surface-container-lowest": "#050f1c",
+              "on-background": "#d9e3f6",
+              "primary-fixed": "#e9ddff",
+              "tertiary-fixed": "#ffdcbb",
+              "on-primary-fixed": "#23005c",
+              "error-container": "#93000a",
+              error: "#ffb4ab",
+              "on-surface": "#d9e3f6",
+              "on-primary-fixed-variant": "#5516be",
+              "on-surface-variant": "#cbc3d7",
+              "on-tertiary-container": "#3f2300",
+              "surface-container": "#16202e",
+              "inverse-surface": "#d9e3f6",
+              "secondary-container": "#474744",
+              "on-primary-container": "#340080",
+              "secondary-fixed": "#e4e2de",
+              primary: "#d0bcff",
+              surface: "#091421",
+              "primary-container": "#a078ff",
+              "surface-tint": "#d0bcff",
+              "surface-container-high": "#212b39",
+              "on-secondary-fixed-variant": "#474744",
+              "on-error": "#690005",
+              background: "#091421",
+              tertiary: "#ffb869",
+              "surface-dim": "#091421",
+              "on-secondary-fixed": "#1b1c1a",
+              "tertiary-container": "#ca801e",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-primary": "#3c0091",
+              "surface-container-low": "#121c2a",
+              "outline-variant": "#494454",
+              "on-tertiary-fixed": "#2c1700",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              sm: "12px",
+              "margin-desktop": "32px",
+              xs: "4px",
+              xl: "80px",
+              md: "24px",
+              gutter: "24px",
+              lg: "48px",
+              "margin-mobile": "16px",
+              base: "8px",
+            },
+            fontFamily: {
+              "title-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "800",
+                },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-surface text-on-surface">
+    <!-- Sidebar Navigation -->
+    <aside
+      class="fixed left-0 top-0 h-full w-64 flex flex-col p-md bg-surface-container border-r border-secondary-container/10"
+    >
+      <div class="mb-lg">
+        <h1 class="font-headline-md text-headline-md font-bold text-primary">
+          ProTrainer Elite
+        </h1>
+        <p class="font-label-md text-label-md text-on-surface-variant">
+          Midnight Workspace
+        </p>
+      </div>
+      <nav class="flex-1 flex flex-col gap-base">
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-md text-label-md">Overview</span>
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-high transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Clients</span>
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">fitness_center</span>
+          <span class="font-label-md text-label-md">Workout Planner</span>
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">chat</span>
+          <span class="font-label-md text-label-md">Chat</span>
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">person</span>
+          <span class="font-label-md text-label-md">Profile</span>
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-label-md text-label-md">Settings</span>
+        </a>
+      </nav>
+      <div class="mt-auto border-t border-secondary-container/10 pt-md">
+        <button
+          class="flex items-center gap-sm p-sm w-full rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </button>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="ml-64 min-h-screen">
+      <!-- Top App Bar -->
+      <header
+        class="flex justify-between items-center w-full px-margin-desktop py-sm bg-surface-container border-b border-secondary-container/10"
+      >
+        <div class="flex items-center gap-md">
+          <div
+            class="flex items-center gap-sm bg-surface-container-high px-md py-xs rounded-full border border-outline/10"
+          >
+            <span class="material-symbols-outlined text-outline">search</span>
+            <input
+              class="bg-transparent border-none focus:ring-0 text-label-md w-64 text-on-surface"
+              placeholder="Search system..."
+              type="text"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-md">
+          <button
+            class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all"
+          >
+            notifications
+          </button>
+          <button
+            class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all"
+          >
+            help
+          </button>
+          <div class="h-8 w-px bg-secondary-container/20 mx-sm"></div>
+          <div class="flex items-center gap-sm">
+            <img
+              alt="Trainer Account"
+              class="w-8 h-8 rounded-full border border-primary/20"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA12jbL7p_1eFOMmNxZQ82uoGFlQ3Brnh3XkPeXJxX8uI3ctpD10x2Z97z5jNgbmfQ20jBcL1Gk4JIqGwXyRxH0yRrbHKPTf-krARmJCBsx60NzBUlFXYytm-CAnDz7Ha27p5z1CzlZhcCxDQewkS_ErcFFztv7TKrtxkiqKwf7B0_uV64W7WHmQ3ntD9RxgSdDCx78_kWVH50Iiq26ov9-KNjlBC_YvzEmtgA4sWD5tcSpnvT4Rqg73ypJYMJilEpE7zVKDFGI_ZM"
+            />
+            <span class="font-label-md text-label-md text-on-surface"
+              >Admin Console</span
+            >
+          </div>
+        </div>
+      </header>
+      <!-- Page Content -->
+      <div class="p-margin-desktop max-w-7xl mx-auto space-y-lg">
+        <!-- Top Section: Professional Profile -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+          <!-- Profile Identity Card -->
+          <div
+            class="lg:col-span-4 bg-surface-container-low rounded-xl border border-secondary-container/10 p-md flex flex-col items-center text-center shadow-lg shadow-black/20"
+          >
+            <div class="relative mb-md">
+              <img
+                class="w-32 h-32 rounded-full border-4 border-primary object-cover"
+                data-alt="A professional portrait of a male fitness trainer"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH8IbIDb1yvPge95nzGFRQ60rfiXH90692-fxCHBmKMd9lvL4Wyfx-l3MQqNGwVk9xf2agjrAxh50HB2da1Em1smtA5QxCRYtgPvpX3LIpb0MsqZSpNyzkokMssi6JnREn7T7Az39VRa0a6qKo65NVmg3F10by9o-At6rZ-m2KT020UQAh0GKFQ8Mp7J54zhL1PkcmnQGxyzOMIFOjXyZ_0nuWyYuzh8bp8TSr3IW1cPWdgxQWfgw1dDrMN--KxWlnNhRwsyY516c"
+              />
+              <div
+                class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-sm py-xs rounded-full flex items-center gap-xs shadow-lg shadow-primary/20"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px]"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >workspace_premium</span
+                >
+                <span class="font-label-sm text-label-sm whitespace-nowrap"
+                  >Elite Trainer</span
+                >
+              </div>
+            </div>
+            <h2 class="font-headline-md text-headline-md text-on-surface mb-xs">
+              Marcus Johnson
+            </h2>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-md">
+              Senior Performance Architect
+            </p>
+            <div
+              class="w-full grid grid-cols-2 gap-sm pt-md border-t border-secondary-container/10"
+            >
+              <div class="text-center">
+                <p
+                  class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-xs"
+                >
+                  Overall Rating
+                </p>
+                <div class="flex items-center justify-center gap-xs">
+                  <span class="font-headline-md text-headline-md text-primary"
+                    >4.9</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-tertiary text-[20px]"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >star</span
+                  >
+                </div>
+              </div>
+              <div class="text-center">
+                <p
+                  class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-xs"
+                >
+                  Clients Trained
+                </p>
+                <p class="font-headline-md text-headline-md text-on-surface">
+                  150+
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- Bio & Credentials Bento -->
+          <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-gutter">
+            <!-- Education -->
+            <div
+              class="bg-surface-container-low rounded-xl border border-secondary-container/10 p-md shadow-lg shadow-black/20"
+            >
+              <div class="flex items-center gap-sm mb-md">
+                <div
+                  class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center"
+                >
+                  <span class="material-symbols-outlined text-primary"
+                    >school</span
+                  >
+                </div>
+                <h3 class="font-title-lg text-title-lg text-on-surface">
+                  Education
+                </h3>
+              </div>
+              <div class="space-y-sm">
+                <p class="font-body-md text-body-md text-on-surface">
+                  B.S. Sports Science
+                </p>
+                <p class="font-label-md text-label-md text-on-surface-variant">
+                  University of Performance Athletics
+                </p>
+              </div>
+            </div>
+            <!-- Certifications -->
+            <div
+              class="bg-surface-container-low rounded-xl border border-secondary-container/10 p-md shadow-lg shadow-black/20"
+            >
+              <div class="flex items-center gap-sm mb-md">
+                <div
+                  class="w-10 h-10 rounded-lg bg-tertiary-container/20 flex items-center justify-center"
+                >
+                  <span class="material-symbols-outlined text-tertiary"
+                    >military_tech</span
+                  >
+                </div>
+                <h3 class="font-title-lg text-title-lg text-on-surface">
+                  Certifications
+                </h3>
+              </div>
+              <div class="flex flex-wrap gap-xs">
+                <span
+                  class="bg-surface-container-high px-sm py-xs rounded-md font-label-md text-label-md text-on-surface border border-secondary-container/10"
+                  >NASM-CPT</span
+                >
+                <span
+                  class="bg-surface-container-high px-sm py-xs rounded-md font-label-md text-label-md text-on-surface border border-secondary-container/10"
+                  >CSCS</span
+                >
+                <span
+                  class="bg-surface-container-high px-sm py-xs rounded-md font-label-md text-label-md text-on-surface border border-secondary-container/10"
+                  >Precision Nutrition L1</span
+                >
+              </div>
+            </div>
+            <!-- Experience -->
+            <div
+              class="md:col-span-2 bg-surface-container-low rounded-xl border border-secondary-container/10 p-md shadow-lg shadow-black/20"
+            >
+              <div class="flex items-center gap-sm mb-md">
+                <div
+                  class="w-10 h-10 rounded-lg bg-on-secondary-container/20 flex items-center justify-center"
+                >
+                  <span class="material-symbols-outlined text-secondary"
+                    >history_edu</span
+                  >
+                </div>
+                <h3 class="font-title-lg text-title-lg text-on-surface">
+                  Experience
+                </h3>
+              </div>
+              <div class="flex items-center gap-lg">
+                <div>
+                  <span class="font-display-lg text-display-lg text-on-surface"
+                    >10</span
+                  >
+                  <span
+                    class="font-headline-md text-headline-md text-primary ml-xs"
+                    >Years</span
+                  >
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface-variant border-l border-secondary-container/20 pl-lg"
+                >
+                  Specialized in high-performance metabolic conditioning and
+                  professional athlete strength development. Former Lead Trainer
+                  at Global Elite Gyms.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- New: Client Management Table Section -->
+        <section class="space-y-md">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-sm">
+              <span class="w-2 h-8 bg-primary rounded-full"></span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">
+                Client Management
+              </h2>
+            </div>
+            <div
+              class="flex bg-surface-container-low rounded-lg p-xs border border-secondary-container/10"
+            >
+              <button
+                class="px-md py-xs rounded-md bg-primary text-on-primary font-label-md text-label-md"
+              >
+                Active
+              </button>
+              <button
+                class="px-md py-xs rounded-md text-on-surface-variant hover:text-on-surface font-label-md text-label-md"
+              >
+                Past
+              </button>
+            </div>
+          </div>
+          <div
+            class="bg-surface-container-low rounded-xl border border-secondary-container/10 overflow-hidden shadow-lg shadow-black/20"
+          >
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-surface-container-high border-b border-secondary-container/10"
+                >
+                  <th class="p-md font-label-md text-label-md text-outline">
+                    Client Name
+                  </th>
+                  <th class="p-md font-label-md text-label-md text-outline">
+                    Program Type
+                  </th>
+                  <th class="p-md font-label-md text-label-md text-outline">
+                    Current Status
+                  </th>
+                  <th class="p-md font-label-md text-label-md text-outline">
+                    Progress
+                  </th>
+                  <th
+                    class="p-md font-label-md text-label-md text-outline text-right"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-secondary-container/10">
+                <tr class="hover:bg-surface-container transition-colors">
+                  <td class="p-md">
+                    <div class="flex items-center gap-sm">
+                      <div
+                        class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary"
+                      >
+                        JD
+                      </div>
+                      <span class="font-body-md text-body-md text-on-surface"
+                        >John Davis</span
+                      >
+                    </div>
+                  </td>
+                  <td class="p-md text-on-surface-variant font-body-md">
+                    Hypertrophy Elite
+                  </td>
+                  <td class="p-md">
+                    <span
+                      class="inline-flex items-center px-sm py-xs rounded-full bg-emerald-500/10 text-emerald-500 font-label-sm text-label-sm"
+                      >Active Now</span
+                    >
+                  </td>
+                  <td class="p-md">
+                    <div
+                      class="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden"
+                    >
+                      <div class="h-full bg-primary" style="width: 75%"></div>
+                    </div>
+                  </td>
+                  <td class="p-md text-right">
+                    <button
+                      class="bg-surface-container-high px-md py-xs rounded-md border border-secondary-container/10 text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-surface-container transition-colors">
+                  <td class="p-md">
+                    <div class="flex items-center gap-sm">
+                      <div
+                        class="w-8 h-8 rounded-full bg-tertiary/20 flex items-center justify-center font-bold text-tertiary"
+                      >
+                        SR
+                      </div>
+                      <span class="font-body-md text-body-md text-on-surface"
+                        >Sarah Reed</span
+                      >
+                    </div>
+                  </td>
+                  <td class="p-md text-on-surface-variant font-body-md">
+                    Metabolic Reset
+                  </td>
+                  <td class="p-md">
+                    <span
+                      class="inline-flex items-center px-sm py-xs rounded-full bg-primary/10 text-primary font-label-sm text-label-sm"
+                      >Scheduled</span
+                    >
+                  </td>
+                  <td class="p-md">
+                    <div
+                      class="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden"
+                    >
+                      <div class="h-full bg-primary" style="width: 40%"></div>
+                    </div>
+                  </td>
+                  <td class="p-md text-right">
+                    <button
+                      class="bg-surface-container-high px-md py-xs rounded-md border border-secondary-container/10 text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <!-- Personal & Performance Data Section -->
+        <section class="space-y-md">
+          <div class="flex items-center gap-sm">
+            <span class="w-2 h-8 bg-primary rounded-full"></span>
+            <h2 class="font-headline-md text-headline-md text-on-surface">
+              Personal &amp; Performance Data
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+            <!-- Contact & Expanded Performance Stats -->
+            <div class="space-y-gutter">
+              <!-- Contact Info Card -->
+              <div
+                class="bg-surface-container-low rounded-xl border border-secondary-container/10 overflow-hidden shadow-lg shadow-black/20"
+              >
+                <div
+                  class="bg-surface-container-high px-md py-sm border-b border-secondary-container/10"
+                >
+                  <h3 class="font-label-md text-label-md text-on-surface">
+                    Contact Information
+                  </h3>
+                </div>
+                <div class="p-md space-y-md">
+                  <div class="flex items-center gap-md">
+                    <span class="material-symbols-outlined text-outline"
+                      >mail</span
+                    >
+                    <div>
+                      <p class="font-label-sm text-label-sm text-outline">
+                        Work Email
+                      </p>
+                      <p class="font-body-md text-body-md text-on-surface">
+                        m.johnson@protrainer.com
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-md">
+                    <span class="material-symbols-outlined text-outline"
+                      >phone</span
+                    >
+                    <div>
+                      <p class="font-label-sm text-label-sm text-outline">
+                        Mobile
+                      </p>
+                      <p class="font-body-md text-body-md text-on-surface">
+                        +1 (555) 234-8901
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Expanded Performance Metrics -->
+              <div
+                class="bg-surface-container-low rounded-xl border border-secondary-container/10 p-md shadow-lg shadow-black/20"
+              >
+                <h3 class="font-label-md text-label-md text-on-surface mb-md">
+                  Personal Metrics Variance
+                </h3>
+                <div class="grid grid-cols-1 gap-sm">
+                  <div
+                    class="flex justify-between items-center p-sm bg-surface-container rounded-lg border border-error/10"
+                  >
+                    <div class="flex items-center gap-xs">
+                      <span class="material-symbols-outlined text-error text-sm"
+                        >block</span
+                      >
+                      <span
+                        class="font-label-md text-label-md text-on-surface-variant"
+                        >Missed Workouts</span
+                      >
+                    </div>
+                    <span class="font-headline-md text-error">02</span>
+                  </div>
+                  <div
+                    class="flex justify-between items-center p-sm bg-surface-container rounded-lg border border-error/10"
+                  >
+                    <div class="flex items-center gap-xs">
+                      <span class="material-symbols-outlined text-error text-sm"
+                        >error</span
+                      >
+                      <span
+                        class="font-label-md text-label-md text-on-surface-variant"
+                        >Missed Exercises</span
+                      >
+                    </div>
+                    <span class="font-headline-md text-error">05</span>
+                  </div>
+                  <div
+                    class="flex justify-between items-center p-sm bg-surface-container rounded-lg border border-error/10"
+                  >
+                    <div class="flex items-center gap-xs">
+                      <span class="material-symbols-outlined text-error text-sm"
+                        >warning</span
+                      >
+                      <span
+                        class="font-label-md text-label-md text-on-surface-variant"
+                        >Missed Reps</span
+                      >
+                    </div>
+                    <span class="font-headline-md text-error">12</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Updated Smooth Line Chart: Weight/Biometrics Variance -->
+            <div
+              class="lg:col-span-2 bg-surface-container-low rounded-xl border border-secondary-container/10 flex flex-col shadow-lg shadow-black/20"
+            >
+              <div
+                class="bg-surface-container-high px-md py-sm border-b border-secondary-container/10 flex justify-between items-center"
+              >
+                <h3 class="font-label-md text-label-md text-on-surface">
+                  Weight &amp; Body Fat Variance (Smooth)
+                </h3>
+                <div class="flex gap-sm">
+                  <span
+                    class="flex items-center gap-xs font-label-sm text-label-sm text-on-surface-variant"
+                    ><span class="w-2 h-2 rounded-full bg-primary"></span>
+                    Weight</span
+                  >
+                  <span
+                    class="flex items-center gap-xs font-label-sm text-label-sm text-on-surface-variant"
+                    ><span class="w-2 h-2 rounded-full bg-tertiary"></span> Body
+                    Fat %</span
+                  >
+                </div>
+              </div>
+              <div
+                class="p-md flex-1 flex flex-col justify-end relative overflow-hidden"
+              >
+                <!-- Simulated SVG Line Chart with Gradient Fill -->
+                <div class="h-64 w-full relative">
+                  <svg
+                    class="absolute inset-0 w-full h-full"
+                    preserveaspectratio="none"
+                    viewbox="0 0 100 100"
+                  >
+                    <!-- Area Fill Gradient -->
+                    <defs>
+                      <lineargradient
+                        id="purpleFill"
+                        x1="0%"
+                        x2="0%"
+                        y1="0%"
+                        y2="100%"
+                      >
+                        <stop
+                          offset="0%"
+                          stop-color="#d0bcff"
+                          stop-opacity="0.3"
+                        ></stop>
+                        <stop
+                          offset="100%"
+                          stop-color="#d0bcff"
+                          stop-opacity="0"
+                        ></stop>
+                      </lineargradient>
+                    </defs>
+                    <!-- Area path -->
+                    <path
+                      d="M0,70 C10,65 20,75 30,60 C40,45 50,55 60,35 C70,15 85,25 100,20 V100 H0 Z"
+                      fill="url(#purpleFill)"
+                    ></path>
+                    <!-- Line path -->
+                    <path
+                      d="M0,70 C10,65 20,75 30,60 C40,45 50,55 60,35 C70,15 85,25 100,20"
+                      fill="none"
+                      stroke="#d0bcff"
+                      stroke-width="2"
+                    ></path>
+                    <!-- Data Points -->
+                    <circle cx="0" cy="70" fill="#d0bcff" r="1.5"></circle>
+                    <circle cx="30" cy="60" fill="#d0bcff" r="1.5"></circle>
+                    <circle cx="60" cy="35" fill="#d0bcff" r="1.5"></circle>
+                    <circle cx="100" cy="20" fill="#d0bcff" r="1.5"></circle>
+                    <!-- Secondary line (Body Fat) -->
+                    <path
+                      d="M0,85 C15,80 30,88 45,78 C60,68 80,72 100,65"
+                      fill="none"
+                      stroke="#ffb869"
+                      stroke-dasharray="4"
+                      stroke-width="2"
+                    ></path>
+                  </svg>
+                </div>
+                <div
+                  class="flex justify-between mt-sm px-sm border-t border-secondary-container/10 pt-xs"
+                >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >Jan</span
+                  >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >Feb</span
+                  >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >Mar</span
+                  >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >Apr</span
+                  >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >May</span
+                  >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >Jun</span
+                  >
+                  <span class="font-label-sm text-label-sm text-outline"
+                    >Jul</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Personal Workout Schedule: Expanded Display -->
+            <div
+              class="lg:col-span-3 bg-surface-container-low rounded-xl border border-secondary-container/10 overflow-hidden shadow-lg shadow-black/20"
+            >
+              <div
+                class="bg-surface-container-high px-md py-sm border-b border-secondary-container/10 flex justify-between items-center"
+              >
+                <h3 class="font-label-md text-label-md text-on-surface">
+                  Personal Workout Log &amp; Roadmap
+                </h3>
+                <button
+                  class="text-primary font-label-md text-label-md hover:underline"
+                >
+                  View Full Calendar
+                </button>
+              </div>
+              <div
+                class="p-md grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md"
+              >
+                <!-- Yesterday: Completed -->
+                <div
+                  class="bg-surface-container rounded-lg p-sm border-l-4 border-emerald-500"
+                >
+                  <div class="flex justify-between items-start mb-xs">
+                    <span
+                      class="font-label-sm text-label-sm text-emerald-500 uppercase font-bold"
+                      >Yesterday</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-emerald-500 text-[18px]"
+                      >check_circle</span
+                    >
+                  </div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Lower Body Strength
+                  </p>
+                  <p class="font-label-sm text-label-sm text-outline">
+                    COMPLETED • 6:00 AM
+                  </p>
+                </div>
+                <!-- Today: AM (Completed) -->
+                <div
+                  class="bg-surface-container rounded-lg p-sm border-l-4 border-emerald-500"
+                >
+                  <div class="flex justify-between items-start mb-xs">
+                    <span
+                      class="font-label-sm text-label-sm text-emerald-500 uppercase font-bold"
+                      >Today (AM)</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-emerald-500 text-[18px]"
+                      >check_circle</span
+                    >
+                  </div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Mobility &amp; Core
+                  </p>
+                  <p class="font-label-sm text-label-sm text-outline">
+                    COMPLETED • 7:30 AM
+                  </p>
+                </div>
+                <!-- Today: PM (Upcoming) -->
+                <div
+                  class="bg-primary/5 rounded-lg p-sm border-l-4 border-primary"
+                >
+                  <div class="flex justify-between items-start mb-xs">
+                    <span
+                      class="font-label-sm text-label-sm text-primary uppercase font-bold"
+                      >Today (PM)</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary text-[18px]"
+                      >update</span
+                    >
+                  </div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Active Recovery
+                  </p>
+                  <p class="font-label-sm text-label-sm text-outline">
+                    NEXT • 4:00 PM
+                  </p>
+                </div>
+                <!-- Tomorrow: Future -->
+                <div
+                  class="bg-surface-container rounded-lg p-sm border-l-4 border-outline/20"
+                >
+                  <div class="flex justify-between items-start mb-xs">
+                    <span
+                      class="font-label-sm text-label-sm text-outline uppercase font-bold"
+                      >Tomorrow</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-outline text-[18px]"
+                      >calendar_today</span
+                    >
+                  </div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Olympic Technique
+                  </p>
+                  <p class="font-label-sm text-label-sm text-outline">
+                    SCHEDULED • 6:00 AM
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+          <!-- Completed Workouts Section -->
+          <div
+            class="bg-surface-container-low rounded-md border border-secondary-container/10 flex flex-col shadow-lg shadow-black/20 overflow-hidden"
+          >
+            <div
+              class="bg-surface-container-high px-md py-sm border-b border-secondary-container/10 flex justify-between items-center"
+            >
+              <h3 class="font-label-md text-label-md text-on-surface">
+                Completed Workouts
+              </h3>
+              <button
+                class="text-primary font-label-md text-label-md hover:underline"
+              >
+                View History
+              </button>
+            </div>
+            <div class="p-md space-y-sm">
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-secondary-container/10"
+              >
+                <div class="flex items-center gap-sm">
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"
+                  >
+                    <span class="material-symbols-outlined">task_alt</span>
+                  </div>
+                  <div>
+                    <p class="font-label-md text-label-md text-on-surface">
+                      High Intensity Lower Body
+                    </p>
+                    <p
+                      class="font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      45 mins • Yesterday
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined text-outline"
+                  >chevron_right</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-secondary-container/10"
+              >
+                <div class="flex items-center gap-sm">
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"
+                  >
+                    <span class="material-symbols-outlined">task_alt</span>
+                  </div>
+                  <div>
+                    <p class="font-label-md text-label-md text-on-surface">
+                      Cardio &amp; Mobility
+                    </p>
+                    <p
+                      class="font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      30 mins • 2 days ago
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined text-outline"
+                  >chevron_right</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-secondary-container/10"
+              >
+                <div class="flex items-center gap-sm">
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"
+                  >
+                    <span class="material-symbols-outlined">task_alt</span>
+                  </div>
+                  <div>
+                    <p class="font-label-md text-label-md text-on-surface">
+                      Upper Body Strength A
+                    </p>
+                    <p
+                      class="font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      60 mins • 3 days ago
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined text-outline"
+                  >chevron_right</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Scheduled Sessions Section -->
+          <div
+            class="bg-surface-container-low rounded-md border border-secondary-container/10 flex flex-col shadow-lg shadow-black/20 overflow-hidden"
+          >
+            <div
+              class="bg-surface-container-high px-md py-sm border-b border-secondary-container/10 flex justify-between items-center"
+            >
+              <h3 class="font-label-md text-label-md text-on-surface">
+                Scheduled Sessions
+              </h3>
+              <button
+                class="flex items-center gap-xs text-primary font-label-md text-label-md hover:underline"
+              >
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Schedule New
+              </button>
+            </div>
+            <div class="p-md space-y-sm">
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-secondary-container/10"
+              >
+                <div class="flex flex-col">
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Functional Core Workshop
+                  </p>
+                  <p class="font-label-sm text-label-sm text-primary">
+                    Tomorrow, 9:00 AM
+                  </p>
+                </div>
+                <div class="flex items-center gap-xs">
+                  <button
+                    class="p-xs text-on-surface-variant hover:text-primary transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >edit</span
+                    >
+                  </button>
+                  <button
+                    class="p-xs text-on-surface-variant hover:text-error transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >delete</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-secondary-container/10"
+              >
+                <div class="flex flex-col">
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Full Body Metabolic Blast
+                  </p>
+                  <p class="font-label-sm text-label-sm text-primary">
+                    Fri, 8:00 AM
+                  </p>
+                </div>
+                <div class="flex items-center gap-xs">
+                  <button
+                    class="p-xs text-on-surface-variant hover:text-primary transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >edit</span
+                    >
+                  </button>
+                  <button
+                    class="p-xs text-on-surface-variant hover:text-error transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >delete</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-secondary-container/10"
+              >
+                <div class="flex flex-col">
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Recovery &amp; Stretch Flow
+                  </p>
+                  <p class="font-label-sm text-label-sm text-primary">
+                    Sat, 10:30 AM
+                  </p>
+                </div>
+                <div class="flex items-center gap-xs">
+                  <button
+                    class="p-xs text-on-surface-variant hover:text-primary transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >edit</span
+                    >
+                  </button>
+                  <button
+                    class="p-xs text-on-surface-variant hover:text-error transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-[20px]"
+                      >delete</span
+                    >
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

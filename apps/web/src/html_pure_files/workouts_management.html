@@ -1,0 +1,831 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-primary": "#6d3bd7",
+              "surface-bright": "#303a48",
+              "on-tertiary": "#482900",
+              "inverse-on-surface": "#27313f",
+              "on-secondary": "#30312e",
+              "surface-variant": "#2b3544",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-container-highest": "#2b3544",
+              outline: "#958ea0",
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary-container": "#b6b5b1",
+              error: "#ffb4ab",
+              "tertiary-fixed": "#ffdcbb",
+              "on-primary-fixed": "#23005c",
+              "error-container": "#93000a",
+              "on-surface": "#d9e3f6",
+              "on-primary-fixed-variant": "#5516be",
+              "surface-container-lowest": "#050f1c",
+              "primary-fixed-dim": "#d0bcff",
+              secondary: "#c8c6c3",
+              "on-error-container": "#ffdad6",
+              "primary-fixed": "#e9ddff",
+              "on-background": "#d9e3f6",
+              primary: "#d0bcff",
+              "secondary-container": "#474744",
+              "on-primary-container": "#340080",
+              "surface-container": "#16202e",
+              "inverse-surface": "#d9e3f6",
+              "tertiary-container": "#ca801e",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-primary": "#3c0091",
+              "on-tertiary-fixed": "#2c1700",
+              "outline-variant": "#494454",
+              "surface-container-low": "#121c2a",
+              tertiary: "#ffb869",
+              "on-secondary-fixed-variant": "#474744",
+              "on-error": "#690005",
+              background: "#091421",
+              "on-secondary-fixed": "#1b1c1a",
+              "surface-dim": "#091421",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "20px",
+              full: "9999px",
+            },
+            spacing: {
+              xs: "4px",
+              xl: "80px",
+              md: "24px",
+              gutter: "24px",
+              sm: "12px",
+              "margin-desktop": "40px",
+              base: "8px",
+              lg: "48px",
+              "margin-mobile": "16px",
+            },
+            fontFamily: {
+              "display-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "title-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "800",
+                },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .glass-card {
+        background: rgba(31, 41, 55, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-active {
+        border-right: 2px solid #d0bcff;
+        color: #d0bcff;
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-surface font-body-md min-h-screen flex">
+    <!-- SideNavBar -->
+    <aside
+      class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 z-50 bg-surface-container border-r border-outline/10 py-lg"
+    >
+      <div class="px-md mb-lg">
+        <h1 class="font-headline-md text-headline-md text-primary">
+          Performance
+        </h1>
+        <p class="font-label-md text-label-md text-on-surface-variant">
+          Elite Tier
+        </p>
+      </div>
+      <nav class="flex-1 space-y-1">
+        <a
+          class="flex items-center px-md py-sm transition-colors hover:text-on-surface hover:bg-surface-bright/10 text-on-surface-variant font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-sm" data-icon="dashboard"
+            >dashboard</span
+          >
+          Dashboard
+        </a>
+        <a
+          class="flex items-center px-md py-sm transition-colors hover:text-on-surface hover:bg-surface-bright/10 text-on-surface-variant font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-sm" data-icon="group"
+            >group</span
+          >
+          Clients
+        </a>
+        <a
+          class="flex items-center px-md py-sm transition-colors sidebar-active font-label-md text-label-md"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-sm"
+            data-icon="fitness_center"
+            >fitness_center</span
+          >
+          Workouts
+        </a>
+        <a
+          class="flex items-center px-md py-sm transition-colors hover:text-on-surface hover:bg-surface-bright/10 text-on-surface-variant font-label-md text-label-md"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-sm"
+            data-icon="calendar_today"
+            >calendar_today</span
+          >
+          Schedule
+        </a>
+        <a
+          class="flex items-center px-md py-sm transition-colors hover:text-on-surface hover:bg-surface-bright/10 text-on-surface-variant font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-sm" data-icon="monitoring"
+            >monitoring</span
+          >
+          Analytics
+        </a>
+      </nav>
+      <div class="px-md mt-auto pt-lg border-t border-outline/10 space-y-1">
+        <a
+          class="flex items-center py-sm transition-colors hover:text-on-surface text-on-surface-variant font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-sm" data-icon="help"
+            >help</span
+          >
+          Support
+        </a>
+        <a
+          class="flex items-center py-sm transition-colors hover:text-on-surface text-on-surface-variant font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-sm" data-icon="logout"
+            >logout</span
+          >
+          Logout
+        </a>
+      </div>
+    </aside>
+    <!-- Main Content Canvas -->
+    <main class="flex-1 md:ml-64 min-h-screen">
+      <!-- TopAppBar -->
+      <header
+        class="flex justify-between items-center w-full px-margin-desktop h-20 sticky top-0 z-40 bg-surface border-b border-outline/10"
+      >
+        <div class="flex items-center gap-lg">
+          <h2
+            class="font-headline-md text-headline-md font-bold text-on-surface"
+          >
+            Workouts Management
+          </h2>
+          <div
+            class="hidden lg:flex items-center bg-surface-container-high rounded-xl px-sm py-xs border border-outline/10"
+          >
+            <span
+              class="material-symbols-outlined text-on-surface-variant mr-xs"
+              data-icon="search"
+              >search</span
+            >
+            <input
+              class="bg-transparent border-none focus:ring-0 text-body-md placeholder:text-on-surface-variant w-64"
+              placeholder="Search workouts..."
+              type="text"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-md">
+          <button
+            class="bg-primary text-on-primary h-12 px-md rounded-xl font-label-md text-label-md flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all"
+          >
+            <span class="material-symbols-outlined" data-icon="add">add</span>
+            Create New Workout
+          </button>
+          <div class="flex items-center gap-sm">
+            <button
+              class="text-on-surface-variant hover:bg-surface-container rounded-full p-xs transition-colors"
+            >
+              <span class="material-symbols-outlined" data-icon="notifications"
+                >notifications</span
+              >
+            </button>
+            <button
+              class="text-on-surface-variant hover:bg-surface-container rounded-full p-xs transition-colors"
+            >
+              <span class="material-symbols-outlined" data-icon="settings"
+                >settings</span
+              >
+            </button>
+            <img
+              alt="Trainer Profile"
+              class="w-10 h-10 rounded-full border border-primary/20 object-cover"
+              data-alt="A professional fitness trainer portrait with a confident expression, set against a dark, moody gym background with purple neon light accents. The lighting is dramatic and high-contrast, highlighting athletic features and conveying a sense of expertise and high-end performance coaching in a nocturnal luxury environment."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRMYoFneO_6lZ-ItAiwZoLTg82WeINpddtwLo3yPCi8H3tRHDhre08ghyQo_YtPu4jyUDXWiCgKUZ9A8uCypLTx7LxVa4rGcovHhsvtd6Kqm-OcZIJ9Ptt0f-kTyJP5bGoMUe3lB2NRkhKqJ1XctEnPa4aGQTem7mwL2Ydi_I58DIRcA1E3Y1Ljfyfdry8zRD5daJhtGPF43m3bO9W80WYRuF_m0ma_yLpgr0TbxVrOwA_XcX1FuFC0VbANxhWuz1YvUVpJIP47Aw"
+            />
+          </div>
+        </div>
+      </header>
+      <!-- Content Area -->
+      <div class="px-margin-desktop py-lg space-y-lg">
+        <!-- Statistics Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+          <div
+            class="glass-card p-md rounded-2xl flex flex-col justify-between min-h-[140px] hover:border-primary/40 transition-colors"
+          >
+            <div>
+              <p
+                class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider"
+              >
+                Total Workouts
+              </p>
+              <h3 class="font-display-lg text-display-lg mt-xs text-primary">
+                128
+              </h3>
+            </div>
+            <div
+              class="flex items-center text-emerald-400 font-label-sm text-label-sm"
+            >
+              <span
+                class="material-symbols-outlined text-[16px] mr-xs"
+                data-icon="trending_up"
+                >trending_up</span
+              >
+              +12% this month
+            </div>
+          </div>
+          <div
+            class="glass-card p-md rounded-2xl flex flex-col justify-between min-h-[140px] hover:border-primary/40 transition-colors"
+          >
+            <div>
+              <p
+                class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider"
+              >
+                Most Used Template
+              </p>
+              <h3 class="font-title-lg text-title-lg mt-xs text-on-surface">
+                Hypertrophy Push Day
+              </h3>
+            </div>
+            <div class="text-on-surface-variant font-label-sm text-label-sm">
+              Used in 42 active programs
+            </div>
+          </div>
+          <div
+            class="glass-card p-md rounded-2xl flex flex-col justify-between min-h-[140px] hover:border-primary/40 transition-colors"
+          >
+            <div>
+              <p
+                class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider"
+              >
+                Avg. Completion Rate
+              </p>
+              <h3 class="font-display-lg text-display-lg mt-xs text-on-surface">
+                94.2%
+              </h3>
+            </div>
+            <div
+              class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden"
+            >
+              <div class="bg-primary h-full w-[94%]"></div>
+            </div>
+          </div>
+          <div
+            class="glass-card p-md rounded-2xl flex flex-col justify-between min-h-[140px] hover:border-primary/40 transition-colors"
+          >
+            <div>
+              <p
+                class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider"
+              >
+                Workouts Published
+              </p>
+              <h3 class="font-display-lg text-display-lg mt-xs text-on-surface">
+                24
+              </h3>
+            </div>
+            <p class="text-on-surface-variant font-label-sm text-label-sm">
+              In October 2023
+            </p>
+          </div>
+        </div>
+        <!-- Main Section: Workout Library Table -->
+        <section
+          class="glass-card rounded-2xl overflow-hidden border border-outline/10"
+        >
+          <div
+            class="px-md py-sm border-b border-outline/10 flex justify-between items-center bg-surface-container-low"
+          >
+            <h4 class="font-title-lg text-title-lg text-on-surface">
+              Workout Library
+            </h4>
+            <div class="flex gap-sm">
+              <button
+                class="flex items-center gap-xs px-sm py-xs bg-surface-variant text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-bright transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-[18px]"
+                  data-icon="filter_list"
+                  >filter_list</span
+                >
+                Filter
+              </button>
+              <button
+                class="flex items-center gap-xs px-sm py-xs bg-surface-variant text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-bright transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-[18px]"
+                  data-icon="download"
+                  >download</span
+                >
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant">
+                  <th
+                    class="px-md py-sm font-label-md text-label-md uppercase tracking-wider"
+                  >
+                    Workout Name
+                  </th>
+                  <th
+                    class="px-md py-sm font-label-md text-label-md uppercase tracking-wider"
+                  >
+                    Category
+                  </th>
+                  <th
+                    class="px-md py-sm font-label-md text-label-md uppercase tracking-wider"
+                  >
+                    Usage Count
+                  </th>
+                  <th
+                    class="px-md py-sm font-label-md text-label-md uppercase tracking-wider"
+                  >
+                    Last Modified
+                  </th>
+                  <th
+                    class="px-md py-sm font-label-md text-label-md uppercase tracking-wider text-right"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline/10">
+                <!-- Row 1 -->
+                <tr class="hover:bg-surface-bright/10 transition-colors group">
+                  <td class="px-md py-base">
+                    <div class="flex items-center gap-md">
+                      <div
+                        class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
+                      >
+                        <span
+                          class="material-symbols-outlined"
+                          data-icon="fitness_center"
+                          >fitness_center</span
+                        >
+                      </div>
+                      <span class="font-title-lg text-body-md text-on-surface"
+                        >Advanced Hypertrophy Upper B</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-md py-base">
+                    <span
+                      class="px-sm py-xs rounded-full bg-surface-container text-primary border border-primary/20 font-label-sm text-label-sm"
+                      >Hypertrophy</span
+                    >
+                  </td>
+                  <td class="px-md py-base font-body-md text-on-surface">
+                    142 clients
+                  </td>
+                  <td
+                    class="px-md py-base font-body-md text-on-surface-variant"
+                  >
+                    Oct 24, 2023
+                  </td>
+                  <td class="px-md py-base text-right">
+                    <button
+                      class="text-primary font-label-md text-label-md hover:underline active:scale-95 transition-transform"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 2 -->
+                <tr class="hover:bg-surface-bright/10 transition-colors group">
+                  <td class="px-md py-base">
+                    <div class="flex items-center gap-md">
+                      <div
+                        class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary"
+                      >
+                        <span
+                          class="material-symbols-outlined"
+                          data-icon="speed"
+                          >speed</span
+                        >
+                      </div>
+                      <span class="font-title-lg text-body-md text-on-surface"
+                        >Endurance Threshold Run</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-md py-base">
+                    <span
+                      class="px-sm py-xs rounded-full bg-surface-container text-tertiary border border-tertiary/20 font-label-sm text-label-sm"
+                      >Endurance</span
+                    >
+                  </td>
+                  <td class="px-md py-base font-body-md text-on-surface">
+                    89 clients
+                  </td>
+                  <td
+                    class="px-md py-base font-body-md text-on-surface-variant"
+                  >
+                    Oct 22, 2023
+                  </td>
+                  <td class="px-md py-base text-right">
+                    <button
+                      class="text-primary font-label-md text-label-md hover:underline active:scale-95 transition-transform"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 3 -->
+                <tr class="hover:bg-surface-bright/10 transition-colors group">
+                  <td class="px-md py-base">
+                    <div class="flex items-center gap-md">
+                      <div
+                        class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400"
+                      >
+                        <span class="material-symbols-outlined" data-icon="bolt"
+                          >bolt</span
+                        >
+                      </div>
+                      <span class="font-title-lg text-body-md text-on-surface"
+                        >Max Strength Deadlift Focus</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-md py-base">
+                    <span
+                      class="px-sm py-xs rounded-full bg-surface-container text-emerald-400 border border-emerald-400/20 font-label-sm text-label-sm"
+                      >Strength</span
+                    >
+                  </td>
+                  <td class="px-md py-base font-body-md text-on-surface">
+                    215 clients
+                  </td>
+                  <td
+                    class="px-md py-base font-body-md text-on-surface-variant"
+                  >
+                    Oct 20, 2023
+                  </td>
+                  <td class="px-md py-base text-right">
+                    <button
+                      class="text-primary font-label-md text-label-md hover:underline active:scale-95 transition-transform"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 4 -->
+                <tr class="hover:bg-surface-bright/10 transition-colors group">
+                  <td class="px-md py-base">
+                    <div class="flex items-center gap-md">
+                      <div
+                        class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
+                      >
+                        <span
+                          class="material-symbols-outlined"
+                          data-icon="fitness_center"
+                          >fitness_center</span
+                        >
+                      </div>
+                      <span class="font-title-lg text-body-md text-on-surface"
+                        >Post-Activation Potentiation Circuit</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-md py-base">
+                    <span
+                      class="px-sm py-xs rounded-full bg-surface-container text-primary border border-primary/20 font-label-sm text-label-sm"
+                      >Power</span
+                    >
+                  </td>
+                  <td class="px-md py-base font-body-md text-on-surface">
+                    54 clients
+                  </td>
+                  <td
+                    class="px-md py-base font-body-md text-on-surface-variant"
+                  >
+                    Oct 18, 2023
+                  </td>
+                  <td class="px-md py-base text-right">
+                    <button
+                      class="text-primary font-label-md text-label-md hover:underline active:scale-95 transition-transform"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 5 -->
+                <tr class="hover:bg-surface-bright/10 transition-colors group">
+                  <td class="px-md py-base">
+                    <div class="flex items-center gap-md">
+                      <div
+                        class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400"
+                      >
+                        <span
+                          class="material-symbols-outlined"
+                          data-icon="self_improvement"
+                          >self_improvement</span
+                        >
+                      </div>
+                      <span class="font-title-lg text-body-md text-on-surface"
+                        >Mobility &amp; Core Stability Flow</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-md py-base">
+                    <span
+                      class="px-sm py-xs rounded-full bg-surface-container text-amber-400 border border-amber-400/20 font-label-sm text-label-sm"
+                      >Recovery</span
+                    >
+                  </td>
+                  <td class="px-md py-base font-body-md text-on-surface">
+                    312 clients
+                  </td>
+                  <td
+                    class="px-md py-base font-body-md text-on-surface-variant"
+                  >
+                    Oct 15, 2023
+                  </td>
+                  <td class="px-md py-base text-right">
+                    <button
+                      class="text-primary font-label-md text-label-md hover:underline active:scale-95 transition-transform"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div
+            class="px-md py-md border-t border-outline/10 flex items-center justify-between text-on-surface-variant bg-surface-container-low"
+          >
+            <span class="font-label-sm text-label-sm"
+              >Showing 1-5 of 128 workouts</span
+            >
+            <div class="flex gap-xs">
+              <button
+                class="p-xs rounded-lg hover:bg-surface-variant disabled:opacity-30"
+                disabled=""
+              >
+                <span class="material-symbols-outlined" data-icon="chevron_left"
+                  >chevron_left</span
+                >
+              </button>
+              <button
+                class="px-sm py-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md"
+              >
+                1
+              </button>
+              <button
+                class="px-sm py-xs rounded-lg hover:bg-surface-variant font-label-md text-label-md"
+              >
+                2
+              </button>
+              <button
+                class="px-sm py-xs rounded-lg hover:bg-surface-variant font-label-md text-label-md"
+              >
+                3
+              </button>
+              <button class="p-xs rounded-lg hover:bg-surface-variant">
+                <span
+                  class="material-symbols-outlined"
+                  data-icon="chevron_right"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+        </section>
+        <!-- Featured Workout Bento Grid Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+          <div
+            class="lg:col-span-2 glass-card rounded-2xl p-lg relative overflow-hidden group"
+          >
+            <div class="absolute inset-0 z-0">
+              <img
+                alt="Training Background"
+                class="w-full h-full object-cover opacity-20 transition-transform duration-700 group-hover:scale-105"
+                data-alt="A cinematic, low-angle shot of a high-end training facility with sleek matte black equipment and atmospheric purple LED strip lighting along the floor. The environment is clean and professional, using deep shadows and sharp highlights to create a premium, nocturnal aesthetic. Minimalist architecture and high-quality textures convey a sense of exclusive performance training."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc6rvnf2aAzXsyf-U8oEA91Dt_hqTylrxPmq8opQHauDSY6BMdaV15xk-lyT9Ic0VQLSanUd2pilNtRgtFXNzalb7fboxNpbga0UuBr0_mDgv7ibz-MCVERa_R2FNvAx1QtMW6g12tjGG-ED5Z_pDutI9ohmNYxxGo9DME2To3qo81kGq0UOxqsty-iihd3PtHn-vXGC2I5zzxM2j10Hr-Eq4blYo4UKj_dyXSW8UZ61gjVwej7KDApzzBryjtng464jzc1qZ5Akw"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-surface via-surface/60 to-transparent"
+              ></div>
+            </div>
+            <div class="relative z-10 h-full flex flex-col justify-end">
+              <span
+                class="bg-primary/20 text-primary border border-primary/30 px-sm py-xs rounded-full font-label-sm text-label-sm w-fit mb-sm uppercase tracking-widest"
+                >Featured Template</span
+              >
+              <h3
+                class="font-display-lg text-headline-lg text-on-surface mb-sm"
+              >
+                The Elite Performance Macro-Cycle
+              </h3>
+              <p class="text-on-surface-variant font-body-md max-w-md mb-md">
+                Our most comprehensive 12-week program for professional
+                athletes. Optimized for concurrent strength and hypertrophy
+                gains with integrated recovery blocks.
+              </p>
+              <div class="flex gap-md">
+                <button
+                  class="bg-primary text-on-primary h-12 px-md rounded-xl font-label-md text-label-md hover:opacity-90 transition-all"
+                >
+                  Assign to Client
+                </button>
+                <button
+                  class="bg-surface-variant/80 text-on-surface h-12 px-md rounded-xl font-label-md text-label-md border border-outline/20 hover:bg-surface-variant transition-all"
+                >
+                  Edit Structure
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-md flex flex-col gap-md">
+            <h4 class="font-title-lg text-title-lg text-on-surface">
+              Recent Activity
+            </h4>
+            <div class="space-y-sm">
+              <div
+                class="flex items-start gap-sm p-sm rounded-xl hover:bg-surface-bright/10 transition-colors"
+              >
+                <div
+                  class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0"
+                >
+                  <span
+                    class="material-symbols-outlined text-[20px]"
+                    data-icon="check_circle"
+                    >check_circle</span
+                  >
+                </div>
+                <div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Alex Mercer completed 'Hypertrophy Upper'
+                  </p>
+                  <p
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                  >
+                    2 minutes ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-start gap-sm p-sm rounded-xl hover:bg-surface-bright/10 transition-colors"
+              >
+                <div
+                  class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0"
+                >
+                  <span
+                    class="material-symbols-outlined text-[20px]"
+                    data-icon="edit"
+                    >edit</span
+                  >
+                </div>
+                <div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    New Workout Published: 'Leg Day C'
+                  </p>
+                  <p
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                  >
+                    1 hour ago
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex items-start gap-sm p-sm rounded-xl hover:bg-surface-bright/10 transition-colors"
+              >
+                <div
+                  class="w-8 h-8 rounded-full bg-tertiary/20 text-tertiary flex items-center justify-center shrink-0"
+                >
+                  <span
+                    class="material-symbols-outlined text-[20px]"
+                    data-icon="group_add"
+                    >group_add</span
+                  >
+                </div>
+                <div>
+                  <p class="font-label-md text-label-md text-on-surface">
+                    Workout 'Full Body' assigned to 12 new clients
+                  </p>
+                  <p
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                  >
+                    4 hours ago
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              class="mt-auto w-full py-sm border border-outline/20 rounded-xl font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:border-outline/40 transition-all"
+            >
+              View All Activity
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+    <!-- Contextual Floating Action Button -->
+    <button
+      class="fixed bottom-margin-mobile right-margin-mobile md:bottom-lg md:right-lg bg-primary text-on-primary w-14 h-14 rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-all z-50 hover:bg-inverse-primary"
+    >
+      <span
+        class="material-symbols-outlined text-[28px]"
+        data-icon="add"
+        style="font-variation-settings: &quot;FILL&quot; 0"
+        >add</span
+      >
+    </button>
+  </body>
+</html>

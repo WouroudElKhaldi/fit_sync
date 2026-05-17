@@ -1,0 +1,559 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Trainee Profile - Emily Chen</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #091421;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .glass-card {
+        background: #16202e;
+        border: 1px solid rgba(228, 226, 222, 0.1);
+        border-radius: 20px;
+      }
+      .chart-gradient {
+        background: linear-gradient(
+          180deg,
+          rgba(139, 92, 246, 0.2) 0%,
+          rgba(139, 92, 246, 0) 100%
+        );
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#2b3544",
+              outline: "#958ea0",
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary-container": "#b6b5b1",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-container-highest": "#2b3544",
+              "surface-bright": "#303a48",
+              "inverse-primary": "#6d3bd7",
+              "on-secondary": "#30312e",
+              "on-tertiary": "#482900",
+              "inverse-on-surface": "#27313f",
+              secondary: "#c8c6c3",
+              "on-error-container": "#ffdad6",
+              "primary-fixed-dim": "#d0bcff",
+              "surface-container-lowest": "#050f1c",
+              "on-background": "#d9e3f6",
+              "primary-fixed": "#e9ddff",
+              "tertiary-fixed": "#ffdcbb",
+              "on-primary-fixed": "#23005c",
+              "error-container": "#93000a",
+              error: "#ffb4ab",
+              "on-surface": "#d9e3f6",
+              "on-primary-fixed-variant": "#5516be",
+              "on-surface-variant": "#cbc3d7",
+              "on-tertiary-container": "#3f2300",
+              "surface-container": "#16202e",
+              "inverse-surface": "#d9e3f6",
+              "secondary-container": "#474744",
+              "on-primary-container": "#340080",
+              "secondary-fixed": "#e4e2de",
+              primary: "#d0bcff",
+              surface: "#091421",
+              "primary-container": "#a078ff",
+              "surface-tint": "#d0bcff",
+              "surface-container-high": "#212b39",
+              "on-secondary-fixed-variant": "#474744",
+              "on-error": "#690005",
+              background: "#091421",
+              tertiary: "#ffb869",
+              "surface-dim": "#091421",
+              "on-secondary-fixed": "#1b1c1a",
+              "tertiary-container": "#ca801e",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-primary": "#3c0091",
+              "surface-container-low": "#121c2a",
+              "outline-variant": "#494454",
+              "on-tertiary-fixed": "#2c1700",
+            },
+            spacing: {
+              sm: "12px",
+              "margin-desktop": "40px",
+              xs: "4px",
+              xl: "80px",
+              md: "24px",
+              gutter: "24px",
+              lg: "48px",
+              "margin-mobile": "16px",
+              base: "8px",
+            },
+            fontFamily: {
+              "title-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background text-on-surface">
+    <!-- Side Navigation Shell -->
+    <aside
+      class="fixed left-0 top-0 h-full w-64 flex flex-col p-md bg-surface-container border-r border-secondary-container/10 z-50"
+    >
+      <div class="mb-lg">
+        <span class="font-headline-md text-headline-md font-bold text-primary"
+          >ProTrainer Elite</span
+        >
+        <p
+          class="text-label-md font-label-md text-on-surface-variant opacity-70"
+        >
+          Midnight Workspace
+        </p>
+      </div>
+      <nav class="flex-1 space-y-xs">
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span> Overview
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span> Clients
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">fitness_center</span> Workout
+          Planner
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">chat</span> Chat
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">person</span> Profile
+        </a>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">settings</span> Settings
+        </a>
+      </nav>
+      <div class="mt-auto">
+        <button
+          class="w-full bg-primary-container text-on-primary-container p-sm rounded-lg font-label-md text-label-md mb-md"
+        >
+          New Client
+        </button>
+        <a
+          class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors font-label-md text-label-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined">logout</span> Logout
+        </a>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="ml-64 min-h-screen">
+      <!-- Top App Bar Shell -->
+      <header
+        class="flex justify-between items-center w-full px-margin-desktop py-sm bg-surface-container sticky top-0 z-40"
+      >
+        <div class="flex items-center gap-md">
+          <span class="font-title-lg text-title-lg font-black text-on-surface"
+            >ProTrainer CRM</span
+          >
+          <div class="relative flex items-center">
+            <span
+              class="material-symbols-outlined absolute left-sm text-outline"
+              >search</span
+            >
+            <input
+              class="bg-surface-container-low border-none rounded-full pl-xl pr-md py-xs text-label-md w-64 focus:ring-1 focus:ring-primary"
+              placeholder="Search trainee data..."
+              type="text"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-md">
+          <button
+            class="text-on-surface-variant hover:text-primary transition-all"
+          >
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button
+            class="text-on-surface-variant hover:text-primary transition-all"
+          >
+            <span class="material-symbols-outlined">help</span>
+          </button>
+          <div
+            class="h-8 w-8 rounded-full bg-primary-fixed-dim overflow-hidden border border-outline-variant"
+          >
+            <img
+              alt="Trainer Account"
+              class="h-full w-full object-cover"
+              data-alt="A professional headshot of a fit personal trainer with a confident smile, wearing high-end athletic apparel. The background is a blurred high-tech gym with purple neon accents and industrial textures. The lighting is cinematic, focusing on professional competence and a modern fitness aesthetic."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7vskHVjnfKFVFHIyLjzqzP5UO2PVeHvsv0qjZe9KFvGkJJEEGUuY9MOz7IBtNKZBO1zl2kiU0EsKFK_4NHuPtbSsIZ3AX35h8trpdL8tbb7Y82Oe1NpKomsgUEDQzYXI5CYJNfSrg7q7bqnIncgF-SpKYjH7MExiskilIapFDaYxC8xxq2nE2XXpwT9zPhWx62J0Nker_Y0xxOHxc3lb6HczuSPvGv4Fb_vYxk4Yj5ijqL1pXWkSxsXcbQWcIHPwVs6lHTxZFOWs"
+            />
+          </div>
+        </div>
+      </header>
+      <!-- Profile Canvas -->
+      <div class="p-margin-desktop space-y-lg max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <section
+          class="glass-card p-md flex flex-col md:flex-row items-center md:items-start gap-md"
+        >
+          <div class="relative">
+            <div class="w-32 h-32 rounded-full border-4 border-primary/20 p-1">
+              <img
+                alt="Emily Chen profile"
+                class="w-full h-full object-cover rounded-full"
+                data-alt="Close-up portrait of Emily Chen, a fit young woman with an athletic build. She is dressed in sleek, dark purple performance wear against a sophisticated, dark studio background with subtle cool-toned lighting. Her expression is determined and focused, conveying a sense of commitment to her fat loss goals."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjolTChTu1CRcVsDrT_t9OI1BJ-RekKLbr_Xo3q24gwWdYCUGBTEyw6VilJGuElyg8eJE-vEQpD7lRy0FFoeguDb2JZbgj6WeDl-OHvS2gTjVWpVMpqEIMJ7FeLTNwoejC7Pm81NHdMle-jRL7mhlyV_O5XIoeR-A1uQE-8nFFdjSR8wDbtS6L3tX485MGZ1qFr4lfXXd4OAOwReXGIYoPTR75xpgYN-6GdWS8skfeu2jztExLwig32lB54SuZ7U61tRr-MGDSoAw"
+              />
+            </div>
+            <span
+              class="absolute bottom-1 right-1 bg-emerald-500 w-6 h-6 rounded-full border-4 border-surface"
+            ></span>
+          </div>
+          <div class="flex-1 text-center md:text-left">
+            <div class="flex flex-col md:flex-row md:items-center gap-sm mb-xs">
+              <h1 class="font-headline-lg text-headline-lg text-on-surface">
+                Emily Chen
+              </h1>
+              <span
+                class="bg-primary/10 text-primary border border-primary/20 px-sm py-xs rounded-full text-label-sm font-label-sm w-fit mx-auto md:mx-0"
+                >Goal: Fat Loss</span
+              >
+            </div>
+            <div
+              class="flex flex-wrap justify-center md:justify-start gap-md mt-sm text-on-surface-variant font-body-md text-body-md"
+            >
+              <div class="flex items-center gap-xs">
+                <span class="material-symbols-outlined text-primary text-[20px]"
+                  >mail</span
+                >
+                emily.chen@example.com
+              </div>
+              <div class="flex items-center gap-xs">
+                <span class="material-symbols-outlined text-primary text-[20px]"
+                  >call</span
+                >
+                +1 (555) 234-5678
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button
+              class="bg-surface-container-high border border-outline-variant px-md py-sm rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors"
+            >
+              Edit Profile
+            </button>
+            <button
+              class="bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity"
+            >
+              Assign Workout
+            </button>
+          </div>
+        </section>
+        <!-- Grid Layout for Metrics & Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+          <!-- 1. Personal Metrics Card -->
+          <div class="glass-card p-md flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-md">
+              <h3 class="font-headline-md text-headline-md">
+                Personal Metrics
+              </h3>
+              <span class="material-symbols-outlined text-outline"
+                >analytics</span
+              >
+            </div>
+            <div class="space-y-md">
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container-low rounded-xl border border-outline-variant/5"
+              >
+                <span
+                  class="text-on-surface-variant font-label-md text-label-md"
+                  >Weight</span
+                >
+                <span class="text-on-surface font-title-lg text-title-lg"
+                  >62<span class="text-label-md opacity-60 ml-1">kg</span></span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container-low rounded-xl border border-outline-variant/5"
+              >
+                <span
+                  class="text-on-surface-variant font-label-md text-label-md"
+                  >Height</span
+                >
+                <span class="text-on-surface font-title-lg text-title-lg"
+                  >165<span class="text-label-md opacity-60 ml-1"
+                    >cm</span
+                  ></span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm bg-surface-container-low rounded-xl border border-outline-variant/5"
+              >
+                <span
+                  class="text-on-surface-variant font-label-md text-label-md"
+                  >Body Fat</span
+                >
+                <span class="text-primary font-title-lg text-title-lg"
+                  >22<span class="text-label-md opacity-60 ml-1">%</span></span
+                >
+              </div>
+            </div>
+            <p class="mt-md text-label-sm text-outline-variant">
+              Last updated: 2 days ago
+            </p>
+          </div>
+          <!-- 2. Weight Variance Chart (Visual Representation) -->
+          <div class="lg:col-span-2 glass-card p-md relative overflow-hidden">
+            <div class="flex items-center justify-between mb-md">
+              <h3 class="font-headline-md text-headline-md">Weight Variance</h3>
+              <div class="flex gap-xs bg-surface-container-low p-xs rounded-lg">
+                <button
+                  class="px-sm py-1 rounded-md text-label-sm bg-primary text-on-primary"
+                >
+                  3M
+                </button>
+                <button
+                  class="px-sm py-1 rounded-md text-label-sm text-on-surface-variant hover:text-on-surface"
+                >
+                  6M
+                </button>
+                <button
+                  class="px-sm py-1 rounded-md text-label-sm text-on-surface-variant hover:text-on-surface"
+                >
+                  1Y
+                </button>
+              </div>
+            </div>
+            <!-- SVG Chart Mockup -->
+            <div class="h-48 w-full mt-md relative">
+              <svg
+                class="w-full h-full"
+                preserveaspectratio="none"
+                viewbox="0 0 800 200"
+              >
+                <defs>
+                  <lineargradient
+                    id="purpleGrad"
+                    x1="0%"
+                    x2="0%"
+                    y1="0%"
+                    y2="100%"
+                  >
+                    <stop
+                      offset="0%"
+                      style="stop-color: #8b5cf6; stop-opacity: 0.3"
+                    ></stop>
+                    <stop
+                      offset="100%"
+                      style="stop-color: #8b5cf6; stop-opacity: 0"
+                    ></stop>
+                  </lineargradient>
+                </defs>
+                <path
+                  d="M0,180 Q100,160 200,170 T400,120 T600,80 T800,70 L800,200 L0,200 Z"
+                  fill="url(#purpleGrad)"
+                ></path>
+                <path
+                  d="M0,180 Q100,160 200,170 T400,120 T600,80 T800,70"
+                  fill="none"
+                  stroke="#8B5CF6"
+                  stroke-linecap="round"
+                  stroke-width="3"
+                ></path>
+                <!-- Data Points -->
+                <circle cx="200" cy="170" fill="#8B5CF6" r="4"></circle>
+                <circle cx="400" cy="120" fill="#8B5CF6" r="4"></circle>
+                <circle cx="600" cy="80" fill="#8B5CF6" r="4"></circle>
+                <circle cx="800" cy="70" fill="#8B5CF6" r="4"></circle>
+              </svg>
+              <div
+                class="flex justify-between mt-sm text-label-sm text-outline"
+              >
+                <span>April</span>
+                <span>May</span>
+                <span>June</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 3. Workout Timeline -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+          <!-- Completed Workouts -->
+          <div class="glass-card p-md">
+            <div class="flex items-center gap-sm mb-md">
+              <span
+                class="material-symbols-outlined text-primary"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >check_circle</span
+              >
+              <h3 class="font-headline-md text-headline-md">
+                Completed Workouts
+              </h3>
+            </div>
+            <div class="space-y-sm">
+              <div
+                class="flex items-center justify-between p-sm rounded-xl hover:bg-surface-container-highest transition-all group cursor-pointer border border-transparent hover:border-outline-variant/20"
+              >
+                <div>
+                  <h4 class="font-label-md text-label-md text-on-surface">
+                    High Intensity Lower Body
+                  </h4>
+                  <p class="text-label-sm text-on-surface-variant">
+                    Jun 12, 2024 • 55 mins
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors"
+                  >chevron_right</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm rounded-xl hover:bg-surface-container-highest transition-all group cursor-pointer border border-transparent hover:border-outline-variant/20"
+              >
+                <div>
+                  <h4 class="font-label-md text-label-md text-on-surface">
+                    Cardio &amp; Mobility
+                  </h4>
+                  <p class="text-label-sm text-on-surface-variant">
+                    Jun 10, 2024 • 40 mins
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors"
+                  >chevron_right</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm rounded-xl hover:bg-surface-container-highest transition-all group cursor-pointer border border-transparent hover:border-outline-variant/20"
+              >
+                <div>
+                  <h4 class="font-label-md text-label-md text-on-surface">
+                    Upper Body Strength A
+                  </h4>
+                  <p class="text-label-sm text-on-surface-variant">
+                    Jun 08, 2024 • 65 mins
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors"
+                  >chevron_right</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Scheduled Sessions -->
+          <div class="glass-card p-md">
+            <div class="flex items-center gap-sm mb-md">
+              <span
+                class="material-symbols-outlined text-tertiary"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >calendar_today</span
+              >
+              <h3 class="font-headline-md text-headline-md">
+                Scheduled Sessions
+              </h3>
+            </div>
+            <div class="space-y-sm">
+              <div
+                class="flex items-center justify-between p-sm rounded-xl bg-surface-container-high border-l-4 border-primary"
+              >
+                <div>
+                  <h4 class="font-label-md text-label-md text-on-surface">
+                    Functional Core Workshop
+                  </h4>
+                  <p class="text-label-sm text-primary">
+                    Tomorrow • 10:00 AM (45m)
+                  </p>
+                </div>
+                <button
+                  class="text-on-surface-variant hover:text-error transition-colors"
+                >
+                  <span class="material-symbols-outlined">cancel</span>
+                </button>
+              </div>
+              <div
+                class="flex items-center justify-between p-sm rounded-xl hover:bg-surface-container-highest transition-all group cursor-pointer border border-transparent hover:border-outline-variant/20"
+              >
+                <div>
+                  <h4 class="font-label-md text-label-md text-on-surface">
+                    Full Body Metabolic Blast
+                  </h4>
+                  <p class="text-label-sm text-on-surface-variant">
+                    Jun 16, 2024 • 60 mins
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors"
+                  >edit</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-sm rounded-xl hover:bg-surface-container-highest transition-all group cursor-pointer border border-transparent hover:border-outline-variant/20"
+              >
+                <div>
+                  <h4 class="font-label-md text-label-md text-on-surface">
+                    Recovery &amp; Stretch Flow
+                  </h4>
+                  <p class="text-label-sm text-on-surface-variant">
+                    Jun 18, 2024 • 30 mins
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors"
+                  >edit</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <!-- Floating Action Button (Contextual for Profile) -->
+    <!-- Suppressed on Profile per UX Goal guidelines, but normally would go here if it were Dashboard -->
+  </body>
+</html>

@@ -1,0 +1,668 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#16202e",
+              "surface-bright": "#303a48",
+              "on-primary": "#3c0091",
+              primary: "#d0bcff",
+              "on-secondary": "#30312e",
+              outline: "#958ea0",
+              secondary: "#c8c6c3",
+              "on-tertiary": "#482900",
+              "surface-container-high": "#212b39",
+              "on-error": "#690005",
+              surface: "#091421",
+              "primary-fixed": "#e9ddff",
+              "on-surface-variant": "#cbc3d7",
+              "surface-dim": "#091421",
+              "on-surface": "#d9e3f6",
+              "tertiary-fixed": "#ffdcbb",
+              "surface-container-lowest": "#050f1c",
+              "surface-container-highest": "#2b3544",
+              error: "#ffb4ab",
+              "surface-variant": "#2b3544",
+              "primary-container": "#a078ff",
+              "inverse-surface": "#d9e3f6",
+              tertiary: "#ffb869",
+              "on-tertiary-fixed": "#2c1700",
+              "tertiary-container": "#ca801e",
+              "surface-container-low": "#121c2a",
+              "primary-fixed-dim": "#d0bcff",
+              "on-error-container": "#ffdad6",
+              "surface-tint": "#d0bcff",
+              "on-secondary-container": "#b6b5b1",
+              "error-container": "#93000a",
+              "tertiary-fixed-dim": "#ffb869",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-primary-container": "#340080",
+              background: "#091421",
+              "inverse-primary": "#6d3bd7",
+              "on-tertiary-container": "#3f2300",
+              "outline-variant": "#494454",
+              "on-background": "#d9e3f6",
+              "secondary-fixed": "#e4e2de",
+              "secondary-container": "#474744",
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary-fixed": "#1b1c1a",
+              "on-primary-fixed-variant": "#5516be",
+              "on-secondary-fixed-variant": "#474744",
+              "on-primary-fixed": "#23005c",
+              "inverse-on-surface": "#27313f",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "20px",
+              full: "9999px",
+            },
+            spacing: {
+              "margin-mobile": "16px",
+              "margin-desktop": "40px",
+              md: "24px",
+              xl: "80px",
+              base: "8px",
+              xs: "4px",
+              lg: "48px",
+              sm: "12px",
+              gutter: "24px",
+            },
+            fontFamily: {
+              "headline-lg": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "title-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "800",
+                },
+              ],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "700" },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #091421;
+        color: #d9e3f6;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      .glass-panel {
+        background: rgba(22, 32, 46, 0.8);
+        backdrop-filter: blur(24px);
+        border-left: 1px solid rgba(208, 188, 255, 0.1);
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #2b3544;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="overflow-hidden">
+    <!-- Sidebar Component (Shared Component Logic) -->
+    <aside
+      class="fixed left-0 top-0 h-full w-64 flex flex-col p-md bg-surface-container border-r border-secondary-container/10 z-40"
+    >
+      <div class="mb-lg">
+        <span class="font-headline-md text-headline-md font-bold text-primary"
+          >ProTrainer Elite</span
+        >
+        <p class="font-label-md text-label-md text-on-surface-variant">
+          Midnight Workspace
+        </p>
+      </div>
+      <nav class="flex-1 space-y-2">
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-md text-label-md">Overview</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Clients</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-highest"
+        >
+          <span class="material-symbols-outlined">fitness_center</span>
+          <span class="font-label-md text-label-md">Workout Planner</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">chat</span>
+          <span class="font-label-md text-label-md">Chat</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">person</span>
+          <span class="font-label-md text-label-md">Profile</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-label-md text-label-md">Settings</span>
+        </div>
+      </nav>
+      <button
+        class="mt-4 w-full py-3 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >add</span
+        >
+        New Client
+      </button>
+      <div class="mt-auto pt-4 border-t border-secondary-container/10">
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </div>
+      </div>
+    </aside>
+    <!-- Top App Bar (Shared Component Logic) -->
+    <header
+      class="fixed top-0 right-0 left-64 h-20 bg-surface-container border-b border-secondary-container/10 flex items-center justify-between px-margin-desktop z-30"
+    >
+      <div class="flex items-center gap-6 flex-1">
+        <span
+          class="font-title-lg text-title-lg font-black text-on-surface whitespace-nowrap"
+          >ProTrainer CRM</span
+        >
+        <div class="relative w-full max-w-md">
+          <span
+            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+            >search</span
+          >
+          <input
+            class="w-full bg-surface-container-low border border-outline-variant rounded-full py-2 pl-12 pr-4 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+            placeholder="Search exercises..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4">
+          <span
+            class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-all"
+            >notifications</span
+          >
+          <span
+            class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-all"
+            >help</span
+          >
+        </div>
+        <button
+          class="px-6 py-2 bg-primary-container text-on-primary-container font-label-md text-label-md rounded-full hover:opacity-90 transition-all"
+        >
+          Quick Action
+        </button>
+        <div
+          class="w-10 h-10 rounded-full bg-surface-bright border border-outline-variant flex items-center justify-center overflow-hidden"
+        >
+          <img
+            alt="Trainer profile picture"
+            data-alt="Close up portrait of a professional athletic fitness trainer with a confident smile, wearing premium dark athletic gear. The background is a soft-focus high-end gym interior with subtle purple LED lighting, maintaining a luxurious midnight corporate aesthetic."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDes9noZMEhc0xZQ4r5zIGQg26CIUpfX9P5y23ZXoXB6LsSKZd7evtvOo_NFEQYKNfQ6qHqjOzhddgIqpjec6oMaK3IXJEXXziPM-h_fmH5LDmftJQYY0zGkhgsd5WiSOU_xmsyDv__3SzeLIi8zZ48jDVBelhpzSFBzK6jJk5CnzVLs-kXZS7Bo0x2R4x-EUEuX7kRN6jhIIzBd-SweTKE_osd8YKZbxozcNhyHd5U38-9oruhNbXJx0xwfZR1tZ2IiqAaEOP22L0"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main
+      class="ml-64 mt-20 p-margin-desktop h-[calc(100vh-80px)] overflow-hidden flex gap- gutter"
+    >
+      <div class="flex-1 flex flex-col gap-sm pr-[400px]">
+        <!-- Content Header -->
+        <div class="flex items-center justify-between mb-sm">
+          <div class="flex items-center gap-4">
+            <select
+              class="bg-surface-container-high border-none rounded-lg font-label-md text-label-md text-on-surface py-2 px-4 focus:ring-1 focus:ring-primary"
+            >
+              <option>Muscle Group</option>
+              <option>Chest</option>
+              <option>Back</option>
+              <option>Legs</option>
+            </select>
+            <select
+              class="bg-surface-container-high border-none rounded-lg font-label-md text-label-md text-on-surface py-2 px-4 focus:ring-1 focus:ring-primary"
+            >
+              <option>Equipment</option>
+              <option>Barbell</option>
+              <option>Dumbbell</option>
+              <option>Machine</option>
+            </select>
+          </div>
+          <button
+            class="bg-primary-container text-on-primary-container px-6 py-3 rounded-2xl font-label-md text-label-md flex items-center gap-2 hover:shadow-[0_0_15px_rgba(208,188,255,0.3)] transition-all"
+          >
+            <span class="material-symbols-outlined">add_circle</span>
+            + Add New Exercise
+          </button>
+        </div>
+        <!-- Exercise List -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3">
+          <!-- Row 1 -->
+          <div
+            class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant/10 rounded-2xl hover:bg-surface-container-high transition-all group"
+          >
+            <span class="material-symbols-outlined text-outline cursor-grab"
+              >drag_indicator</span
+            >
+            <div
+              class="w-16 h-16 rounded-xl bg-surface-bright flex-shrink-0 overflow-hidden border border-outline-variant/20"
+            >
+              <img
+                data-alt="A cinematic, high-contrast photograph of a chrome barbell loaded with heavy weight plates on a flat bench press station. The lighting is moody and dramatic with deep blue shadows and a sharp purple highlight reflecting off the metal, set in a premium dark-themed fitness studio."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6E5sDwkyUaP6ooIzLD1M9kJtnFzaqxs0CC6f_NpTaJufbfxFZUwjbNtStsOEeVFlYX8AEvB2uOW_WSfdjeBtCQ5ORz-uV4MTGutUEQ6KGZRi5N9PucNhAU-VoboocFfNel--y4bla1gXM1eACLLzz8vTUBYOMSL78TJnjWiXoSegPu_QFK9pbegcvgbYCJocFNRU39iH6EesjwXLkPzhl0pGb-fC4TImhMjIe0jWMdXxePxVpDzYo6wI5RwF4BuCpFcyWHqXXcfs"
+              />
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-xs">
+                Barbell Bench Press
+              </h3>
+              <p
+                class="font-body-md text-body-md text-on-surface-variant truncate"
+              >
+                Standard flat bench press for chest hypertrophy and power
+                development.
+              </p>
+            </div>
+            <div class="flex gap-2 mx-4">
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Chest</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Barbell</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Flat Bench</span
+              >
+            </div>
+            <button
+              class="material-symbols-outlined text-outline hover:text-on-surface transition-colors"
+            >
+              more_vert
+            </button>
+          </div>
+          <!-- Row 2 -->
+          <div
+            class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant/10 rounded-2xl hover:bg-surface-container-high transition-all group"
+          >
+            <span class="material-symbols-outlined text-outline cursor-grab"
+              >drag_indicator</span
+            >
+            <div
+              class="w-16 h-16 rounded-xl bg-surface-bright flex-shrink-0 overflow-hidden border border-outline-variant/20"
+            >
+              <img
+                data-alt="Professional fitness equipment shot showing a high-end adjustable incline weight bench. The material is premium black leather with subtle purple stitching, illuminated by a single spotlight from above against a dark charcoal industrial background."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwNCbsd8xn8BCdgR62Q3i3AoC9nAiz1CPGf6I5yrukKKVQpxSwsgR-wLtBJ7hmM5QrSpeGvY8tENxuLZKftOgczKeNhlEJD3RYHZ9p77-8nQ-B3CKAD70DZdpdXihhPyraE0gtqKcXddK6UWWXYLreV9rv2bPlidYZdN3thXRTvVGq-we5UxruJRGzRr786lIqHFJwbUJu9NMRlcyiZQ8tuHfgUHTGTikoOw4idzfb0rf7v3QBEBt4n9BbieJLnu9Gamb6UuQIrYM"
+              />
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-xs">
+                Incline Dumbbell Fly
+              </h3>
+              <p
+                class="font-body-md text-body-md text-on-surface-variant truncate"
+              >
+                Isolates upper pectoral muscles through a controlled wide-arc
+                movement.
+              </p>
+            </div>
+            <div class="flex gap-2 mx-4">
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Chest</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Dumbbell</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Isolation</span
+              >
+            </div>
+            <button
+              class="material-symbols-outlined text-outline hover:text-on-surface transition-colors"
+            >
+              more_vert
+            </button>
+          </div>
+          <!-- Row 3 -->
+          <div
+            class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant/10 rounded-2xl hover:bg-surface-container-high transition-all group"
+          >
+            <span class="material-symbols-outlined text-outline cursor-grab"
+              >drag_indicator</span
+            >
+            <div
+              class="w-16 h-16 rounded-xl bg-surface-bright flex-shrink-0 overflow-hidden border border-outline-variant/20"
+            >
+              <img
+                data-alt="Close-up of a high-tech cable crossover machine handle, made of knurled steel. The scene is lit with a vibrant purple glow from nearby accent lights in a modern, luxury gym environment with deep black walls."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAai7zcpvd0L6HCmuLwZ864Hg8XVcBWw8hgDEV-DcIVtanTkkcKvWsfz3i86qK9aTHYfkUvD10gpZ_SKaPNyKx8H0QInZReQiCz4h6C39Ls4QrQfBtr338sh04GCOR2sAMlhICOkvwYant3cagbHZBcqQeUFthPHX82Gfhe8iEvQPlXKDs1N7Odez57Fdykw_FWA-EWSO3zcOo9OjlUajZwsVyRcWLv4zjCoy1wLB8eCCAL7PsEfradRcfCAHdM2Nf8B7EyhFU1Sfc"
+              />
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-xs">
+                Cable Crossover (Low-to-High)
+              </h3>
+              <p
+                class="font-body-md text-body-md text-on-surface-variant truncate"
+              >
+                Targets upper chest and inner pectoral definition using constant
+                tension.
+              </p>
+            </div>
+            <div class="flex gap-2 mx-4">
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Chest</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Cables</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Upper Pecs</span
+              >
+            </div>
+            <button
+              class="material-symbols-outlined text-outline hover:text-on-surface transition-colors"
+            >
+              more_vert
+            </button>
+          </div>
+          <!-- Row 4 -->
+          <div
+            class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant/10 rounded-2xl hover:bg-surface-container-high transition-all group"
+          >
+            <span class="material-symbols-outlined text-outline cursor-grab"
+              >drag_indicator</span
+            >
+            <div
+              class="w-16 h-16 rounded-xl bg-surface-bright flex-shrink-0 overflow-hidden border border-outline-variant/20"
+            >
+              <img
+                data-alt="Professional Olympic squat rack with a barbell and heavy plates in a dark, elite training facility. The floor is black rubber matting, and the rack is illuminated by vertical purple neon strips, creating a high-performance, moody vibe."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzOmPpzQDE1j_VkiV8qD60rbUixQOFph3HnUhghLnNWsSQHrG7CzqR0Hx9MhVV1NUinFaAfYU0FWrzEp5Af84t8KMTXihba2Un9_D21cRoIQu0ZxD1CWb-FRmxlpKD3rxxXdOmYbt2Zni8V47fBUuhXgvgappF3NVnUKqw-dbZ59C6t3AGtc0MSb0NpfYImX138g5WOQOTF7JP6hb0jclnzUoA0jDaeDNZhue9KVoYLR-KZdRPLtF9A2GwhJI4wOVhaCrj1dKkr5U"
+              />
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-xs">
+                Barbell Back Squat
+              </h3>
+              <p
+                class="font-body-md text-body-md text-on-surface-variant truncate"
+              >
+                Fundamental lower body compound lift for overall leg
+                development.
+              </p>
+            </div>
+            <div class="flex gap-2 mx-4">
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Legs</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Barbell</span
+              >
+              <span
+                class="px-3 py-1 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded-full"
+                >Compound</span
+              >
+            </div>
+            <button
+              class="material-symbols-outlined text-outline hover:text-on-surface transition-colors"
+            >
+              more_vert
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Slide-over Panel: Add New Exercise -->
+    <aside
+      class="fixed right-0 top-0 h-full w-[400px] glass-panel z-50 flex flex-col p-md shadow-2xl"
+    >
+      <div class="flex items-center justify-between mb-lg">
+        <h2 class="font-headline-md text-headline-md font-bold text-on-surface">
+          Add New Exercise
+        </h2>
+        <button
+          class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all p-2 bg-surface-container rounded-full"
+        >
+          close
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto custom-scrollbar space-y-md pr-2">
+        <!-- Photo Upload -->
+        <div
+          class="w-full h-48 rounded-2xl border-2 border-dashed border-outline-variant/50 bg-surface-container-low flex flex-col items-center justify-center gap-3 hover:border-primary/50 transition-colors cursor-pointer group"
+        >
+          <span
+            class="material-symbols-outlined text-[48px] text-primary transition-transform group-hover:scale-110"
+            >cloud_upload</span
+          >
+          <span class="font-label-md text-label-md text-on-surface-variant"
+            >Upload Exercise Media</span
+          >
+        </div>
+        <!-- Fields -->
+        <div class="space-y-sm">
+          <label
+            class="block font-label-md text-label-md text-on-surface-variant"
+            >Exercise Title</label
+          >
+          <input
+            class="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl py-3 px-4 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            placeholder="e.g. Weighted Pullups"
+            type="text"
+          />
+        </div>
+        <div class="space-y-sm">
+          <label
+            class="block font-label-md text-label-md text-on-surface-variant"
+            >Short Description</label
+          >
+          <textarea
+            class="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl py-3 px-4 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+            placeholder="Describe the focus and key benefits..."
+            rows="3"
+          ></textarea>
+        </div>
+        <!-- Multi-selects Chips -->
+        <div class="space-y-sm">
+          <label
+            class="block font-label-md text-label-md text-on-surface-variant"
+            >Target Muscles</label
+          >
+          <div
+            class="flex flex-wrap gap-2 p-3 bg-surface-container-high border border-outline-variant/30 rounded-xl min-h-[50px]"
+          >
+            <span
+              class="flex items-center gap-1 bg-primary text-on-primary font-label-sm text-label-sm px-3 py-1 rounded-full"
+            >
+              Chest
+              <span class="material-symbols-outlined text-[14px] cursor-pointer"
+                >close</span
+              >
+            </span>
+            <span
+              class="flex items-center gap-1 bg-primary text-on-primary font-label-sm text-label-sm px-3 py-1 rounded-full"
+            >
+              Triceps
+              <span class="material-symbols-outlined text-[14px] cursor-pointer"
+                >close</span
+              >
+            </span>
+            <button class="text-primary material-symbols-outlined text-[20px]">
+              add_circle
+            </button>
+          </div>
+        </div>
+        <div class="space-y-sm">
+          <label
+            class="block font-label-md text-label-md text-on-surface-variant"
+            >Equipment Required</label
+          >
+          <div
+            class="flex flex-wrap gap-2 p-3 bg-surface-container-high border border-outline-variant/30 rounded-xl min-h-[50px]"
+          >
+            <span
+              class="flex items-center gap-1 bg-primary text-on-primary font-label-sm text-label-sm px-3 py-1 rounded-full"
+            >
+              Barbell
+              <span class="material-symbols-outlined text-[14px] cursor-pointer"
+                >close</span
+              >
+            </span>
+            <button class="text-primary material-symbols-outlined text-[20px]">
+              add_circle
+            </button>
+          </div>
+        </div>
+        <!-- Steps List -->
+        <div class="space-y-sm">
+          <label
+            class="block font-label-md text-label-md text-on-surface-variant"
+            >Instructional Steps</label
+          >
+          <div class="space-y-3">
+            <div class="flex gap-4">
+              <span
+                class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center font-bold text-primary flex-shrink-0"
+                >1</span
+              >
+              <input
+                class="flex-1 bg-transparent border-b border-outline-variant/30 focus:border-primary outline-none py-1 text-body-md"
+                type="text"
+                value="Lie flat on the bench with feet planted."
+              />
+            </div>
+            <div class="flex gap-4">
+              <span
+                class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center font-bold text-primary flex-shrink-0"
+                >2</span
+              >
+              <input
+                class="flex-1 bg-transparent border-b border-outline-variant/30 focus:border-primary outline-none py-1 text-body-md"
+                type="text"
+                value="Grip the bar slightly wider than shoulders."
+              />
+            </div>
+          </div>
+          <button
+            class="mt-4 w-full py-2 border border-primary/30 text-primary font-label-md text-label-md rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+          >
+            <span class="material-symbols-outlined">add</span>
+            Add Step
+          </button>
+        </div>
+      </div>
+      <!-- Panel Footer -->
+      <div class="pt-lg flex gap-4 border-t border-outline-variant/10 mt-md">
+        <button
+          class="flex-1 py-3 bg-surface-bright text-on-surface font-label-md text-label-md rounded-xl hover:bg-surface-container-highest transition-all"
+        >
+          Cancel
+        </button>
+        <button
+          class="flex-1 py-3 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+        >
+          Save Exercise
+        </button>
+      </div>
+    </aside>
+  </body>
+</html>

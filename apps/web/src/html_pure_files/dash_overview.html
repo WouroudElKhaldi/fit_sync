@@ -1,0 +1,866 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ProTrainer CRM - Overview Dashboard</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-highest": "#2b3544",
+              "secondary-container": "#474744",
+              "surface-tint": "#d0bcff",
+              surface: "#091421",
+              "inverse-surface": "#d9e3f6",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-container": "#b6b5b1",
+              "on-tertiary-fixed": "#2c1700",
+              "on-error": "#690005",
+              "tertiary-fixed": "#ffdcbb",
+              "on-primary": "#3c0091",
+              "surface-container-high": "#212b39",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              "surface-bright": "#303a48",
+              "secondary-fixed": "#e4e2de",
+              "on-tertiary-fixed-variant": "#673d00",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-error-container": "#ffdad6",
+              tertiary: "#ffb869",
+              "on-tertiary-container": "#3f2300",
+              "on-surface-variant": "#cbc3d7",
+              "on-background": "#d9e3f6",
+              outline: "#958ea0",
+              "primary-fixed": "#e9ddff",
+              "inverse-primary": "#6d3bd7",
+              "on-primary-container": "#340080",
+              "surface-container": "#16202e",
+              "on-secondary-fixed-variant": "#474744",
+              "on-primary-fixed-variant": "#5516be",
+              secondary: "#c8c6c3",
+              primary: "#d0bcff",
+              "surface-container-low": "#121c2a",
+              "outline-variant": "#494454",
+              "on-secondary": "#30312e",
+              "tertiary-container": "#ca801e",
+              "on-primary-fixed": "#23005c",
+              "primary-container": "#a078ff",
+              "surface-dim": "#091421",
+              "inverse-on-surface": "#27313f",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-variant": "#2b3544",
+              "on-surface": "#d9e3f6",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#050f1c",
+              "on-tertiary": "#482900",
+              background: "#091421",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "24px",
+              sm: "12px",
+              lg: "48px",
+              xl: "80px",
+              xs: "4px",
+              "margin-desktop": "40px",
+              base: "8px",
+              "margin-mobile": "16px",
+              md: "24px",
+            },
+            fontFamily: {
+              "headline-md": ["Plus Jakarta Sans"],
+              "title-lg": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "700" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-surface font-body-md antialiased min-h-screen"
+  >
+    <!-- SideNavBar Shared Component -->
+    <aside
+      class="hidden md:flex bg-surface dark:bg-surface-dim font-headline-md text-headline-md font-body-md text-body-md font-label-md text-label-md fixed left-0 top-0 h-full flex-col p-md w-64 bg-surface-container dark:bg-surface-container-low border-r border-secondary-container/10 z-50"
+    >
+      <div class="flex items-center gap-sm mb-xl">
+        <div
+          class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/30 flex-shrink-0"
+        >
+          <img
+            alt="Trainer profile picture"
+            class="w-full h-full object-cover"
+            data-alt="A close-up portrait of a professional athletic trainer in a modern, dimly lit premium gym environment. The lighting is cinematic, casting subtle shadows to emphasize fitness and focus. The trainer wears sleek, dark athletic apparel, aligning with a sophisticated midnight-inspired luxury aesthetic."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJA4p40Yqfm3OsEOXkQ9qQD9noMA_-W1GxOoUDMHAaufsaSjX4amNrA0EAAYhF9sWTLYCSs-sVbp1CQGwq4hYHZxxvZ29OlU1Jog5dSLS1FR0MDDzPMOWac4g76A-37CDagHO7h6oM8rnEORHDMyCEYM1jTFhJibwmVD4JTPTKkmdIxqsNnnrM9z7aaArKpI225YM0yE4fKPjeMtTJU6Z0Rz1LM0-7cUHPWVbk-52YLkPw8r5tng-L6h7-RHb_4L-71hBJqn4pUSc"
+          />
+        </div>
+        <div class="flex flex-col">
+          <span
+            class="font-headline-md text-[18px] leading-[24px] font-bold text-primary dark:text-primary truncate"
+            >ProTrainer Elite</span
+          >
+          <span
+            class="font-label-sm text-label-sm text-on-surface-variant dark:text-on-secondary-container truncate"
+            >Midnight Workspace</span
+          >
+        </div>
+      </div>
+      <button
+        class="w-full bg-primary text-on-primary font-label-md text-label-md py-sm rounded-lg mb-lg hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-xs"
+      >
+        <span class="material-symbols-outlined" style="font-size: 18px"
+          >add</span
+        >
+        New Client
+      </button>
+      <nav class="flex-1 flex flex-col gap-xs">
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-primary dark:text-primary-fixed-dim font-bold border-r-2 border-primary scale-95 duration-150 transition-transform"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-md text-label-md">Overview</span>
+        </a>
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-on-surface-variant dark:text-on-secondary-container"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Clients</span>
+        </a>
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-on-surface-variant dark:text-on-secondary-container"
+          href="#"
+        >
+          <span class="material-symbols-outlined">fitness_center</span>
+          <span class="font-label-md text-label-md">Workout Planner</span>
+        </a>
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-on-surface-variant dark:text-on-secondary-container"
+          href="#"
+        >
+          <span class="material-symbols-outlined">chat</span>
+          <span class="font-label-md text-label-md">Chat</span>
+        </a>
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-on-surface-variant dark:text-on-secondary-container"
+          href="#"
+        >
+          <span class="material-symbols-outlined">person</span>
+          <span class="font-label-md text-label-md">Profile</span>
+        </a>
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-on-surface-variant dark:text-on-secondary-container"
+          href="#"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-label-md text-label-md">Settings</span>
+        </a>
+      </nav>
+      <div class="mt-auto pt-sm border-t border-secondary-container/10">
+        <a
+          class="flex items-center gap-sm px-sm py-sm rounded-lg hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-colors duration-200 text-on-surface-variant dark:text-on-secondary-container"
+          href="#"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </a>
+      </div>
+    </aside>
+    <!-- TopAppBar Shared Component -->
+    <header
+      class="hidden md:flex bg-surface-container dark:bg-surface-container-low font-headline-md text-headline-md font-label-md text-label-md justify-between items-center w-full px-margin-desktop py-sm fixed top-0 z-40 border-b border-secondary-container/10"
+      style="padding-left: calc(256px + 40px)"
+    >
+      <div class="flex items-center gap-md">
+        <div class="font-title-lg text-title-lg font-black text-on-surface">
+          ProTrainer CRM
+        </div>
+        <div class="relative w-64">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+            style="font-size: 20px"
+            >search</span
+          >
+          <input
+            class="w-full bg-surface border border-outline-variant/50 rounded-full py-2 pl-10 pr-4 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+            placeholder="Search clients, workouts..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center gap-md">
+        <button
+          class="font-label-md text-label-md text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-all p-2 rounded-full hover:bg-surface-container-highest"
+        >
+          <span class="material-symbols-outlined">help</span>
+        </button>
+        <button
+          class="font-label-md text-label-md text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-all p-2 rounded-full hover:bg-surface-container-highest relative"
+        >
+          <span class="material-symbols-outlined">notifications</span>
+          <span
+            class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"
+          ></span>
+        </button>
+        <div class="h-6 w-px bg-outline-variant/30 mx-sm"></div>
+        <button
+          class="font-label-md text-label-md text-surface bg-inverse-surface border border-outline-variant/20 px-4 py-2 rounded-lg hover:bg-inverse-surface/90 transition-all"
+        >
+          Support
+        </button>
+        <button
+          class="font-label-md text-label-md bg-primary text-on-primary px-4 py-2 rounded-lg hover:bg-primary/90 transition-all"
+        >
+          Quick Action
+        </button>
+        <div
+          class="w-9 h-9 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/30 ml-sm cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img
+            alt="Trainer Account"
+            class="w-full h-full object-cover"
+            data-alt="A small square profile icon of a professional athletic trainer. Cinematic lighting, modern dark aesthetic, focused on the face, fitting a luxury fitness application design."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMC9KojnczpdccShhtPlQNPCrM7WYrmB4leTizXInMn-X8-0As_6ZlkDJD9DLQgbz-_zpa3x1VH9jJlQFYE7bdkeq3aOY50hYhs1G-C6JEYvzfwPL_lwmz09jioJPR8fshDzNHO9rrqaHdKALBIFIZmqsQzQjr3S1KMlJGNRhKqSbLrXvNf42zxOTBNzsRrztipDXdXE8KX6BTm5sc8pfLGlYZJs92SZO2CrjvuTWSSDpAp0zGGWbVEoMFmYVdPk8mFroxQ_qJ-_0"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main
+      class="md:ml-64 pt-[80px] md:pt-[100px] p-margin-mobile md:p-margin-desktop min-h-screen"
+    >
+      <div class="mb-lg">
+        <h1
+          class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-xs"
+        >
+          Dashboard Overview
+        </h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Here is what's happening with your clients today.
+        </p>
+      </div>
+      <!-- Top Row: Quick Stat Cards -->
+      <section
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-lg"
+      >
+        <!-- Card 1 -->
+        <div
+          class="bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md flex flex-col justify-between group hover:border-primary/50 transition-colors relative overflow-hidden"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors"
+          ></div>
+          <div class="flex justify-between items-start mb-sm relative z-10">
+            <span class="font-label-md text-label-md text-on-surface-variant"
+              >Active Clients</span
+            >
+            <span
+              class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg"
+              >group</span
+            >
+          </div>
+          <div class="relative z-10">
+            <span class="font-display-lg text-display-lg text-on-surface"
+              >42</span
+            >
+            <div class="flex items-center mt-xs gap-xs text-primary">
+              <span class="material-symbols-outlined text-[16px]"
+                >trending_up</span
+              >
+              <span class="font-label-sm text-label-sm">+3 this week</span>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div
+          class="bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md flex flex-col justify-between group hover:border-tertiary-container/50 transition-colors relative overflow-hidden"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-container/5 rounded-full blur-xl group-hover:bg-tertiary-container/10 transition-colors"
+          ></div>
+          <div class="flex justify-between items-start mb-sm relative z-10">
+            <span class="font-label-md text-label-md text-on-surface-variant"
+              >Pending Requests</span
+            >
+            <span
+              class="material-symbols-outlined text-tertiary-container bg-tertiary-container/10 p-2 rounded-lg"
+              >person_add</span
+            >
+          </div>
+          <div class="relative z-10">
+            <span class="font-display-lg text-display-lg text-on-surface"
+              >5</span
+            >
+            <div class="flex items-center mt-xs gap-xs text-on-surface-variant">
+              <span class="material-symbols-outlined text-[16px]"
+                >schedule</span
+              >
+              <span class="font-label-sm text-label-sm"
+                >Requires attention</span
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div
+          class="bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md flex flex-col justify-between group hover:border-primary/50 transition-colors relative overflow-hidden"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors"
+          ></div>
+          <div class="flex justify-between items-start mb-sm relative z-10">
+            <span class="font-label-md text-label-md text-on-surface-variant"
+              >Workouts Completed</span
+            >
+            <span
+              class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg"
+              >task_alt</span
+            >
+          </div>
+          <div class="relative z-10">
+            <span class="font-display-lg text-display-lg text-on-surface"
+              >12</span
+            >
+            <div class="flex items-center mt-xs gap-xs text-on-surface-variant">
+              <span class="font-label-sm text-label-sm">Today</span>
+            </div>
+          </div>
+        </div>
+        <!-- Card 4 -->
+        <div
+          class="bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md flex flex-col justify-between group hover:border-tertiary-fixed/30 transition-colors relative overflow-hidden"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-fixed/5 rounded-full blur-xl group-hover:bg-tertiary-fixed/10 transition-colors"
+          ></div>
+          <div class="flex justify-between items-start mb-sm relative z-10">
+            <span class="font-label-md text-label-md text-on-surface-variant"
+              >Average Rating</span
+            >
+            <span
+              class="material-symbols-outlined text-tertiary-fixed bg-tertiary-fixed/10 p-2 rounded-lg"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >star</span
+            >
+          </div>
+          <div class="relative z-10">
+            <span class="font-display-lg text-display-lg text-on-surface"
+              >4.9</span
+            >
+            <div class="flex items-center mt-xs gap-xs text-on-surface-variant">
+              <span class="font-label-sm text-label-sm"
+                >Across 128 reviews</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Middle Section: Dual-column -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-md mb-lg">
+        <!-- Left: Line Chart -->
+        <div
+          class="lg:col-span-2 bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md flex flex-col"
+        >
+          <div
+            class="flex justify-between items-center mb-md pb-sm border-b border-outline-variant/20"
+          >
+            <h2 class="font-title-lg text-title-lg text-on-surface">
+              Client Engagement Over Time
+            </h2>
+            <button
+              class="text-on-surface-variant hover:text-primary transition-colors"
+            >
+              <span class="material-symbols-outlined">more_horiz</span>
+            </button>
+          </div>
+          <div class="flex-1 w-full relative min-h-[250px] mt-sm">
+            <!-- Faux SVG Chart representing data -->
+            <svg
+              class="w-full h-full absolute inset-0 preserve-3d"
+              preserveaspectratio="none"
+              viewbox="0 0 600 200"
+            >
+              <!-- Horizontal Grid Lines -->
+              <line
+                class="text-outline-variant/30"
+                stroke="currentColor"
+                stroke-width="1"
+                x1="0"
+                x2="600"
+                y1="200"
+                y2="200"
+              ></line>
+              <line
+                class="text-outline-variant/20"
+                stroke="currentColor"
+                stroke-width="1"
+                x1="0"
+                x2="600"
+                y1="150"
+                y2="150"
+              ></line>
+              <line
+                class="text-outline-variant/20"
+                stroke="currentColor"
+                stroke-width="1"
+                x1="0"
+                x2="600"
+                y1="100"
+                y2="100"
+              ></line>
+              <line
+                class="text-outline-variant/20"
+                stroke="currentColor"
+                stroke-width="1"
+                x1="0"
+                x2="600"
+                y1="50"
+                y2="50"
+              ></line>
+              <!-- Purple Data Line -->
+              <path
+                class="text-primary"
+                d="M0,180 C50,160 100,190 150,140 C200,90 250,130 300,80 C350,30 400,100 450,50 C500,0 550,60 600,20"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+              ></path>
+              <!-- Gradient Fill under line -->
+              <path
+                d="M0,180 C50,160 100,190 150,140 C200,90 250,130 300,80 C350,30 400,100 450,50 C500,0 550,60 600,20 L600,200 L0,200 Z"
+                fill="url(#purple-fade)"
+                opacity="0.2"
+              ></path>
+              <defs>
+                <lineargradient id="purple-fade" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#d0bcff"></stop>
+                  <stop
+                    offset="100%"
+                    stop-color="#091421"
+                    stop-opacity="0"
+                  ></stop>
+                </lineargradient>
+              </defs>
+              <!-- Data Points -->
+              <circle
+                class="text-primary"
+                cx="150"
+                cy="140"
+                fill="#091421"
+                r="4"
+                stroke="currentColor"
+                stroke-width="2"
+              ></circle>
+              <circle
+                class="text-primary"
+                cx="300"
+                cy="80"
+                fill="#091421"
+                r="4"
+                stroke="currentColor"
+                stroke-width="2"
+              ></circle>
+              <circle
+                class="text-primary"
+                cx="450"
+                cy="50"
+                fill="#091421"
+                r="4"
+                stroke="currentColor"
+                stroke-width="2"
+              ></circle>
+            </svg>
+            <!-- X-Axis Labels -->
+            <div
+              class="absolute bottom-[-30px] left-0 w-full flex justify-between px-2 font-label-sm text-label-sm text-on-surface-variant"
+            >
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+          </div>
+        </div>
+        <!-- Right: Needs Attention -->
+        <div
+          class="lg:col-span-1 bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md flex flex-col"
+        >
+          <div
+            class="flex justify-between items-center mb-md pb-sm border-b border-outline-variant/20"
+          >
+            <div class="flex items-center gap-xs">
+              <span
+                class="material-symbols-outlined text-error"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >error</span
+              >
+              <h2 class="font-title-lg text-title-lg text-on-surface">
+                Needs Attention
+              </h2>
+            </div>
+          </div>
+          <div class="flex flex-col gap-sm flex-1 overflow-y-auto">
+            <!-- Item 1 -->
+            <div
+              class="bg-surface rounded-lg p-sm border border-outline-variant/20 flex items-start gap-sm hover:border-outline-variant/50 transition-colors cursor-pointer group"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex-shrink-0"
+              >
+                <img
+                  alt="Sarah Miller"
+                  class="w-full h-full object-cover"
+                  data-alt="A small circular portrait of a young female client. The image is styled with modern, high-contrast corporate lighting against a dark background to fit a professional CRM interface."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc2tOKPsLZyE7ty9GIlqtNMdy-x-f8LDQhWeHw_Nbm2TotwkfI6Tp7etqqc8AnVIgmiZUy__gTIukheHTIz9CIhjJbLB2rXC1brKAj-e5s-B_MKAiRiD4k127W6PS6nZkVfUJmFN4xQNBxnPV0I99i81auDdgUadafm7RudWqqonnrUO76LgoRhECxtuKdr5mKOPFgk5BvA8lQu-FQlLMbHRdYwbcvkIzt3fguzDJJF-cc3bA61g6KMb8uHdlqj3IwRt_-TzHoatM"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-label-md text-label-md text-on-surface truncate">
+                  Sarah Miller
+                </p>
+                <p
+                  class="font-label-sm text-label-sm text-error mt-xs truncate"
+                >
+                  Missed Set: Deadlift
+                </p>
+                <p
+                  class="font-label-sm text-label-sm text-on-surface-variant mt-xs truncate"
+                >
+                  Last updated 2h ago
+                </p>
+              </div>
+              <span
+                class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors self-center"
+                >chevron_right</span
+              >
+            </div>
+            <!-- Item 2 -->
+            <div
+              class="bg-surface rounded-lg p-sm border border-outline-variant/20 flex items-start gap-sm hover:border-outline-variant/50 transition-colors cursor-pointer group"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex-shrink-0"
+              >
+                <img
+                  alt="David Chen"
+                  class="w-full h-full object-cover"
+                  data-alt="A small circular portrait of a male client. The image is styled with modern, high-contrast corporate lighting against a dark background to fit a professional CRM interface."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCzuewzKYX0tw7h6yFyFRThaYQryA1pPYfAS2d-sSLCtLW-QJFllbZL3q13q4d-bJyJ8Xgx3nfECquEGAorx4XsdhgGDLi4nbqoU7-lhrxckphf71eKCIdoeVUsShHOtN5UH49D5axQARhMDcVlTrn4W-mVyq0LtzKmaWON5JiDcda8vcz4Ja4KbeoB4Xw15CBAMjknunEZWsUBhhsx2CwHiEU-1SA8N7zS1vW6Ybf2yvYP5cBv-43F3TdM8v5yMhAFieo7xMDUQw"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-label-md text-label-md text-on-surface truncate">
+                  David Chen
+                </p>
+                <p
+                  class="font-label-sm text-label-sm text-tertiary-container mt-xs truncate"
+                >
+                  Form Check Requested
+                </p>
+                <p
+                  class="font-label-sm text-label-sm text-on-surface-variant mt-xs truncate"
+                >
+                  Squat video uploaded
+                </p>
+              </div>
+              <span
+                class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors self-center"
+                >chevron_right</span
+              >
+            </div>
+            <!-- Item 3 -->
+            <div
+              class="bg-surface rounded-lg p-sm border border-outline-variant/20 flex items-start gap-sm hover:border-outline-variant/50 transition-colors cursor-pointer group"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0 text-on-surface-variant"
+              >
+                <span class="font-headline-md text-headline-md">EJ</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-label-md text-label-md text-on-surface truncate">
+                  Emma Johnson
+                </p>
+                <p
+                  class="font-label-sm text-label-sm text-on-surface-variant mt-xs truncate"
+                >
+                  Subscription renewing soon
+                </p>
+              </div>
+              <span
+                class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors self-center"
+                >chevron_right</span
+              >
+            </div>
+          </div>
+          <button
+            class="w-full mt-sm py-2 font-label-md text-label-md text-primary hover:bg-primary/5 rounded-lg transition-colors border border-transparent hover:border-primary/20"
+          >
+            View All Alerts
+          </button>
+        </div>
+      </section>
+      <!-- Bottom Section: Recent Workouts Feed -->
+      <section
+        class="bg-surface-container border border-tertiary-fixed/10 rounded-xl p-md"
+      >
+        <div
+          class="flex justify-between items-center mb-md pb-sm border-b border-outline-variant/20"
+        >
+          <h2 class="font-title-lg text-title-lg text-on-surface">
+            Recent Workouts Feed
+          </h2>
+          <div class="flex gap-sm">
+            <button
+              class="bg-surface border border-outline-variant/30 px-3 py-1 rounded-lg font-label-sm text-label-sm text-on-surface hover:bg-surface-container-highest transition-colors"
+            >
+              Filter
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-sm">
+          <!-- Feed Item 1 -->
+          <div
+            class="bg-surface border border-outline-variant/20 rounded-lg p-sm flex flex-col gap-sm hover:border-primary/40 transition-colors group"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-xs">
+                <div class="w-8 h-8 rounded-full overflow-hidden">
+                  <img
+                    alt="Mike Ross"
+                    class="w-full h-full object-cover"
+                    data-alt="Small avatar of a fit male client looking determined, moody corporate fitness lighting."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcWXAu0GGt3-SeyUb6mtnjSYrneYayl0qSAUYwfRdOwpNw7QYwKTawiTnOm98bNvB2PtSczs8an5X1DEjzbAv7-RBtPlh__7Rxo5YVUCTWq-v0NVOEotViGrYKHBPL_c381hxtdQzj9YdwqdlQBPHZHNLH0T1IQ2P1DiufEXRMdd9upWfNZV3IjeSXPXZTlcIw34KgP4a0wvxHRa5f9ZCiPYFLPHllJLjexMKTEa-NGz9LDZSTALe-H62PSmXsPPAW9-f9M20U1IE"
+                  />
+                </div>
+                <span class="font-label-md text-label-md text-on-surface"
+                  >Mike Ross</span
+                >
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant"
+                >10m ago</span
+              >
+            </div>
+            <div>
+              <h3
+                class="font-body-md text-body-md font-semibold text-primary mb-xs"
+              >
+                Hypertrophy Leg Day
+              </h3>
+              <p
+                class="font-label-sm text-label-sm text-on-surface-variant line-clamp-2"
+              >
+                Completed 5 exercises. Squat volume increased by 5% over last
+                week. Reported feeling strong.
+              </p>
+            </div>
+            <div
+              class="flex gap-xs mt-auto pt-sm border-t border-outline-variant/10"
+            >
+              <span
+                class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-medium text-tertiary-fixed uppercase tracking-wider"
+                >Volume PR</span
+              >
+              <span
+                class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-medium text-on-surface-variant uppercase tracking-wider"
+                >Legs</span
+              >
+            </div>
+          </div>
+          <!-- Feed Item 2 -->
+          <div
+            class="bg-surface border border-outline-variant/20 rounded-lg p-sm flex flex-col gap-sm hover:border-primary/40 transition-colors group"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-xs">
+                <div class="w-8 h-8 rounded-full overflow-hidden">
+                  <img
+                    alt="Jessica Pearson"
+                    class="w-full h-full object-cover"
+                    data-alt="Small avatar of a focused female client, moody corporate fitness lighting."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7yHz_Z21giXrWuQICojDjlpPHIGiQfbySd_oBsEcGPDdq6oPyxYsw6muHbgq76ZVa5lVWvU4xYwPHXUsRAgEcAHsNQnrYTujU6E-pES6AvRaQI_K0qsQtw9i1BNiK-dg5fZ2o2MzdZuUc3jOvHn8imcoocmbsuiEnsgd8kk1gxvx05WkdAU6Wrj0gkTv8vTZKbXVrJQA8FWTbCFz_jmcs_OSA5Q6tq6joG01GVuhqa3pQmrZybpu5qlLmSkRZ-LJy-18Y47-BGl4"
+                  />
+                </div>
+                <span class="font-label-md text-label-md text-on-surface"
+                  >Jessica Pearson</span
+                >
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant"
+                >45m ago</span
+              >
+            </div>
+            <div>
+              <h3
+                class="font-body-md text-body-md font-semibold text-primary mb-xs"
+              >
+                Upper Body Power
+              </h3>
+              <p
+                class="font-label-sm text-label-sm text-on-surface-variant line-clamp-2"
+              >
+                Struggled with final set of overhead press. Adjusted weight down
+                for next session.
+              </p>
+            </div>
+            <div
+              class="flex gap-xs mt-auto pt-sm border-t border-outline-variant/10"
+            >
+              <span
+                class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-medium text-on-surface-variant uppercase tracking-wider"
+                >Upper Body</span
+              >
+            </div>
+          </div>
+          <!-- Feed Item 3 -->
+          <div
+            class="bg-surface border border-outline-variant/20 rounded-lg p-sm flex flex-col gap-sm hover:border-primary/40 transition-colors group hidden lg:flex"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-xs">
+                <div
+                  class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest flex items-center justify-center"
+                >
+                  <span
+                    class="font-label-md text-label-md text-on-surface-variant"
+                    >HL</span
+                  >
+                </div>
+                <span class="font-label-md text-label-md text-on-surface"
+                  >Harvey Specter</span
+                >
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant"
+                >2h ago</span
+              >
+            </div>
+            <div>
+              <h3
+                class="font-body-md text-body-md font-semibold text-primary mb-xs"
+              >
+                Active Recovery &amp; Core
+              </h3>
+              <p
+                class="font-label-sm text-label-sm text-on-surface-variant line-clamp-2"
+              >
+                Completed full mobility routine and 15 mins steady state cardio.
+              </p>
+            </div>
+            <div
+              class="flex gap-xs mt-auto pt-sm border-t border-outline-variant/10"
+            >
+              <span
+                class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-medium text-on-surface-variant uppercase tracking-wider"
+                >Recovery</span
+              >
+              <span
+                class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-medium text-on-surface-variant uppercase tracking-wider"
+                >Core</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mt-md flex justify-center">
+          <button
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary flex items-center gap-xs transition-colors"
+          >
+            Load More
+            <span class="material-symbols-outlined text-[18px]"
+              >expand_more</span
+            >
+          </button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

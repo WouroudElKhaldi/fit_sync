@@ -8,11 +8,11 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background overflow-hidden">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
         <Header />
-        <main className="pt-[72px] p-10">
+        <main className="flex-1 overflow-y-auto pt-20 px-8 pb-12 w-full max-w-[var(--max-width-content)] mx-auto scroll-smooth">
           {children}
         </main>
       </div>

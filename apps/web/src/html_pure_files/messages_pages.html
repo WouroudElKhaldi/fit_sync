@@ -1,0 +1,697 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ProTrainer Elite - Chat</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-highest": "#2b3544",
+              "secondary-container": "#474744",
+              "surface-tint": "#d0bcff",
+              surface: "#091421",
+              "inverse-surface": "#d9e3f6",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-container": "#b6b5b1",
+              "on-tertiary-fixed": "#2c1700",
+              "on-error": "#690005",
+              "tertiary-fixed": "#ffdcbb",
+              "on-primary": "#3c0091",
+              "surface-container-high": "#212b39",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              "surface-bright": "#303a48",
+              "secondary-fixed": "#e4e2de",
+              "on-tertiary-fixed-variant": "#673d00",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-error-container": "#ffdad6",
+              tertiary: "#ffb869",
+              "on-tertiary-container": "#3f2300",
+              "on-surface-variant": "#cbc3d7",
+              "on-background": "#d9e3f6",
+              outline: "#958ea0",
+              "primary-fixed": "#e9ddff",
+              "inverse-primary": "#6d3bd7",
+              "on-primary-container": "#340080",
+              "surface-container": "#16202e",
+              "on-secondary-fixed-variant": "#474744",
+              "on-primary-fixed-variant": "#5516be",
+              secondary: "#c8c6c3",
+              primary: "#d0bcff",
+              "surface-container-low": "#121c2a",
+              "outline-variant": "#494454",
+              "on-secondary": "#30312e",
+              "tertiary-container": "#ca801e",
+              "on-primary-fixed": "#23005c",
+              "primary-container": "#a078ff",
+              "surface-dim": "#091421",
+              "inverse-on-surface": "#27313f",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-variant": "#2b3544",
+              "on-surface": "#d9e3f6",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#050f1c",
+              "on-tertiary": "#482900",
+              background: "#091421",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "24px",
+              sm: "12px",
+              lg: "48px",
+              xl: "80px",
+              xs: "4px",
+              "margin-desktop": "40px",
+              base: "8px",
+              "margin-mobile": "16px",
+              md: "24px",
+            },
+            fontFamily: {
+              "headline-md": ["Plus Jakarta Sans"],
+              "title-lg": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "700" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .fill-icon {
+        font-variation-settings:
+          "FILL" 1,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+
+      /* Custom Scrollbar for dark theme */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #2b3544;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #474744;
+      }
+    </style>
+  </head>
+  <body class="bg-surface text-on-surface flex h-screen overflow-hidden">
+    <!-- SideNavBar -->
+    <nav
+      class="fixed left-0 top-0 h-full w-64 flex flex-col p-md bg-surface border-r border-secondary-container/10 z-20 hidden md:flex"
+    >
+      <!-- Header -->
+      <div class="mb-lg">
+        <h1 class="font-headline-md text-headline-md font-bold text-primary">
+          ProTrainer Elite
+        </h1>
+        <p class="font-label-sm text-label-sm text-on-surface-variant mt-xs">
+          Midnight Workspace
+        </p>
+      </div>
+      <!-- Navigation Tabs -->
+      <div class="flex-1 space-y-sm flex flex-col">
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-md text-label-md">Overview</span>
+        </a>
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Clients</span>
+        </a>
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">fitness_center</span>
+          <span class="font-label-md text-label-md">Workout Planner</span>
+        </a>
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-highest transition-transform scale-95 duration-150"
+          href="#"
+        >
+          <span class="material-symbols-outlined fill-icon">chat</span>
+          <span class="font-label-md text-label-md">Chat</span>
+        </a>
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">person</span>
+          <span class="font-label-md text-label-md">Profile</span>
+        </a>
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-label-md text-label-md">Settings</span>
+        </a>
+      </div>
+      <!-- CTA & Footer -->
+      <div class="mt-auto space-y-md">
+        <button
+          class="w-full bg-[#8B5CF6] text-[#FFFDF8] font-label-md text-label-md h-[48px] rounded-lg hover:opacity-90 transition-opacity"
+        >
+          New Client
+        </button>
+        <a
+          class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </a>
+      </div>
+    </nav>
+    <!-- Main Content Area -->
+    <main
+      class="flex-1 ml-0 md:ml-64 flex flex-col h-full bg-background relative"
+    >
+      <!-- TopAppBar -->
+      <header
+        class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-sm bg-surface-container-low border-b border-secondary-container/10 z-10 shrink-0"
+      >
+        <div class="flex items-center gap-md">
+          <button
+            class="md:hidden text-on-surface-variant hover:text-primary transition-colors"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <h2 class="font-title-lg text-title-lg font-black text-on-surface">
+            ProTrainer CRM
+          </h2>
+        </div>
+        <!-- Search & Actions -->
+        <div class="flex items-center gap-md">
+          <div class="hidden md:flex relative">
+            <span
+              class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant"
+              >search</span
+            >
+            <input
+              class="bg-[#1F2937] border border-[#FFFDF8]/10 text-on-surface font-body-md text-body-md rounded-lg pl-xl pr-sm py-sm w-64 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/20 focus:outline-none transition-all placeholder:text-on-surface-variant"
+              placeholder="Search clients, messages..."
+              type="text"
+            />
+          </div>
+          <div class="flex items-center gap-sm">
+            <button
+              class="p-sm text-on-surface-variant hover:text-primary transition-all"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button
+              class="p-sm text-on-surface-variant hover:text-primary transition-all hidden md:block"
+            >
+              <span class="material-symbols-outlined">help</span>
+            </button>
+          </div>
+          <div
+            class="h-8 w-px bg-secondary-container/30 mx-xs hidden md:block"
+          ></div>
+          <div class="hidden md:flex items-center gap-sm">
+            <button
+              class="px-md py-sm border border-[#FFFDF8]/20 text-[#FFFDF8] font-label-md text-label-md rounded-lg hover:bg-surface-container-highest transition-colors min-h-[48px]"
+            >
+              Support
+            </button>
+            <button
+              class="px-md py-sm bg-[#8B5CF6] text-[#FFFDF8] font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity min-h-[48px]"
+            >
+              Quick Action
+            </button>
+          </div>
+          <div
+            class="w-10 h-10 rounded-full overflow-hidden border border-[#FFFDF8]/10 ml-sm shrink-0"
+          >
+            <img
+              alt="Trainer Account"
+              class="w-full h-full object-cover"
+              data-alt="A professional headshot of a fit male trainer in a modern gym setting. High-contrast lighting highlights his features against a dark, midnight-toned background. He wears a sleek, dark athletic shirt, embodying a premium, focused corporate fitness aesthetic."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyQqZAOTzNuSnl6FCNlmR6Scp3K1jSM82UDFzGv05TVPPSJdDXZJQiJvSJCU8mBCs_KTeHqcbGR-Uf50B-ys5sTAW_4AZMeptHFnNJRdj1HXHWaptpsf-tUEBoO4F_K506a5eF-_FSEkt69QIwilCPEtiAWMwvjwOMRLG9nbGOFB-iA9V7GXBkxS0PzSZJMnVy1t0dOY7zsQl8BAUH83571DhzAJV0Naim6hMKMyaTMENxRA1H0-3buaYxvYvMJw-GohZit8Ohtqk"
+            />
+          </div>
+        </div>
+      </header>
+      <!-- Chat Interface Layout -->
+      <div class="flex-1 flex overflow-hidden">
+        <!-- Left Panel: Chat List -->
+        <aside
+          class="w-full md:w-80 lg:w-96 border-r border-[#FFFDF8]/10 bg-surface-container-low flex flex-col shrink-0 overflow-y-auto"
+        >
+          <div
+            class="p-md border-b border-[#FFFDF8]/10 sticky top-0 bg-surface-container-low z-10"
+          >
+            <h3 class="font-headline-md text-headline-md text-on-surface mb-sm">
+              Messages
+            </h3>
+            <div class="relative w-full md:hidden mb-sm">
+              <span
+                class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant"
+                >search</span
+              >
+              <input
+                class="w-full bg-[#1F2937] border border-[#FFFDF8]/10 text-on-surface font-body-md text-body-md rounded-lg pl-xl pr-sm py-sm focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/20 focus:outline-none transition-all placeholder:text-on-surface-variant"
+                placeholder="Search..."
+                type="text"
+              />
+            </div>
+            <div class="flex gap-sm overflow-x-auto pb-xs">
+              <button
+                class="px-sm py-xs bg-surface-container-highest border border-[#8B5CF6] text-primary font-label-sm text-label-sm rounded-full whitespace-nowrap"
+              >
+                All Chats
+              </button>
+              <button
+                class="px-sm py-xs bg-surface-container border border-[#FFFDF8]/10 text-on-surface-variant font-label-sm text-label-sm rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors"
+              >
+                Unread
+              </button>
+              <button
+                class="px-sm py-xs bg-surface-container border border-[#FFFDF8]/10 text-on-surface-variant font-label-sm text-label-sm rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors"
+              >
+                Clients
+              </button>
+            </div>
+          </div>
+          <!-- Chat List Items -->
+          <div class="flex-1">
+            <!-- Active Chat -->
+            <a
+              class="flex items-start gap-md p-md bg-[#1F2937] border-l-2 border-[#8B5CF6] border-y border-y-[#FFFDF8]/5 hover:bg-surface-container-highest transition-colors relative"
+              href="#"
+            >
+              <div class="relative shrink-0">
+                <img
+                  alt="Sarah Miller"
+                  class="w-12 h-12 rounded-full object-cover border border-[#FFFDF8]/10"
+                  data-alt="A professional headshot of an athletic woman, a personal training client. She looks confident, set against a dark, sleek background with subtle high-contrast lighting that matches the elite, midnight workspace theme."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU265r0Pkg96UtUnNEdf2n0cD5ElcxDZjWCUEAs2kyGF4W_A_vLtmNsXRvkCn0inI3-Dr0FhA3CITCQ8CfxPePwSGgrM1_mNprHseKTHEyOq7uct3cyFU3XoThy-gL_iFPOMIgoya_Jq2_17PW_NZfk0tqFnbk6gKJrNZo1HbpZcw-ojk8P1Cpyoim31iKjZSCpY7Nra2MIqIKiNzd7GBPSFsxdKB-sYyDSHw6nNq8pD0VrurQTcA5mKbyVYymZJE599NMMy0loEo"
+                />
+                <div
+                  class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-[#1F2937]"
+                ></div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-baseline mb-xs">
+                  <h4
+                    class="font-title-lg text-title-lg text-on-surface truncate"
+                  >
+                    Sarah Miller
+                  </h4>
+                  <span class="font-label-sm text-label-sm text-primary"
+                    >10:42 AM</span
+                  >
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface truncate font-semibold"
+                >
+                  I'll focus on the mobility work today.
+                </p>
+                <div class="flex gap-xs mt-xs">
+                  <span
+                    class="px-2 py-0.5 bg-[#091421] text-on-surface-variant font-label-sm text-[10px] rounded border border-[#FFFDF8]/10"
+                    >Athlete</span
+                  >
+                  <span
+                    class="px-2 py-0.5 bg-[#091421] text-on-surface-variant font-label-sm text-[10px] rounded border border-[#FFFDF8]/10"
+                    >Strength Phase</span
+                  >
+                </div>
+              </div>
+              <div
+                class="absolute right-md top-1/2 -translate-y-1/2 w-2 h-2 bg-[#8B5CF6] rounded-full"
+              ></div>
+            </a>
+            <!-- Inactive Chat 1 -->
+            <a
+              class="flex items-start gap-md p-md border-b border-[#FFFDF8]/5 hover:bg-surface-container-highest transition-colors"
+              href="#"
+            >
+              <div class="relative shrink-0">
+                <div
+                  class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-[#FFFDF8]/10 font-title-lg text-title-lg text-on-surface-variant"
+                >
+                  JD
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-baseline mb-xs">
+                  <h4
+                    class="font-label-md text-label-md text-on-surface-variant truncate"
+                  >
+                    John Doe
+                  </h4>
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                    >Yesterday</span
+                  >
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface-variant truncate"
+                >
+                  How many sets of squats for tomorrow?
+                </p>
+              </div>
+            </a>
+            <!-- Inactive Chat 2 -->
+            <a
+              class="flex items-start gap-md p-md border-b border-[#FFFDF8]/5 hover:bg-surface-container-highest transition-colors"
+              href="#"
+            >
+              <div class="relative shrink-0">
+                <img
+                  alt="Marcus Johnson"
+                  class="w-12 h-12 rounded-full object-cover border border-[#FFFDF8]/10 opacity-70"
+                  data-alt="A professional headshot of a male fitness client with a serious expression. The lighting is dramatic and moody, fitting the premium dark mode aesthetic of an elite fitness tracker. He wears a neutral athletic shirt."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwVbcjwzrqx2FwDFciBH68X5cZra4od1wie4zJ5EBQdXopifMmX01SyraHy-i4At7LBsiMhJA10Hk_133a1QyED3hTSGtiYD5zqTtIMJHYZy-n7Xlf2Tn4J2WzLBPQ6yTDXkKJumLYupgmmew6pDWH5jX2KoY8LOELc4hE_LpmXve4NjO8iNe3xzIKLQE0eTLYoVvyxYWBXUZLdAg1vTzyeCvRoMzFSvDTplHyvtxOim5omadm2opLeBWLwbceYhVtCdxhBAfFPBc"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-baseline mb-xs">
+                  <h4
+                    class="font-label-md text-label-md text-on-surface-variant truncate"
+                  >
+                    Marcus Johnson
+                  </h4>
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                    >Mon</span
+                  >
+                </div>
+                <div class="flex items-center gap-xs">
+                  <span
+                    class="material-symbols-outlined text-sm text-on-surface-variant"
+                    >done_all</span
+                  >
+                  <p
+                    class="font-body-md text-body-md text-on-surface-variant truncate"
+                  >
+                    Sounds good, thanks coach.
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </aside>
+        <!-- Main Panel: Active Chat Window -->
+        <section
+          class="flex-1 flex flex-col bg-surface relative hidden md:flex"
+        >
+          <!-- Chat Header -->
+          <header
+            class="flex justify-between items-center p-md bg-[#1F2937] border-b border-[#FFFDF8]/10 shrink-0 shadow-sm"
+          >
+            <div class="flex items-center gap-md">
+              <div class="relative">
+                <img
+                  alt="Sarah Miller"
+                  class="w-10 h-10 rounded-full object-cover border border-[#FFFDF8]/10"
+                  data-alt="A professional headshot of an athletic woman, a personal training client. She looks confident, set against a dark, sleek background with subtle high-contrast lighting that matches the elite, midnight workspace theme."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7NqtrsKYV4CJmMyNhrH9bHYbP-JNXioG_bPcxohAakc4n7Gx8FFMIgBAAzx5g9_ZZHbbWep8RRnmPlxIYxbgqj3nVw7gJpswaGRSu1_bqi7rCLFmHqJTJ10s4TtQcRMkMueCGy87ks890zzBcBA0xQNipYJ6nPgMnrTxtKwLcjs4Vh81v8bgCGoQC-JbGX_w3OD-7S5n2RK1uIin0pEaMhsu7M_QYlsQMFRJBazGqhRHbrFaz5wCoFLgCKvEWCC-csBw2PLTozuc"
+                />
+                <div
+                  class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] rounded-full border-2 border-[#1F2937]"
+                ></div>
+              </div>
+              <div>
+                <h2 class="font-title-lg text-title-lg text-on-surface">
+                  Sarah Miller
+                </h2>
+                <p
+                  class="font-label-sm text-label-sm text-[#10B981] flex items-center gap-xs"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                  Active Now
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-sm">
+              <button
+                class="p-sm text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              >
+                <span class="material-symbols-outlined">call</span>
+              </button>
+              <button
+                class="p-sm text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              >
+                <span class="material-symbols-outlined">videocam</span>
+              </button>
+              <div class="w-px h-6 bg-[#FFFDF8]/10 mx-xs"></div>
+              <button
+                class="px-sm py-xs border border-[#FFFDF8]/20 text-on-surface font-label-sm text-label-sm rounded-md hover:bg-surface-container transition-colors flex items-center gap-xs"
+              >
+                <span class="material-symbols-outlined text-[18px]"
+                  >visibility</span
+                >
+                View Profile
+              </button>
+            </div>
+          </header>
+          <!-- Chat History -->
+          <div
+            class="flex-1 overflow-y-auto p-lg space-y-lg flex flex-col bg-surface relative"
+          >
+            <!-- Date Separator -->
+            <div class="flex justify-center my-md">
+              <span
+                class="px-sm py-xs bg-surface-container border border-[#FFFDF8]/10 rounded-full font-label-sm text-label-sm text-on-surface-variant"
+                >Today, Oct 24</span
+              >
+            </div>
+            <!-- Trainer Message (Purple) -->
+            <div class="flex flex-col items-end gap-xs self-end max-w-[70%]">
+              <div
+                class="bg-[#8B5CF6] text-[#FFFDF8] p-md rounded-2xl rounded-tr-sm shadow-sm font-body-md text-body-md"
+              >
+                Hey Sarah, looking at your macros from yesterday, we might need
+                to bump up the protein slightly on lifting days. How did the
+                legs feel after Tuesday's session?
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-xs"
+              >
+                10:30 AM
+                <span class="material-symbols-outlined text-[14px]"
+                  >done_all</span
+                >
+              </span>
+            </div>
+            <!-- Client Message (Dark Gray) -->
+            <div
+              class="flex flex-col items-start gap-xs self-start max-w-[70%]"
+            >
+              <div
+                class="bg-[#1F2937] border border-[#FFFDF8]/10 text-on-surface p-md rounded-2xl rounded-tl-sm font-body-md text-body-md"
+              >
+                Hey! Legs are definitely sore but manageable. I noticed the
+                protein was a bit low too, I ran out of my usual powder.
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant"
+                >10:35 AM</span
+              >
+            </div>
+            <!-- Trainer Attachment (Template Share) -->
+            <div class="flex flex-col items-end gap-xs self-end max-w-[70%]">
+              <div
+                class="bg-[#8B5CF6] p-sm rounded-2xl rounded-tr-sm shadow-sm font-body-md text-body-md flex flex-col gap-sm"
+              >
+                <p class="text-[#FFFDF8] px-xs">
+                  No worries, just try to hit it with whole foods if possible
+                  today. Here's the updated mobility routine for tomorrow:
+                </p>
+                <!-- Embedded Card -->
+                <div
+                  class="bg-[#1F2937] border border-[#FFFDF8]/10 rounded-xl p-sm flex items-center gap-md"
+                >
+                  <div
+                    class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center shrink-0"
+                  >
+                    <span
+                      class="material-symbols-outlined text-primary text-[24px]"
+                      >description</span
+                    >
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-label-md text-label-md text-on-surface">
+                      Lower Body Mobility Flow
+                    </h5>
+                    <p
+                      class="font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      Template • 15 mins
+                    </p>
+                  </div>
+                  <button
+                    class="p-xs text-primary hover:bg-surface-container rounded-full transition-colors"
+                  >
+                    <span class="material-symbols-outlined">download</span>
+                  </button>
+                </div>
+              </div>
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-xs"
+              >
+                10:38 AM
+                <span class="material-symbols-outlined text-[14px]"
+                  >done_all</span
+                >
+              </span>
+            </div>
+            <!-- Client Message (Dark Gray) -->
+            <div
+              class="flex flex-col items-start gap-xs self-start max-w-[70%]"
+            >
+              <div
+                class="bg-[#1F2937] border border-[#FFFDF8]/10 text-on-surface p-md rounded-2xl rounded-tl-sm font-body-md text-body-md"
+              >
+                Perfect, thanks! I'll focus on the mobility work today.
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant"
+                >10:42 AM</span
+              >
+            </div>
+          </div>
+          <!-- Input Area -->
+          <div class="p-md bg-[#1F2937] border-t border-[#FFFDF8]/10 shrink-0">
+            <div
+              class="flex items-end gap-sm bg-surface border border-[#FFFDF8]/10 rounded-xl focus-within:border-[#8B5CF6] focus-within:ring-2 focus-within:ring-[#8B5CF6]/20 transition-all p-xs"
+            >
+              <div class="flex gap-xs pb-xs pl-xs shrink-0">
+                <button
+                  class="p-sm text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container transition-colors relative group"
+                >
+                  <span class="material-symbols-outlined">add_circle</span>
+                  <!-- Tooltip hint -->
+                  <div
+                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-[#FFFDF8] font-label-sm text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50"
+                  >
+                    Attach File
+                  </div>
+                </button>
+                <button
+                  class="p-sm text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container transition-colors relative group"
+                >
+                  <span class="material-symbols-outlined">fitness_center</span>
+                  <div
+                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-[#FFFDF8] font-label-sm text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50"
+                  >
+                    Workout Templates
+                  </div>
+                </button>
+              </div>
+              <textarea
+                class="flex-1 bg-transparent border-none text-on-surface font-body-md text-body-md resize-none py-md px-sm focus:ring-0 placeholder:text-on-surface-variant min-h-[48px] max-h-[120px]"
+                placeholder="Type a message..."
+                rows="1"
+              ></textarea>
+              <div class="pb-xs pr-xs shrink-0">
+                <button
+                  class="w-10 h-10 bg-[#8B5CF6] text-[#FFFDF8] rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity"
+                >
+                  <span class="material-symbols-outlined">send</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

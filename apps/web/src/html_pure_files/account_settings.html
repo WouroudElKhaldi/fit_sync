@@ -1,0 +1,573 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Settings &amp; Preferences - ProTrainer Elite</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-highest": "#2b3544",
+              "secondary-container": "#474744",
+              "surface-tint": "#d0bcff",
+              surface: "#091421",
+              "inverse-surface": "#d9e3f6",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-container": "#b6b5b1",
+              "on-tertiary-fixed": "#2c1700",
+              "on-error": "#690005",
+              "tertiary-fixed": "#ffdcbb",
+              "on-primary": "#3c0091",
+              "surface-container-high": "#212b39",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              "surface-bright": "#303a48",
+              "secondary-fixed": "#e4e2de",
+              "on-tertiary-fixed-variant": "#673d00",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-error-container": "#ffdad6",
+              tertiary: "#ffb869",
+              "on-tertiary-container": "#3f2300",
+              "on-surface-variant": "#cbc3d7",
+              "on-background": "#d9e3f6",
+              outline: "#958ea0",
+              "primary-fixed": "#e9ddff",
+              "inverse-primary": "#6d3bd7",
+              "on-primary-container": "#340080",
+              "surface-container": "#16202e",
+              "on-secondary-fixed-variant": "#474744",
+              "on-primary-fixed-variant": "#5516be",
+              secondary: "#c8c6c3",
+              primary: "#d0bcff",
+              "surface-container-low": "#121c2a",
+              "outline-variant": "#494454",
+              "on-secondary": "#30312e",
+              "tertiary-container": "#ca801e",
+              "on-primary-fixed": "#23005c",
+              "primary-container": "#a078ff",
+              "surface-dim": "#091421",
+              "inverse-on-surface": "#27313f",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-variant": "#2b3544",
+              "on-surface": "#d9e3f6",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#050f1c",
+              "on-tertiary": "#482900",
+              background: "#091421",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "24px",
+              sm: "12px",
+              lg: "48px",
+              xl: "80px",
+              xs: "4px",
+              "margin-desktop": "40px",
+              base: "8px",
+              "margin-mobile": "16px",
+              md: "24px",
+            },
+            fontFamily: {
+              "headline-md": ["Plus Jakarta Sans"],
+              "title-lg": ["Plus Jakarta Sans"],
+              "label-sm": ["Plus Jakarta Sans"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-md": ["Plus Jakarta Sans"],
+              "label-md": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "700" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .material-symbols-outlined.fill {
+        font-variation-settings: "FILL" 1;
+      }
+      /* Custom range slider styling for cross-browser consistency where tailwind utilities might fall short visually */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #d0bcff;
+        cursor: pointer;
+        margin-top: -6px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        border: 2px solid #091421;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8px;
+        cursor: pointer;
+        background: #2b3544;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface text-on-surface font-body-md text-body-md antialiased min-h-screen selection:bg-primary-container selection:text-on-primary-container"
+  >
+    <!-- SideNavBar (from JSON) -->
+    <nav
+      class="bg-surface-dim font-headline-md text-headline-md font-body-md text-body-md font-label-md text-label-md fixed left-0 top-0 h-full w-64 flex-col border-r border-secondary-container/10 hidden md:flex p-md z-20"
+    >
+      <!-- Header -->
+      <div class="mb-lg flex items-center gap-sm">
+        <div
+          class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden flex-shrink-0"
+        >
+          <img
+            alt="Trainer profile picture"
+            class="w-full h-full object-cover"
+            data-alt="A close-up, high-contrast portrait of a professional athletic trainer in a modern, dimly lit fitness studio. The lighting is dramatic, highlighting their focused expression with deep charcoal shadows and subtle cool-toned highlights. The overall mood is intense, premium, and sophisticated."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq_3HJyuF5RuRd7gojt7V4_mH_NFIc5Zzi0IoYmE6F9kpES9GFUF-C-BqgFFNOIwwMF6XPXwYyd9QbIeTtgRde9VeQguXcLkYzaDZIi22Bi53tzWWGqZch8GAOfimgYP8d4y5W4fhzZsFeFl_y4hM-f4GcQkGyXGdEqjda0vWO_CWWIccArhl6wuKv1MrGy9PI2av2f-qVpp686RidA2Y6R6tgmPMIZf7MwIl_ya5p6gl5V6abvAyavha2X_Snl08ZfO-PS2Fkym0"
+          />
+        </div>
+        <div class="flex flex-col">
+          <span class="font-headline-md text-headline-md font-bold text-primary"
+            >ProTrainer Elite</span
+          >
+          <span class="font-label-sm text-label-sm text-on-surface-variant"
+            >Midnight Workspace</span
+          >
+        </div>
+      </div>
+      <!-- CTA -->
+      <button
+        class="mb-lg w-full bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-lg hover:bg-primary-fixed transition-colors duration-200 flex items-center justify-center gap-2"
+      >
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        New Client
+      </button>
+      <!-- Navigation Links -->
+      <ul class="flex flex-col flex-grow space-y-1">
+        <!-- Overview -->
+        <li>
+          <a
+            class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-secondary-container hover:bg-surface-container-high transition-colors duration-200"
+            href="#"
+          >
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-label-md text-label-md">Overview</span>
+          </a>
+        </li>
+        <!-- Clients -->
+        <li>
+          <a
+            class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-secondary-container hover:bg-surface-container-high transition-colors duration-200"
+            href="#"
+          >
+            <span class="material-symbols-outlined">group</span>
+            <span class="font-label-md text-label-md">Clients</span>
+          </a>
+        </li>
+        <!-- Workout Planner -->
+        <li>
+          <a
+            class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-secondary-container hover:bg-surface-container-high transition-colors duration-200"
+            href="#"
+          >
+            <span class="material-symbols-outlined">fitness_center</span>
+            <span class="font-label-md text-label-md">Workout Planner</span>
+          </a>
+        </li>
+        <!-- Chat -->
+        <li>
+          <a
+            class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-secondary-container hover:bg-surface-container-high transition-colors duration-200"
+            href="#"
+          >
+            <span class="material-symbols-outlined">chat</span>
+            <span class="font-label-md text-label-md">Chat</span>
+          </a>
+        </li>
+        <!-- Profile -->
+        <li>
+          <a
+            class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-secondary-container hover:bg-surface-container-high transition-colors duration-200"
+            href="#"
+          >
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-label-md text-label-md">Profile</span>
+          </a>
+        </li>
+        <!-- Settings (ACTIVE) -->
+        <li>
+          <a
+            class="flex items-center gap-sm px-4 py-3 rounded-lg text-primary-fixed-dim font-bold border-r-2 border-primary bg-surface-container-lowest scale-95 duration-150 transition-transform"
+            href="#"
+          >
+            <span class="material-symbols-outlined fill">settings</span>
+            <span class="font-label-md text-label-md">Settings</span>
+          </a>
+        </li>
+      </ul>
+      <!-- Footer -->
+      <div class="mt-auto pt-lg border-t border-secondary-container/10">
+        <a
+          class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-secondary-container hover:bg-surface-container-high transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </a>
+      </div>
+    </nav>
+    <!-- TopAppBar (from JSON) -->
+    <header
+      class="bg-surface-container-low font-headline-md text-headline-md font-label-md text-label-md flex justify-between items-center px-margin-desktop py-sm border-b border-secondary-container/10 fixed top-0 right-0 left-64 z-10 hidden md:flex"
+    >
+      <!-- Brand / Product Name -->
+      <div class="flex items-center gap-sm">
+        <span class="font-title-lg text-title-lg font-black text-on-surface"
+          >ProTrainer CRM</span
+        >
+      </div>
+      <!-- Actions Container -->
+      <div class="flex items-center gap-md">
+        <!-- Icon Actions -->
+        <div class="flex items-center gap-sm text-on-secondary-container">
+          <button
+            class="p-2 rounded-full hover:bg-surface-container-highest transition-colors duration-200 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button
+            class="p-2 rounded-full hover:bg-surface-container-highest transition-colors duration-200 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined">help</span>
+          </button>
+        </div>
+        <div class="w-[1px] h-8 bg-secondary-container/20"></div>
+        <!-- Secondary Action -->
+        <button
+          class="text-on-surface-variant font-label-md text-label-md hover:text-primary-fixed-dim transition-all"
+        >
+          Support
+        </button>
+        <!-- Primary Action -->
+        <button
+          class="border border-secondary-container/30 text-on-surface font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-surface-container-highest hover:border-primary/50 transition-all"
+        >
+          Quick Action
+        </button>
+        <!-- Profile Image -->
+        <div
+          class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden ml-sm cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+        >
+          <img
+            alt="Trainer Account"
+            class="w-full h-full object-cover"
+            data-alt="A small, circular avatar portrait of a professional athletic trainer. Dark, moody lighting against a deep charcoal background. High contrast, sharp focus on the face, exuding a premium and serious aesthetic."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ8kN71t2YUxxKdtpOULvVC36RrLqwntNfo6zViMjH_-doCwntE-1QOGfmLitJCDyA1UflVSN_QPZLSKhLpb3okpa22RhNX5JA0HnfYtrxuOZYRFOxp3wW36U-iNbwVWvCzXXY3Ybb2QCXulCrTAWJEAjm6HMtOgEiqaG71StauIHXJeQLKUl_17RC9iAkgEgPju726eFmiOK8khUaV8-aRtfwrkd_tHMYyOaVgBESdz9bzwwH7QG1DTFzGc1oQRkrWSzfXiy8sUo"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Area -->
+    <main
+      class="md:ml-64 pt-[88px] px-margin-mobile md:px-margin-desktop pb-xl min-h-screen bg-surface"
+    >
+      <div class="max-w-4xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-lg pt-md">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">
+            Settings &amp; Preferences
+          </h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            Configure your workspace environment, measurement standards, and
+            notification parameters.
+          </p>
+        </div>
+        <!-- Settings Grid / Layout -->
+        <div class="space-y-gutter">
+          <!-- Block 1: Regional & Units (Bento/Card Style) -->
+          <section
+            class="bg-surface-container border border-secondary-container/10 rounded-xl p-md lg:p-lg relative overflow-hidden group"
+          >
+            <!-- Subtle glow effect on hover -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            ></div>
+            <div
+              class="flex items-center gap-sm mb-md pb-sm border-b border-secondary-container/10 relative z-10"
+            >
+              <span class="material-symbols-outlined text-primary">public</span>
+              <h2 class="font-title-lg text-title-lg text-on-surface">
+                Regional Standards
+              </h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-lg relative z-10">
+              <!-- Weight Units -->
+              <div class="flex flex-col space-y-3">
+                <label
+                  class="font-label-md text-label-md text-on-surface-variant flex justify-between items-center"
+                >
+                  Weight Measurement
+                  <span
+                    class="material-symbols-outlined text-[16px] opacity-50 cursor-help"
+                    title="Affects all client strength tracking"
+                    >info</span
+                  >
+                </label>
+                <!-- Segmented Control -->
+                <div
+                  class="flex p-1 bg-surface-container-highest rounded-lg w-full max-w-[240px]"
+                >
+                  <button
+                    class="flex-1 py-2 rounded-md bg-surface text-primary shadow-[0_2px_8px_rgba(0,0,0,0.2)] font-label-md text-label-md border border-primary/20 transition-all"
+                  >
+                    Metric (kg)
+                  </button>
+                  <button
+                    class="flex-1 py-2 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-md text-label-md transition-all"
+                  >
+                    Imperial (lbs)
+                  </button>
+                </div>
+              </div>
+              <!-- Distance Units -->
+              <div class="flex flex-col space-y-3">
+                <label
+                  class="font-label-md text-label-md text-on-surface-variant flex justify-between items-center"
+                >
+                  Length / Distance
+                  <span
+                    class="material-symbols-outlined text-[16px] opacity-50 cursor-help"
+                    title="Affects body measurements and run tracking"
+                    >info</span
+                  >
+                </label>
+                <!-- Segmented Control -->
+                <div
+                  class="flex p-1 bg-surface-container-highest rounded-lg w-full max-w-[240px]"
+                >
+                  <button
+                    class="flex-1 py-2 rounded-md bg-surface text-primary shadow-[0_2px_8px_rgba(0,0,0,0.2)] font-label-md text-label-md border border-primary/20 transition-all"
+                  >
+                    CM / KM
+                  </button>
+                  <button
+                    class="flex-1 py-2 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-md text-label-md transition-all"
+                  >
+                    IN / MI
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Block 2: Notifications & Automation -->
+          <section
+            class="bg-surface-container border border-secondary-container/10 rounded-xl p-md lg:p-lg relative overflow-hidden group"
+          >
+            <div
+              class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            ></div>
+            <div
+              class="flex items-center gap-sm mb-md pb-sm border-b border-secondary-container/10 relative z-10"
+            >
+              <span class="material-symbols-outlined text-primary"
+                >notifications_active</span
+              >
+              <h2 class="font-title-lg text-title-lg text-on-surface">
+                Alerts &amp; Automation
+              </h2>
+            </div>
+            <div class="space-y-xl relative z-10 mt-md">
+              <!-- Slider Control -->
+              <div class="flex flex-col max-w-2xl">
+                <div class="flex justify-between items-end mb-4">
+                  <div class="flex flex-col">
+                    <label class="font-label-md text-label-md text-on-surface"
+                      >Client Arrival Lead Time</label
+                    >
+                    <span
+                      class="font-body-md text-body-md text-on-surface-variant text-sm mt-1"
+                      >Pre-session notification window.</span
+                    >
+                  </div>
+                  <div
+                    class="bg-surface-container-highest px-3 py-1 rounded text-primary font-label-md text-label-md border border-secondary-container/20"
+                  >
+                    60 mins
+                  </div>
+                </div>
+                <!-- Custom styled range slider container -->
+                <div class="relative w-full pt-2 pb-6">
+                  <!-- The actual input overlaid for functionality if needed, visually hidden or styled -->
+                  <input
+                    class="w-full absolute top-2 z-10 opacity-0 cursor-pointer h-8"
+                    max="120"
+                    min="0"
+                    step="15"
+                    type="range"
+                    value="60"
+                  />
+                  <!-- Visual Track -->
+                  <div
+                    class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden"
+                  >
+                    <!-- Visual Fill -->
+                    <div class="h-full bg-primary" style="width: 50%"></div>
+                  </div>
+                  <!-- Visual Thumb (positioned by value) -->
+                  <div
+                    class="absolute top-[2px] left-[50%] -translate-x-1/2 w-6 h-6 bg-primary rounded-full shadow-[0_0_12px_rgba(208,188,255,0.4)] border-[3px] border-surface pointer-events-none transition-transform duration-100 ease-out group-hover:scale-110"
+                  ></div>
+                  <!-- Markers -->
+                  <div
+                    class="flex justify-between mt-3 text-on-surface-variant font-label-sm text-label-sm px-1"
+                  >
+                    <span>0m</span>
+                    <span>30m</span>
+                    <span class="text-primary font-bold">60m</span>
+                    <span>90m</span>
+                    <span>120m</span>
+                  </div>
+                </div>
+              </div>
+              <div class="h-[1px] w-full bg-secondary-container/10"></div>
+              <!-- Toggles Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-y-md gap-x-lg">
+                <!-- Toggle Item 1 -->
+                <div
+                  class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-highest/50 transition-colors"
+                >
+                  <div class="flex flex-col">
+                    <span class="font-label-md text-label-md text-on-surface"
+                      >Push Notifications</span
+                    >
+                    <span
+                      class="font-body-md text-body-md text-on-surface-variant text-[13px]"
+                      >Receive alerts on your mobile device.</span
+                    >
+                  </div>
+                  <!-- Active Toggle -->
+                  <button
+                    class="w-12 h-6 bg-primary rounded-full relative cursor-pointer flex-shrink-0 transition-colors border border-primary-fixed-dim/30"
+                  >
+                    <div
+                      class="w-4 h-4 bg-surface rounded-full absolute top-[3px] right-1 shadow-sm"
+                    ></div>
+                  </button>
+                </div>
+                <!-- Toggle Item 2 -->
+                <div
+                  class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-highest/50 transition-colors"
+                >
+                  <div class="flex flex-col">
+                    <span class="font-label-md text-label-md text-on-surface"
+                      >Daily Email Digest</span
+                    >
+                    <span
+                      class="font-body-md text-body-md text-on-surface-variant text-[13px]"
+                      >Summary of tomorrow's schedule sent at 8 PM.</span
+                    >
+                  </div>
+                  <!-- Inactive Toggle -->
+                  <button
+                    class="w-12 h-6 bg-surface-container-highest rounded-full relative cursor-pointer flex-shrink-0 border border-secondary-container/30 transition-colors"
+                  >
+                    <div
+                      class="w-4 h-4 bg-on-surface-variant rounded-full absolute top-[3px] left-1 shadow-sm"
+                    ></div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Save Actions (Floating or bottom of content) -->
+          <div class="flex justify-end gap-sm pt-md">
+            <button
+              class="px-6 py-3 rounded-lg border border-secondary-container/30 text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-colors"
+            >
+              Discard Changes
+            </button>
+            <button
+              class="px-6 py-3 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-fixed shadow-[0_4px_12px_rgba(208,188,255,0.15)] transition-all transform hover:-translate-y-0.5"
+            >
+              Save Preferences
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

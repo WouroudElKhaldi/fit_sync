@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+.next/
+
+# Prisma
+packages/database/node_modules/.prisma/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Turbo
+.turbo/
+
+# Misc
+*.tsbuildinfo
+
+**/.turbo/
+**/node_modules/
+**/dist/
+**/build/
+**/.cache/
+coverage/
+*.log
+
+026-05-15 21:53:37.867 [info] W0515 21:53:37.866217  2252 log_context.go:118] Cache(userInfo): Singleflight refresh failed: error getting token source: state syncing error: key not found

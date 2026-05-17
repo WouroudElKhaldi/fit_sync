@@ -1,0 +1,93 @@
+[
+  {
+    "chatId": "chat-1",
+    "clientId": "u-client-2",
+    "clientName": "Sarah Miller",
+    "clientAvatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuBc2tOKPsLZyE7ty9GIlqtNMdy-x-f8LDQhWeHw_Nbm2TotwkfI6Tp7etqqc8AnVIgmiZUy__gTIukheHTIz9CIhjJbLB2rXC1brKAj-e5s-B_MKAiRiD4k127W6PS6nZkVfUJmFN4xQNBxnPV0I99i81auDdgUadafm7RudWqqonnrUO76LgoRhECxtuKdr5mKOPFgk5BvA8lQu-FQlLMbHRdYwbcvkIzt3fguzDJJF-cc3bA61g6KMb8uHdlqj3IwRt_-TzHoatM",
+    "lastMessage": "Perfect, thanks! I'll focus on the mobility work today.",
+    "lastMessageTime": "10:42 AM",
+    "unread": true,
+    "tags": ["Athlete", "Strength Phase"],
+    "messages": [
+      {
+        "id": "m-1",
+        "senderId": "u-trainer-1",
+        "text": "Hey Sarah, looking at your macros from yesterday, we might need to bump up the protein slightly on lifting days. How did the legs feel after Tuesday's session?",
+        "time": "10:30 AM",
+        "isRead": true
+      },
+      {
+        "id": "m-2",
+        "senderId": "u-client-2",
+        "text": "Hey! Legs are definitely sore but manageable. I noticed the protein was a bit low too, I ran out of my usual powder.",
+        "time": "10:35 AM",
+        "isRead": true
+      },
+      {
+        "id": "m-3",
+        "senderId": "u-trainer-1",
+        "text": "No worries, just try to hit it with whole foods if possible today. Here's the updated mobility routine for tomorrow:",
+        "time": "10:38 AM",
+        "attachment": {
+          "type": "template",
+          "title": "Lower Body Mobility Flow",
+          "subtitle": "Template • 15 mins",
+          "icon": "description"
+        },
+        "isRead": true
+      },
+      {
+        "id": "m-4",
+        "senderId": "u-client-2",
+        "text": "Perfect, thanks! I'll focus on the mobility work today.",
+        "time": "10:42 AM",
+        "isRead": false
+      }
+    ]
+  },
+  {
+    "chatId": "chat-2",
+    "clientId": "u-client-1",
+    "clientName": "John Doe",
+    "clientAvatar": null,
+    "lastMessage": "How many sets of squats for tomorrow?",
+    "lastMessageTime": "Yesterday",
+    "unread": false,
+    "tags": [],
+    "messages": [
+      {
+        "id": "m-5",
+        "senderId": "u-client-1",
+        "text": "How many sets of squats for tomorrow?",
+        "time": "Yesterday",
+        "isRead": true
+      }
+    ]
+  },
+  {
+    "chatId": "chat-3",
+    "clientId": "u-client-3",
+    "clientName": "David Chen",
+    "clientAvatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuCCzuewzKYX0tw7h6yFyFRThaYQryA1pPYfAS2d-sSLCtLW-QJFllbZL3q13q4d-bJyJ8Xgx3nfECquEGAorx4XsdhgGDLi4nbqoU7-lhrxckphf71eKCIdoeVUsShHOtN5UH49D5axQARhMDcVlTrn4W-mVyq0LtzKmaWON5JiDcda8vcz4Ja4KbeoB4Xw15CBAMjknunEZWsUBhhsx2CwHiEU-1SA8N7zS1vW6Ybf2yvYP5cBv-43F3TdM8v5yMhAFieo7xMDUQw",
+    "lastMessage": "Sounds good, thanks coach.",
+    "lastMessageTime": "Mon",
+    "unread": false,
+    "tags": [],
+    "messages": [
+      {
+        "id": "m-6",
+        "senderId": "u-trainer-1",
+        "text": "Make sure you rest well tonight.",
+        "time": "Mon",
+        "isRead": true
+      },
+      {
+        "id": "m-7",
+        "senderId": "u-client-3",
+        "text": "Sounds good, thanks coach.",
+        "time": "Mon",
+        "isRead": true
+      }
+    ]
+  }
+]

@@ -52,7 +52,9 @@ const Sidebar: React.FC = () => {
   const menuItems = [
     { icon: 'dashboard', label: 'Overview', path: '/' },
     { icon: 'group', label: 'Clients', path: '/clients' },
-    { icon: 'fitness_center', label: 'Workout Planner', path: '/planner' },
+    { icon: 'rate_review', label: 'Session Review', path: '/session-review' },
+    { icon: 'fitness_center', label: 'Workouts', path: '/workouts' },
+    { icon: 'calendar_today', label: 'Workout Planner', path: '/planner' },
     { icon: 'chat', label: 'Chat', path: '/chat' },
     { icon: 'person', label: 'Profile', path: '/profile' },
     { icon: 'settings', label: 'Settings', path: '/settings' },
