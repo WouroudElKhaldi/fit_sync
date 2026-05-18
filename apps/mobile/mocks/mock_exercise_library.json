@@ -1,0 +1,61 @@
+[
+  {
+    "id": "e-1",
+    "name": "Barbell Bench Press",
+    "description": "A classic upper-body strength exercise that targets the chest, shoulders, and triceps.",
+    "steps": [
+      "Lie flat on the bench with your feet planted firmly on the ground.",
+      "Grip the barbell slightly wider than shoulder-width apart.",
+      "Lower the bar slowly to your mid-chest.",
+      "Press the bar back up to the starting position."
+    ],
+    "equipmentId": "eq-1",
+    "equipment": {
+      "id": "eq-1",
+      "name": "Barbell"
+    },
+    "muscles": [
+      {
+        "targetType": "PRIMARY",
+        "muscle": {
+          "id": "m-1",
+          "name": "Pectoralis Major",
+          "category": "Chest"
+        }
+      },
+      {
+        "targetType": "SECONDARY",
+        "muscle": {
+          "id": "m-2",
+          "name": "Triceps Brachii",
+          "category": "Arms"
+        }
+      }
+    ]
+  },
+  {
+    "id": "e-2",
+    "name": "Dumbbell Lateral Raise",
+    "description": "An isolation exercise that targets the lateral deltoids.",
+    "steps": [
+      "Stand with a dumbbell in each hand, resting by your sides.",
+      "Keeping a slight bend in your elbows, raise the weights out to the side until your arms are parallel with the floor.",
+      "Lower the weights back down slowly."
+    ],
+    "equipmentId": "eq-2",
+    "equipment": {
+      "id": "eq-2",
+      "name": "Dumbbells"
+    },
+    "muscles": [
+      {
+        "targetType": "PRIMARY",
+        "muscle": {
+          "id": "m-3",
+          "name": "Lateral Deltoid",
+          "category": "Shoulders"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,442 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-width=1.0" name="viewport" />
+    <title>Settings &amp; Biometrics - FITSYNC PRO</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary": "#30312e",
+              "primary-fixed": "#e9ddff",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              error: "#ffb4ab",
+              tertiary: "#ffb869",
+              "inverse-surface": "#d9e3f6",
+              secondary: "#c8c6c3",
+              "surface-tint": "#d0bcff",
+              "on-error": "#690005",
+              "on-tertiary-fixed": "#2c1700",
+              "on-primary": "#3c0091",
+              "surface-container-highest": "#2b3544",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-fixed-variant": "#474744",
+              "on-surface": "#d9e3f6",
+              "secondary-container": "#474744",
+              "tertiary-fixed-dim": "#ffb869",
+              background: "#091421",
+              "surface-container-high": "#212b39",
+              "on-primary-fixed-variant": "#5516be",
+              outline: "#958ea0",
+              "on-primary-container": "#340080",
+              "on-primary-fixed": "#23005c",
+              "tertiary-container": "#ca801e",
+              "on-error-container": "#ffdad6",
+              "on-background": "#d9e3f6",
+              "surface-dim": "#091421",
+              "inverse-primary": "#6d3bd7",
+              "surface-container": "#16202e",
+              "surface-variant": "#2b3544",
+              "outline-variant": "#494454",
+              surface: "#091421",
+              "on-surface-variant": "#cbc3d7",
+              "on-secondary-container": "#b6b5b1",
+              "primary-container": "#a078ff",
+              "inverse-on-surface": "#27313f",
+              "on-tertiary": "#482900",
+              "surface-bright": "#303a48",
+              "secondary-fixed-dim": "#c8c6c3",
+              primary: "#d0bcff",
+              "on-tertiary-container": "#3f2300",
+              "surface-container-low": "#121c2a",
+              "surface-container-lowest": "#050f1c",
+              "secondary-fixed": "#e4e2de",
+              "tertiary-fixed": "#ffdcbb",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "touch-target-min": "48px",
+              gutter: "16px",
+              "stack-sm": "8px",
+              "margin-mobile": "20px",
+              "stack-lg": "24px",
+              "stack-md": "16px",
+            },
+            fontFamily: {
+              "label-caps": ["Plus Jakarta Sans"],
+              "numeric-data": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "body-base": ["Plus Jakarta Sans"],
+              "display-xl": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.1em",
+                  fontWeight: "700",
+                },
+              ],
+              "numeric-data": [
+                "20px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "-0.05em",
+                  fontWeight: "600",
+                },
+              ],
+              "display-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-base": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Custom toggle styling for iOS-like appearance */
+      .toggle-checkbox:checked {
+        right: 0;
+        border-color: #d0bcff; /* primary */
+      }
+      .toggle-checkbox:checked + .toggle-label {
+        background-color: #d0bcff; /* primary */
+      }
+      .toggle-checkbox {
+        right: 0;
+        z-index: 1;
+        border-color: transparent;
+        transition: all 0.3s;
+      }
+      .toggle-label {
+        width: 3rem;
+        height: 1.5rem;
+        background-color: #494454; /* outline-variant */
+        border-radius: 9999px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .toggle-label:after {
+        content: "";
+        position: absolute;
+        top: 0.125rem;
+        left: 0.125rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        background-color: white;
+        border-radius: 50%;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      .toggle-checkbox:checked + .toggle-label:after {
+        transform: translateX(1.5rem);
+      }
+
+      /* Glassmorphism utilities */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      /* Input styling */
+      .dark-input {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        transition: all 0.3s ease;
+      }
+      .dark-input:focus {
+        border-color: #d0bcff;
+        box-shadow: 0 0 10px rgba(208, 188, 255, 0.2);
+        outline: none;
+      }
+
+      /* Slider styling */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #d0bcff;
+        cursor: pointer;
+        margin-top: -8px;
+        box-shadow: 0 0 10px rgba(208, 188, 255, 0.5);
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-[#1F2937] text-on-surface min-h-screen pb-[100px]">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10"
+    >
+      <div class="flex items-center gap-3">
+        <button
+          aria-label="Go back"
+          class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-variant transition-colors"
+        >
+          <span class="material-symbols-outlined text-primary text-xl"
+            >arrow_back</span
+          >
+        </button>
+      </div>
+      <div class="absolute left-1/2 -translate-x-1/2">
+        <h1
+          class="text-headline-md font-headline-md font-black tracking-tighter text-primary dark:text-primary"
+        >
+          Settings
+        </h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 rounded-full overflow-hidden border border-white/20"
+        >
+          <img
+            alt="User profile photo"
+            class="w-full h-full object-cover"
+            data-alt="A close-up portrait of a determined female athlete with dark hair tied back, looking intensely focused. The lighting is dramatic and moody, reflecting a high-end gym environment with deep shadows and subtle purple and bronze accent lights highlighting her features."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA95q6WV_r19_QcUMr2JyCcDVSYLTnP6HtlwlpkUBcu8-5bFSfNtmfKbqqqmUAugQ7HZ6b3g0UdRWG_O4Qav_pD6fdtQnHjNvQe1taQXuoVeS3mDvnznWp6y3LctCOkowKhK2H1n5thCqLUIvsWCcGxpAItshTBBvLcf9j914R78IAeIHbtLMu8sh5YvGarNeV6xuUlMM9zWhNzOM_pLo3d40AhrH8Bg74VgxwMhMHrEnsVQJn-PcosTSI1IwVrtSp7ANNpJga2QaY"
+          />
+        </div>
+      </div>
+    </header>
+    <main class="pt-[80px] px-margin-mobile max-w-3xl mx-auto space-y-stack-lg">
+      <!-- Biometrics Section -->
+      <section class="space-y-stack-md">
+        <h2
+          class="text-label-caps font-label-caps text-secondary uppercase tracking-wider pl-2"
+        >
+          Biometrics
+        </h2>
+        <div class="glass-card rounded-xl p-5 space-y-6">
+          <!-- Unit Toggle -->
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-body-lg font-body-lg text-on-surface">
+                System of Measurement
+              </p>
+              <p class="text-body-base font-body-base text-on-surface-variant">
+                Imperial (lbs, ft) vs Metric (kg, cm)
+              </p>
+            </div>
+            <div
+              class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in"
+            >
+              <input
+                checked=""
+                class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                id="unit-toggle"
+                name="toggle"
+                type="checkbox"
+              />
+              <label
+                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+                for="unit-toggle"
+              ></label>
+            </div>
+          </div>
+          <div class="h-px bg-white/10 w-full"></div>
+          <!-- Height Input -->
+          <div class="space-y-2">
+            <label
+              class="block text-body-base font-body-base text-on-surface"
+              for="height"
+              >Height</label
+            >
+            <div class="relative">
+              <input
+                class="dark-input w-full h-touch-target-min rounded-lg pl-4 pr-12 text-numeric-data font-numeric-data"
+                id="height"
+                type="number"
+                value="180"
+              />
+              <span
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-body-base font-body-base text-on-surface-variant"
+                >cm</span
+              >
+            </div>
+          </div>
+          <!-- Weight Input -->
+          <div class="space-y-2">
+            <label
+              class="block text-body-base font-body-base text-on-surface"
+              for="weight"
+              >Weight</label
+            >
+            <div class="relative">
+              <input
+                class="dark-input w-full h-touch-target-min rounded-lg pl-4 pr-12 text-numeric-data font-numeric-data"
+                id="weight"
+                type="number"
+                value="75.5"
+              />
+              <span
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-body-base font-body-base text-on-surface-variant"
+                >kg</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Preferences Section -->
+      <section class="space-y-stack-md">
+        <h2
+          class="text-label-caps font-label-caps text-secondary uppercase tracking-wider pl-2"
+        >
+          Preferences
+        </h2>
+        <div class="glass-card rounded-xl p-5 space-y-6">
+          <!-- Notification Lead Time Slider -->
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <label class="text-body-lg font-body-lg text-on-surface"
+                >Workout Reminder</label
+              >
+              <span class="text-primary font-bold">15 min</span>
+            </div>
+            <p
+              class="text-body-base font-body-base text-on-surface-variant mb-2"
+            >
+              Lead time for pre-workout notifications
+            </p>
+            <input
+              class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-white/20"
+              max="60"
+              min="0"
+              type="range"
+              value="15"
+            />
+            <div
+              class="flex justify-between text-label-caps font-label-caps text-on-surface-variant"
+            >
+              <span>0m</span>
+              <span>30m</span>
+              <span>60m</span>
+            </div>
+          </div>
+          <div class="h-px bg-white/10 w-full"></div>
+          <!-- Haptic Feedback Toggle -->
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-body-lg font-body-lg text-on-surface">
+                Haptic Feedback
+              </p>
+              <p class="text-body-base font-body-base text-on-surface-variant">
+                Vibrate on set completion
+              </p>
+            </div>
+            <div
+              class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in"
+            >
+              <input
+                checked=""
+                class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                id="haptic-toggle"
+                name="toggle"
+                type="checkbox"
+              />
+              <label
+                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+                for="haptic-toggle"
+              ></label>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Account Actions -->
+      <section class="space-y-stack-md pt-4">
+        <button
+          class="w-full h-touch-target-min bg-surface-container-high hover:bg-surface-bright border border-white/10 rounded-xl flex items-center justify-between px-5 transition-colors"
+        >
+          <span class="text-body-lg font-body-lg text-on-surface"
+            >Export Data</span
+          >
+          <span class="material-symbols-outlined text-on-surface-variant"
+            >download</span
+          >
+        </button>
+        <button
+          class="w-full h-touch-target-min bg-error/10 hover:bg-error/20 border border-error/30 rounded-xl flex items-center justify-between px-5 transition-colors"
+        >
+          <span class="text-body-lg font-body-lg text-error"
+            >Delete Account</span
+          >
+          <span class="material-symbols-outlined text-error"
+            >delete_forever</span
+          >
+        </button>
+      </section>
+    </main>
+    <!-- BottomNavBar SUPPRESSED: This is a sub-page (Settings) logically accessed from a main tab, focusing on specific tasks. -->
+  </body>
+</html>

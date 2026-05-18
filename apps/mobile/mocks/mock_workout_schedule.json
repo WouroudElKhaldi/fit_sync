@@ -1,0 +1,56 @@
+[
+  {
+    "id": "wp-1",
+    "title": "Upper Body Power",
+    "description": "Heavy push and pull movements to build strength.",
+    "scheduledDate": "2024-05-20T14:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2024-05-15T09:00:00Z",
+    "exercises": [
+      {
+        "id": "we-1",
+        "workoutPlanId": "wp-1",
+        "exerciseId": "e-1",
+        "orderIndex": 1,
+        "restTimeSec": 120,
+        "notes": "Focus on explosive concentric movements.",
+        "exercise": {
+          "id": "e-1",
+          "name": "Barbell Bench Press"
+        },
+        "sets": [
+          {
+            "id": "ws-1",
+            "setIndex": 1,
+            "expectedReps": 5,
+            "expectedWeight": 80,
+            "actualReps": null,
+            "actualWeight": null,
+            "status": "PENDING"
+          },
+          {
+            "id": "ws-2",
+            "setIndex": 2,
+            "expectedReps": 5,
+            "expectedWeight": 80,
+            "actualReps": null,
+            "actualWeight": null,
+            "status": "PENDING"
+          },
+          {
+            "id": "ws-3",
+            "setIndex": 3,
+            "expectedReps": 5,
+            "expectedWeight": 80,
+            "actualReps": null,
+            "actualWeight": null,
+            "status": "PENDING"
+          }
+        ]
+      }
+    ],
+    "session": null
+  }
+]

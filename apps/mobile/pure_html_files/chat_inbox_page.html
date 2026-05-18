@@ -1,0 +1,577 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>FITSYNC PRO - Chat</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary": "#30312e",
+              "primary-fixed": "#e9ddff",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              error: "#ffb4ab",
+              tertiary: "#ffb869",
+              "inverse-surface": "#d9e3f6",
+              secondary: "#c8c6c3",
+              "surface-tint": "#d0bcff",
+              "on-error": "#690005",
+              "on-tertiary-fixed": "#2c1700",
+              "on-primary": "#3c0091",
+              "surface-container-highest": "#2b3544",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-fixed-variant": "#474744",
+              "on-surface": "#d9e3f6",
+              "secondary-container": "#474744",
+              "tertiary-fixed-dim": "#ffb869",
+              background: "#091421",
+              "surface-container-high": "#212b39",
+              "on-primary-fixed-variant": "#5516be",
+              outline: "#958ea0",
+              "on-primary-container": "#340080",
+              "on-primary-fixed": "#23005c",
+              "tertiary-container": "#ca801e",
+              "on-error-container": "#ffdad6",
+              "on-background": "#d9e3f6",
+              "surface-dim": "#091421",
+              "inverse-primary": "#6d3bd7",
+              "surface-container": "#16202e",
+              "surface-variant": "#2b3544",
+              "outline-variant": "#494454",
+              surface: "#091421",
+              "on-surface-variant": "#cbc3d7",
+              "on-secondary-container": "#b6b5b1",
+              "primary-container": "#a078ff",
+              "inverse-on-surface": "#27313f",
+              "on-tertiary": "#482900",
+              "surface-bright": "#303a48",
+              "secondary-fixed-dim": "#c8c6c3",
+              primary: "#d0bcff",
+              "on-tertiary-container": "#3f2300",
+              "surface-container-low": "#121c2a",
+              "surface-container-lowest": "#050f1c",
+              "secondary-fixed": "#e4e2de",
+              "tertiary-fixed": "#ffdcbb",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "touch-target-min": "48px",
+              gutter: "16px",
+              "stack-sm": "8px",
+              "margin-mobile": "20px",
+              "stack-lg": "24px",
+              "stack-md": "16px",
+            },
+            fontFamily: {
+              "label-caps": ["Plus Jakarta Sans"],
+              "numeric-data": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "body-base": ["Plus Jakarta Sans"],
+              "display-xl": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.1em",
+                  fontWeight: "700",
+                },
+              ],
+              "numeric-data": [
+                "20px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "-0.05em",
+                  fontWeight: "600",
+                },
+              ],
+              "display-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-base": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #1f2937; /* As requested, though theme background is #091421. I will use the requested #1F2937 for the base layer as per instructions but map to Tailwind where possible. */
+      }
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="text-on-surface min-h-screen pb-32">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 md:hidden"
+    >
+      <div class="flex items-center gap-4">
+        <img
+          alt="User profile photo"
+          class="w-8 h-8 rounded-full object-cover border border-white/20"
+          data-alt="A close-up portrait of an athletic user with a determined expression, looking directly at the camera. They are in a modern, high-end gym environment with subtle, moody lighting. The image incorporates a modern corporate style with a touch of luxury tech aesthetic. The color palette features deep blacks and crisp whites, complementing a high-contrast UI design."
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMlAbd5VVy9TAvx3hAWKjzmNN5fxKPf3RO6JRvcYsGHVazDx2URLw7kYu8THI_63LYnunLdspsRlBznl96hr2PpEu9JZkiU4F9BFhHsTVTRF1iAt_xujcaQpvlfzlTgI-V0UdmDEIrcX18cNqg-QMxXEu1KhN9HjpyR6exiy6uEUxFVXcm8lHkuPhunzYQdZlqO7x2JcCrwfY8WODW98CC5Iqh8V05BlgPcLPvEZg6yz2jMyrP9y7gVeW3PspLLc0pCYThzu0PGGY"
+        />
+      </div>
+      <h1
+        class="text-headline-md font-headline-md font-black tracking-tighter text-primary dark:text-primary"
+      >
+        FITSYNC PRO
+      </h1>
+      <button
+        class="w-8 h-8 flex items-center justify-center text-primary dark:text-primary hover:opacity-80 transition-opacity"
+      >
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+    </header>
+    <!-- Web Top Nav (Hidden on Mobile) -->
+    <nav
+      class="hidden md:flex fixed top-0 w-full z-50 justify-between items-center px-8 h-20 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10"
+    >
+      <h1
+        class="text-headline-md font-headline-md font-black tracking-tighter text-primary dark:text-primary"
+      >
+        FITSYNC PRO
+      </h1>
+      <div class="flex gap-8">
+        <a
+          class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+          href="#"
+        >
+          <span class="material-symbols-outlined">home</span>
+          <span class="text-label-caps font-label-caps">Home</span>
+        </a>
+        <a
+          class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+          href="#"
+        >
+          <span class="material-symbols-outlined">fitness_center</span>
+          <span class="text-label-caps font-label-caps">Log</span>
+        </a>
+        <a
+          class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+          href="#"
+        >
+          <span class="material-symbols-outlined">monitoring</span>
+          <span class="text-label-caps font-label-caps">Analytics</span>
+        </a>
+        <a
+          class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+          href="#"
+        >
+          <span class="material-symbols-outlined">storefront</span>
+          <span class="text-label-caps font-label-caps">Market</span>
+        </a>
+        <a
+          class="text-primary dark:text-primary flex items-center gap-2 border-b-2 border-primary pb-1"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >chat_bubble</span
+          >
+          <span class="text-label-caps font-label-caps">Chat</span>
+        </a>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          class="w-10 h-10 flex items-center justify-center text-primary dark:text-primary hover:opacity-80 transition-opacity"
+        >
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <img
+          alt="User profile photo"
+          class="w-10 h-10 rounded-full object-cover border border-white/20"
+          data-alt="A close-up portrait of an athletic user with a determined expression, looking directly at the camera. They are in a modern, high-end gym environment with subtle, moody lighting. The image incorporates a modern corporate style with a touch of luxury tech aesthetic. The color palette features deep blacks and crisp whites, complementing a high-contrast UI design."
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx6wqjnWRjsFIKJ9is3OucUvTczQh4qjiQwwUJ0Qat3iFia_v43J4WpAKBSc5aaDpR5JnO49zM4UzJc1vw3_lcfj--PTzQZ7NpDwp2hFPrquMM6WR1ucnBjhddMiVYw2cE3x4X0WKx5ScIBrLxy5jtSRHBajnnAy8YIcmHGFpMsu3mcOnsJ10zlhNcoqjr59JOowTgI5WoLuuhBr7X63GYoGJ0LkSQD4SScuLedQLcCzn2ZTNmNor6hR2VI1mLjnn2voKqaBSusjg"
+        />
+      </div>
+    </nav>
+    <!-- Main Content -->
+    <main
+      class="pt-24 md:pt-28 px-margin-mobile md:px-8 max-w-4xl mx-auto space-y-stack-lg"
+    >
+      <!-- Header Section -->
+      <div class="flex justify-between items-end">
+        <div>
+          <h2 class="text-display-lg font-display-lg text-on-surface">
+            Messages
+          </h2>
+          <p class="text-body-base font-body-base text-on-surface-variant mt-2">
+            Connect with your trainers and community.
+          </p>
+        </div>
+        <button
+          class="w-12 h-12 rounded-full bg-surface-container-high border border-white/15 flex items-center justify-center text-primary hover:bg-surface-bright transition-colors shadow-[0_0_15px_rgba(208,188,255,0.1)]"
+        >
+          <span class="material-symbols-outlined">edit_square</span>
+        </button>
+      </div>
+      <!-- Search Bar -->
+      <div
+        class="relative w-full h-14 rounded-xl bg-white/[0.05] border border-white/15 backdrop-blur-md flex items-center px-4 focus-within:border-primary focus-within:shadow-[0_0_15px_rgba(208,188,255,0.2)] transition-all"
+      >
+        <span class="material-symbols-outlined text-on-surface-variant mr-3"
+          >search</span
+        >
+        <input
+          class="bg-transparent border-none text-body-base font-body-base text-on-surface w-full focus:ring-0 placeholder:text-on-surface-variant/50"
+          placeholder="Search conversations..."
+          type="text"
+        />
+      </div>
+      <!-- Active Trainers Horizontal Scroll (Bento Style Sub-section) -->
+      <div class="space-y-4">
+        <h3 class="text-label-caps font-label-caps text-on-surface-variant">
+          ONLINE TRAINERS
+        </h3>
+        <div class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar">
+          <!-- Trainer 1 -->
+          <div
+            class="snap-start flex-shrink-0 flex flex-col items-center gap-2"
+          >
+            <div
+              class="relative w-16 h-16 rounded-full border-2 border-primary p-0.5"
+            >
+              <img
+                alt="Trainer Avatar"
+                class="w-full h-full rounded-full object-cover"
+                data-alt="A professional headshot of a male fitness trainer in a dark grey athletic shirt. The lighting is dramatic and focused, creating a premium, modern corporate feel. The background is a deep, immersive charcoal gray, matching the overall dark mode aesthetic. The trainer has a confident, focused expression, suitable for a high-end luxury tech interface."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTCsZ8xuSrp8XQ16FQZ7ejNPsmtm1yBNlbfF0lyQjnp3W2q4iHARNrm2ti8WCGa59DzzLA__xhMZfeMpUJ5T3YAQED0NGZZDXhGplQD6lX-porgIeITMUKPl93PsFj2-17sFVqHP1pr4wID8nkI7pHL4DLUzoYD73NAy7-vV2LkMe8z5_TJeZEgnZXkJE1IAtKNUjfU84YP4K5Z6hrldfSy8346TWkaReJp3dhon-InslO91dq-6oJ2hIXA1frEx96iOnUeCIfsQY"
+              />
+              <div
+                class="absolute bottom-0 right-0 w-4 h-4 bg-tertiary rounded-full border-2 border-[#1F2937]"
+              ></div>
+            </div>
+            <span class="text-label-caps font-label-caps text-on-surface"
+              >Alex M.</span
+            >
+          </div>
+          <!-- Trainer 2 -->
+          <div
+            class="snap-start flex-shrink-0 flex flex-col items-center gap-2"
+          >
+            <div
+              class="relative w-16 h-16 rounded-full border-2 border-transparent p-0.5"
+            >
+              <img
+                alt="Trainer Avatar"
+                class="w-full h-full rounded-full object-cover"
+                data-alt="A portrait of a female fitness trainer with hair pulled back, wearing a black workout top. She is captured in a slightly low-key lighting setup that emphasizes her athletic features. The image feels elite and focused, aligning with a high-performance gym environment. The background is dark and unobtrusive, perfectly suited for a sleek UI layout."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5TvW89If--vFGGU0exm_qCnrSt3_o9IKEDmn-MnECOsiLtXmS-USxho90pDUI4MIlCElpaeuvzjAYK9gdBeZ93v8swubKMzXyxtUKSxPTeCbZixImnq8-tdwYdneNsoI76OYK-Pa4ntKwDp4A5GAIB5rh7QUZkW56MVIqoim7cP7eTFGicaEAT-8rE7IYuVah7JPSLsE9otyqpK6meU7Ma6qmII7_eDSxuvg_qSgvCsu3DpdyM-tbPI0rEBLN2W3ht5zRyyGaCOY"
+              />
+              <div
+                class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-[#1F2937]"
+              ></div>
+            </div>
+            <span
+              class="text-label-caps font-label-caps text-on-surface-variant"
+              >Sarah T.</span
+            >
+          </div>
+          <!-- Trainer 3 -->
+          <div
+            class="snap-start flex-shrink-0 flex flex-col items-center gap-2"
+          >
+            <div
+              class="relative w-16 h-16 rounded-full border-2 border-primary p-0.5"
+            >
+              <img
+                alt="Trainer Avatar"
+                class="w-full h-full rounded-full object-cover"
+                data-alt="A close-up shot of a male trainer looking intently off-camera. He is in a dimly lit, high-end fitness studio. The lighting highlights his strong jawline and the texture of his premium athletic wear. The overall tone is sophisticated and intense, designed for a high-contrast luxury fitness app."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBs1345ks2fVoxuUEZ22SrhV8317MASD8LH73j2_4VfU0J3x3vVbstQqqjQJmuxHcF_hvRqOVXALApBeT-GaW85kldR0ivUtIeL6hy_rbspNwDeIzMOpkomhWSIF2LuLlV2sBXMj2AwNHTpkdJEMLuPrdvAFkW0cLJNGpk-POBBwko4TafXXe3iupa8MSJINFcnEu3PHiUOr9zC7VJ9PPI-IzMBjooZZrYlvQpRCtXA9c-4C4iJJy5rYutl1MzehmhDZKEIgsRbHms"
+              />
+              <div
+                class="absolute bottom-0 right-0 w-4 h-4 bg-tertiary rounded-full border-2 border-[#1F2937]"
+              ></div>
+            </div>
+            <span class="text-label-caps font-label-caps text-on-surface"
+              >Marcus R.</span
+            >
+          </div>
+          <!-- Trainer 4 -->
+          <div
+            class="snap-start flex-shrink-0 flex flex-col items-center gap-2"
+          >
+            <div
+              class="relative w-16 h-16 rounded-full border-2 border-transparent p-0.5"
+            >
+              <img
+                alt="Trainer Avatar"
+                class="w-full h-full rounded-full object-cover"
+                data-alt="A bright, engaging portrait of a female trainer smiling softly. The lighting is modern and clean, creating a sense of clarity and focus. She is positioned against a subtle, dark background that fits seamlessly into a deep charcoal interface. The aesthetic balances approachability with elite athletic performance."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPY8BfCMcrY9kUgY5sKFspBUt2vWy4WxC9YwrBuxe53LqTzTNLRFb8SaJlPrNBOoPVaNUWNJxTMCQlc8ElstLyQlTmr2tBmlLfI3F2o6Rz-uVV0SoH_P4xocYDGPT2O87XyLMdXjrwfOjdxcnRKu361I_i3fsDMxbFI313KqxWBmyob3Db4Uga4IlDenNHVI4kn1TBTZqAfOC4tzAydFn4bT1GzeodTH_IPBgV9TtDllObkwy2Vqe_zAfHlEnWuNV9lkxW1JgmU4s"
+              />
+              <div
+                class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-[#1F2937]"
+              ></div>
+            </div>
+            <span
+              class="text-label-caps font-label-caps text-on-surface-variant"
+              >Elena G.</span
+            >
+          </div>
+        </div>
+      </div>
+      <!-- Chat List (Glassmorphism Cards) -->
+      <div class="space-y-4">
+        <h3
+          class="text-label-caps font-label-caps text-on-surface-variant mb-2"
+        >
+          RECENT CONVERSATIONS
+        </h3>
+        <!-- Unread Chat Item -->
+        <div
+          class="relative w-full rounded-xl bg-white/[0.08] backdrop-blur-xl border border-white/15 p-4 flex items-center gap-4 cursor-pointer hover:bg-white/[0.12] transition-colors group"
+        >
+          <div class="relative">
+            <img
+              alt="Alex M Avatar"
+              class="w-14 h-14 rounded-full object-cover"
+              data-alt="A professional headshot of a male fitness trainer in a dark grey athletic shirt. The lighting is dramatic and focused, creating a premium, modern corporate feel. The background is a deep, immersive charcoal gray, matching the overall dark mode aesthetic. The trainer has a confident, focused expression, suitable for a high-end luxury tech interface."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzXTAf65TlOxj8XVgNvZSdqPcl7WT0O0iAplGCfhDVpw8T78V13NWTQ4Niltkj76nZEegwtX_rZ_NXIe7vp1c61OwDB9J7xbZgUduvUID2KBSXlk62sfx01PLuCKMJIHK_Q_-QRefEWgyF46fEiYjxrU7MLUkKzJTPetNgKztoNBPlzjL0Qj1FehS16aBiFrq71IjpN2SJRM9_vMnH7eW-ugwmuWCO8MTclFn25-EvPr8Y6rU_GO20si990LfSN9D3bqOvMyO3sx4"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-1">
+              <h4
+                class="text-body-base font-headline-md text-on-surface truncate"
+              >
+                Alex M.
+                <span
+                  class="text-label-caps font-label-caps text-primary ml-2 bg-primary/10 px-2 py-0.5 rounded-sm"
+                  >TRAINER</span
+                >
+              </h4>
+              <span class="text-label-caps font-label-caps text-primary"
+                >09:42 AM</span
+              >
+            </div>
+            <p
+              class="text-body-base font-body-base text-on-surface truncate font-bold"
+            >
+              Your deadlift form looks much better in that last video. Keep the
+              core tight.
+            </p>
+          </div>
+          <div
+            class="w-3 h-3 bg-primary rounded-full shadow-[0_0_10px_rgba(208,188,255,0.6)]"
+          ></div>
+        </div>
+        <!-- Read Chat Item -->
+        <div
+          class="relative w-full rounded-xl bg-white/[0.04] backdrop-blur-xl border border-white/5 p-4 flex items-center gap-4 cursor-pointer hover:bg-white/[0.08] transition-colors"
+        >
+          <div class="relative">
+            <img
+              alt="Marcus R Avatar"
+              class="w-14 h-14 rounded-full object-cover opacity-80"
+              data-alt="A close-up shot of a male trainer looking intently off-camera. He is in a dimly lit, high-end fitness studio. The lighting highlights his strong jawline and the texture of his premium athletic wear. The overall tone is sophisticated and intense, designed for a high-contrast luxury fitness app."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN-EVCq88wpYCjkKG2nKL64o9eMge5b5ndfRC_XKZ7DUFHn4mbTqOYU0TpcBCZ7PEJbQp-lfEI-xrwuM4ngxT7JcePBbSlM8LG0gNG5VnoYouiq35KoQ4yisvnRylrnJdy4Yf7WLUg-UbMjpDiisu-NAcgu8Hl6sROxNjE8d8RnpvTokiSug23lBXclTGwIOXG0BR51zX-0urdApZKgisVWArsAiQfTX1UZLz6BNvitLJ-nDzo9NCxTQXsGOfo72DmmWosQehIfqU"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-1">
+              <h4
+                class="text-body-base font-headline-md text-on-surface-variant truncate"
+              >
+                Marcus R.
+              </h4>
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant/50"
+                >Yesterday</span
+              >
+            </div>
+            <p
+              class="text-body-base font-body-base text-on-surface-variant/70 truncate"
+            >
+              Ready for the AMRAP session tomorrow?
+            </p>
+          </div>
+        </div>
+        <!-- Read Chat Item -->
+        <div
+          class="relative w-full rounded-xl bg-white/[0.04] backdrop-blur-xl border border-white/5 p-4 flex items-center gap-4 cursor-pointer hover:bg-white/[0.08] transition-colors"
+        >
+          <div
+            class="relative flex items-center justify-center w-14 h-14 rounded-full bg-surface-container-high border border-white/10 text-tertiary"
+          >
+            <span class="material-symbols-outlined text-[28px]">group</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-1">
+              <h4
+                class="text-body-base font-headline-md text-on-surface-variant truncate"
+              >
+                Morning Crew (5AM)
+              </h4>
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant/50"
+                >Tuesday</span
+              >
+            </div>
+            <p
+              class="text-body-base font-body-base text-on-surface-variant/70 truncate"
+            >
+              Sarah: Anyone bringing pre-workout?
+            </p>
+          </div>
+        </div>
+        <!-- Unread Chat Item (Automated) -->
+        <div
+          class="relative w-full rounded-xl bg-white/[0.08] backdrop-blur-xl border border-white/15 p-4 flex items-center gap-4 cursor-pointer hover:bg-white/[0.12] transition-colors group"
+        >
+          <div
+            class="relative flex items-center justify-center w-14 h-14 rounded-full bg-primary/20 border border-primary/30 text-primary"
+          >
+            <span class="material-symbols-outlined text-[28px]">smart_toy</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-1">
+              <h4
+                class="text-body-base font-headline-md text-on-surface truncate"
+              >
+                FitBot
+                <span
+                  class="text-label-caps font-label-caps text-secondary ml-2 bg-secondary/10 px-2 py-0.5 rounded-sm"
+                  >SYSTEM</span
+                >
+              </h4>
+              <span class="text-label-caps font-label-caps text-primary"
+                >Mon</span
+              >
+            </div>
+            <p
+              class="text-body-base font-body-base text-on-surface truncate font-bold"
+            >
+              Weekly summary: You hit 4 PRs this week! Tap to view details.
+            </p>
+          </div>
+          <div
+            class="w-3 h-3 bg-primary rounded-full shadow-[0_0_10px_rgba(208,188,255,0.6)]"
+          ></div>
+        </div>
+      </div>
+    </main>
+    <!-- BottomNavBar (Mobile Only) -->
+    <nav
+      class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] rounded-full bg-surface-container/60 dark:bg-surface-container/60 backdrop-blur-xl border border-white/15 shadow-[0_0_20px_rgba(208,188,255,0.2)] z-50 flex justify-around items-center px-4 py-2"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] font-label-caps mt-1">Home</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">fitness_center</span>
+        <span class="text-[10px] font-label-caps mt-1">Log</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">monitoring</span>
+        <span class="text-[10px] font-label-caps mt-1">Analytics</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">storefront</span>
+        <span class="text-[10px] font-label-caps mt-1">Market</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full w-12 h-12 scale-110 transition-all duration-300 ease-out"
+        href="#"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >chat_bubble</span
+        >
+        <span class="text-[10px] font-label-caps mt-1 hidden">Chat</span>
+      </a>
+    </nav>
+  </body>
+</html>

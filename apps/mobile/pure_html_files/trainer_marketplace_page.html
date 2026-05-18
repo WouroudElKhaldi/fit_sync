@@ -1,0 +1,588 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>FITSYNC PRO - Trainer Marketplace</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary": "#30312e",
+              "primary-fixed": "#e9ddff",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              error: "#ffb4ab",
+              tertiary: "#ffb869",
+              "inverse-surface": "#d9e3f6",
+              secondary: "#c8c6c3",
+              "surface-tint": "#d0bcff",
+              "on-error": "#690005",
+              "on-tertiary-fixed": "#2c1700",
+              "on-primary": "#3c0091",
+              "surface-container-highest": "#2b3544",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-fixed-variant": "#474744",
+              "on-surface": "#d9e3f6",
+              "secondary-container": "#474744",
+              "tertiary-fixed-dim": "#ffb869",
+              background: "#091421",
+              "surface-container-high": "#212b39",
+              "on-primary-fixed-variant": "#5516be",
+              outline: "#958ea0",
+              "on-primary-container": "#340080",
+              "on-primary-fixed": "#23005c",
+              "tertiary-container": "#ca801e",
+              "on-error-container": "#ffdad6",
+              "on-background": "#d9e3f6",
+              "surface-dim": "#091421",
+              "inverse-primary": "#6d3bd7",
+              "surface-container": "#16202e",
+              "surface-variant": "#2b3544",
+              "outline-variant": "#494454",
+              surface: "#091421",
+              "on-surface-variant": "#cbc3d7",
+              "on-secondary-container": "#b6b5b1",
+              "primary-container": "#a078ff",
+              "inverse-on-surface": "#27313f",
+              "on-tertiary": "#482900",
+              "surface-bright": "#303a48",
+              "secondary-fixed-dim": "#c8c6c3",
+              primary: "#d0bcff",
+              "on-tertiary-container": "#3f2300",
+              "surface-container-low": "#121c2a",
+              "surface-container-lowest": "#050f1c",
+              "secondary-fixed": "#e4e2de",
+              "tertiary-fixed": "#ffdcbb",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "touch-target-min": "48px",
+              gutter: "16px",
+              "stack-sm": "8px",
+              "margin-mobile": "20px",
+              "stack-lg": "24px",
+              "stack-md": "16px",
+            },
+            fontFamily: {
+              "label-caps": ["Plus Jakarta Sans"],
+              "numeric-data": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "body-base": ["Plus Jakarta Sans"],
+              "display-xl": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.1em",
+                  fontWeight: "700",
+                },
+              ],
+              "numeric-data": [
+                "20px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "-0.05em",
+                  fontWeight: "600",
+                },
+              ],
+              "display-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-base": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #1f2937; /* As requested, though using theme surface below is better for system consistency. Sticking to request. */
+      }
+      /* Custom scrollbar for horizontal lists */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="text-on-background font-body-base antialiased pb-24">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10"
+    >
+      <div class="flex items-center gap-3">
+        <img
+          alt="User Profile"
+          class="w-8 h-8 rounded-full object-cover border border-white/20"
+          data-alt="A close-up portrait of a fit individual with a determined expression, suitable for a fitness app profile picture. The lighting is dramatic and cinematic, highlighting their features against a dark, moody gym background. The overall aesthetic is modern, intense, and premium, fitting a high-performance fitness brand."
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfzdrv9pXNHZXAFUyjs6G9zXipD6fNX2u6ke9aFeyOepwZXnZdJK7oG-ErtjrhzV-vjd5_YObe8WZcTEz3NezowHMcS5sFqnIAqq2gyttrMregyAmcVBaBV6rDgQ6TtxOsW8JqliS61MVMTWqHUroV_BwRqOMwDRR7XUHLKLbrXyD28NwunKDanhQ_k7ZsyJyBvUCIE0C_rsxLdBfgJSw9ik03s7t5lJHg6jBvbr9EyO3U3Afry0cT1YeBiKIYQAxBOv7PPX6qG2I"
+        />
+      </div>
+      <h1
+        class="text-headline-md font-headline-md font-black tracking-tighter text-primary dark:text-primary"
+      >
+        FITSYNC PRO
+      </h1>
+      <button
+        class="w-8 h-8 flex items-center justify-center text-primary dark:text-primary hover:opacity-80 transition-opacity"
+      >
+        <span class="material-symbols-outlined" data-icon="settings"
+          >settings</span
+        >
+      </button>
+    </header>
+    <!-- Main Canvas -->
+    <main class="pt-[calc(48px+24px)] px-margin-mobile max-w-7xl mx-auto">
+      <!-- Search Bar -->
+      <div class="relative w-full mb-stack-md group">
+        <div
+          class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline"
+        >
+          <span class="material-symbols-outlined" data-icon="search"
+            >search</span
+          >
+        </div>
+        <input
+          class="w-full bg-transparent border border-white/20 text-on-surface placeholder-outline rounded-lg h-touch-target-min pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-300"
+          placeholder="Find your trainer..."
+          type="text"
+        />
+        <button
+          class="absolute inset-y-0 right-0 pr-4 flex items-center text-primary hover:opacity-80 transition-opacity"
+        >
+          <span class="material-symbols-outlined" data-icon="tune">tune</span>
+        </button>
+      </div>
+      <!-- Filter Chips -->
+      <div class="flex overflow-x-auto gap-3 pb-2 mb-stack-lg no-scrollbar">
+        <button
+          class="flex-none px-4 h-[40px] rounded-full bg-primary text-on-primary font-label-caps text-label-caps flex items-center justify-center whitespace-nowrap shadow-[0_0_15px_rgba(208,188,255,0.3)]"
+        >
+          All Trainers
+        </button>
+        <button
+          class="flex-none px-4 h-[40px] rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-label-caps text-label-caps flex items-center justify-center whitespace-nowrap hover:border-primary/50 transition-colors"
+        >
+          Powerlifting
+        </button>
+        <button
+          class="flex-none px-4 h-[40px] rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-label-caps text-label-caps flex items-center justify-center whitespace-nowrap hover:border-primary/50 transition-colors"
+        >
+          Hypertrophy
+        </button>
+        <button
+          class="flex-none px-4 h-[40px] rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-label-caps text-label-caps flex items-center justify-center whitespace-nowrap hover:border-primary/50 transition-colors"
+        >
+          Mobility
+        </button>
+        <button
+          class="flex-none px-4 h-[40px] rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-label-caps text-label-caps flex items-center justify-center whitespace-nowrap hover:border-primary/50 transition-colors"
+        >
+          CrossFit
+        </button>
+      </div>
+      <!-- Masonry Grid of Trainer Cards -->
+      <!-- Note: Pure CSS masonry with columns can alter visual order, but is visually effective. Using CSS columns for simplicity. -->
+      <div
+        class="columns-1 md:columns-2 lg:columns-3 gap-stack-md space-y-stack-md"
+      >
+        <!-- Trainer Card 1 -->
+        <div
+          class="break-inside-avoid bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden relative group"
+        >
+          <div class="h-48 w-full relative">
+            <img
+              alt="Trainer Image"
+              class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+              data-alt="A strong, muscular male personal trainer demonstrating a deadlift in a high-end, dark, atmospheric gym. The lighting highlights his physique and the heavy barbell. The aesthetic is gritty but premium, emphasizing power and raw strength, fitting a top-tier fitness professional profile."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCd1AW--nzMfeC8BfheS1d2zh3tjYwFS6GP2fuIQ5-CkMHqfnjM9V2DAuxewuGdmgXGHmOEhUB4fINUr2ql5ZELsPUbCBJaHaz9ePEW_11vzuDwAo05eONiSATmvW44d3gKBUurl-ltTOl9IEB85LilkjTekQMRpzNHnzd4TPhppDyhPYK9trA3bU-jCmZbJ45Dz2s6GQesd4dbAFAiqwDpb2QVSYQlEfO9PZcK1-ABnuyCCsJ4qyOxZkqT8B39DZqPOnpGF_brzKQ"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-[#1F2937] via-transparent to-transparent"
+            ></div>
+            <div class="absolute bottom-3 left-3 flex gap-2">
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >Powerlifting</span
+              >
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >Elite</span
+              >
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 relative z-10">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-headline-md text-headline-md text-on-surface">
+                  Marcus Vance
+                </h3>
+                <p class="text-on-surface-variant text-sm mt-1">
+                  Strength &amp; Conditioning
+                </p>
+              </div>
+              <div
+                class="flex items-center gap-1 bg-surface/50 border border-[#B06B00]/30 px-2 py-1 rounded-full"
+              >
+                <span
+                  class="material-symbols-outlined text-[#B06B00] text-sm"
+                  data-icon="star"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >star</span
+                >
+                <span
+                  class="font-numeric-data text-sm text-on-surface font-bold"
+                  >4.9</span
+                >
+              </div>
+            </div>
+            <div
+              class="mt-2 flex justify-between items-center border-t border-white/10 pt-3"
+            >
+              <span class="text-on-surface font-semibold">$85/hr</span>
+              <button
+                class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-sm"
+                  data-icon="arrow_forward"
+                  >arrow_forward</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Trainer Card 2 -->
+        <div
+          class="break-inside-avoid bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden relative group"
+        >
+          <div class="h-64 w-full relative">
+            <img
+              alt="Trainer Image"
+              class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+              data-alt="A dynamic shot of a female fitness trainer performing a kettlebell swing. The environment is a sleek, modern functional training space with dark charcoal walls and focused, dramatic lighting. The image conveys energy, agility, and elite athletic performance, aligning with a premium brand aesthetic."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnmki3HcGKIiHuGV5jSYSJvM_qXqadgzCjshBdcv7oSknx8ntmwq3VwsPM0K7uCnU33OKiyEmOzSivH4j8moZfecbrpg7MByCrf_wzUQyFJh_Y3IFTB7zyFARGbriirOCPnH3Q7ADLo6T620wDiu7en23fwKLtByzTfjNSiiHGQitu5zzVvnSxVlZ_7uDC8M3O2OVWvbAxC_0MyOp8hZM_XEUXKY-wI08nIdKhITZpAFj4RKfAP_ycY3fnYqc1nQ3EAaKv7fRhsfM"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-[#1F2937] via-transparent to-transparent"
+            ></div>
+            <div
+              class="absolute bottom-3 left-3 flex gap-2 flex-wrap max-w-[80%]"
+            >
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >Hypertrophy</span
+              >
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >Nutrition</span
+              >
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 relative z-10">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-headline-md text-headline-md text-on-surface">
+                  Elena Rostova
+                </h3>
+                <p class="text-on-surface-variant text-sm mt-1">
+                  Body Recomposition
+                </p>
+              </div>
+              <div
+                class="flex items-center gap-1 bg-surface/50 border border-[#B06B00]/30 px-2 py-1 rounded-full"
+              >
+                <span
+                  class="material-symbols-outlined text-[#B06B00] text-sm"
+                  data-icon="star"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >star</span
+                >
+                <span
+                  class="font-numeric-data text-sm text-on-surface font-bold"
+                  >5.0</span
+                >
+              </div>
+            </div>
+            <div
+              class="mt-2 flex justify-between items-center border-t border-white/10 pt-3"
+            >
+              <span class="text-on-surface font-semibold">$95/hr</span>
+              <button
+                class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-sm"
+                  data-icon="arrow_forward"
+                  >arrow_forward</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Trainer Card 3 -->
+        <div
+          class="break-inside-avoid bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden relative group"
+        >
+          <div class="h-56 w-full relative">
+            <img
+              alt="Trainer Image"
+              class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+              data-alt="A portrait of a male athletic coach standing confidently in an indoor running track facility. The lighting is slightly cooler, emphasizing a scientific, performance-driven approach. He wears dark, minimalist athletic gear. The overall feel is professional, focused, and high-end."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC343GteOOJmYVoLIz3d9A9A2hubyR9aS4OI1QACn2RWbfLVtI6na7il9ZRIWKaHsnLwn8z1sXMiXYNwb01_IwH436vxNi_OM3AR_mVX_A1oANCCb0RVq17Bb_UDHtJVlcC60DMqPAmdWdAvvK-5BkDd_d4i24VGZmwjOKm0wHLKSlTaWbJbCPzXvLvukLmRfwvpmgWTCIRR7imAfEQvGrZRUppHowuEI05yzwzpQFkmNPXo5NJ1gPdYXFFSeUXEHvLSlQrx3CvGC4"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-[#1F2937] via-transparent to-transparent"
+            ></div>
+            <div class="absolute bottom-3 left-3 flex gap-2">
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >Mobility</span
+              >
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >Rehab</span
+              >
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 relative z-10">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-headline-md text-headline-md text-on-surface">
+                  Dr. James Chen
+                </h3>
+                <p class="text-on-surface-variant text-sm mt-1">
+                  Movement Specialist
+                </p>
+              </div>
+              <div
+                class="flex items-center gap-1 bg-surface/50 border border-[#B06B00]/30 px-2 py-1 rounded-full"
+              >
+                <span
+                  class="material-symbols-outlined text-[#B06B00] text-sm"
+                  data-icon="star"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >star</span
+                >
+                <span
+                  class="font-numeric-data text-sm text-on-surface font-bold"
+                  >4.8</span
+                >
+              </div>
+            </div>
+            <div
+              class="mt-2 flex justify-between items-center border-t border-white/10 pt-3"
+            >
+              <span class="text-on-surface font-semibold">$110/hr</span>
+              <button
+                class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-sm"
+                  data-icon="arrow_forward"
+                  >arrow_forward</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Trainer Card 4 -->
+        <div
+          class="break-inside-avoid bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden relative group"
+        >
+          <div class="h-48 w-full relative">
+            <img
+              alt="Trainer Image"
+              class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+              data-alt="A close-up action shot of a male trainer tying his lifting shoes before a heavy set. The focus is tight, with a blurred background showing heavy plates and gym equipment. The mood is intense preparation, using deep blacks and stark lighting to convey serious training intent."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGkvGl2rdDuK_hpPyfLXyoW9iuN6O0MImL1lBGw6ljl0g3p3OHDJK7VEzRTIZOJgshnhsvj-BLWjj4cl2B8Qi3OgMTBRU28LAU13vDVAtJDFIY8e2K1aXETmx_acSAn1IVIckF2Fxs4nWr_wpOq0Bn1xeAJcgmaeTDrvuZZBMKt_LMkrygiDAFFAsTwnV8Voa0GOqZkde2s0RfsJtSCZ5f4dZkb6I_T_u5GgeFkRWTAUBwd44wj5u7ksnFm2MfRDEgla7daJbwoLw"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-[#1F2937] via-transparent to-transparent"
+            ></div>
+            <div class="absolute bottom-3 left-3 flex gap-2">
+              <span
+                class="bg-black/50 backdrop-blur-md border border-white/10 text-white font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase tracking-wider"
+                >CrossFit</span
+              >
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 relative z-10">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-headline-md text-headline-md text-on-surface">
+                  Sam Reynolds
+                </h3>
+                <p class="text-on-surface-variant text-sm mt-1">
+                  HIIT &amp; MetCon
+                </p>
+              </div>
+              <div
+                class="flex items-center gap-1 bg-surface/50 border border-[#B06B00]/30 px-2 py-1 rounded-full"
+              >
+                <span
+                  class="material-symbols-outlined text-[#B06B00] text-sm"
+                  data-icon="star"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >star</span
+                >
+                <span
+                  class="font-numeric-data text-sm text-on-surface font-bold"
+                  >4.7</span
+                >
+              </div>
+            </div>
+            <div
+              class="mt-2 flex justify-between items-center border-t border-white/10 pt-3"
+            >
+              <span class="text-on-surface font-semibold">$70/hr</span>
+              <button
+                class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-sm"
+                  data-icon="arrow_forward"
+                  >arrow_forward</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] rounded-full bg-surface-container/60 dark:bg-surface-container/60 backdrop-blur-xl border border-white/15 shadow-[0_0_20px_rgba(208,188,255,0.2)] z-50 flex justify-around items-center px-4 py-2 mx-margin-mobile"
+    >
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors group"
+      >
+        <span
+          class="material-symbols-outlined group-hover:scale-110 transition-transform"
+          data-icon="home"
+          >home</span
+        >
+        <span
+          class="text-[10px] font-label-caps tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >Home</span
+        >
+      </button>
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors group"
+      >
+        <span
+          class="material-symbols-outlined group-hover:scale-110 transition-transform"
+          data-icon="fitness_center"
+          >fitness_center</span
+        >
+        <span
+          class="text-[10px] font-label-caps tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >Log</span
+        >
+      </button>
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors group"
+      >
+        <span
+          class="material-symbols-outlined group-hover:scale-110 transition-transform"
+          data-icon="monitoring"
+          >monitoring</span
+        >
+        <span
+          class="text-[10px] font-label-caps tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >Analytics</span
+        >
+      </button>
+      <!-- Active Tab: Market -->
+      <button
+        class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full w-12 h-12 scale-110 transition-all duration-300 ease-out shadow-[0_0_15px_rgba(208,188,255,0.4)]"
+      >
+        <span
+          class="material-symbols-outlined"
+          data-icon="storefront"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >storefront</span
+        >
+        <span class="text-[9px] font-bold tracking-widest mt-0.5 leading-none"
+          >Market</span
+        >
+      </button>
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant h-12 w-12 hover:text-primary transition-colors group"
+      >
+        <span
+          class="material-symbols-outlined group-hover:scale-110 transition-transform"
+          data-icon="chat_bubble"
+          >chat_bubble</span
+        >
+        <span
+          class="text-[10px] font-label-caps tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >Chat</span
+        >
+      </button>
+    </nav>
+  </body>
+</html>

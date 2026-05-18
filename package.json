@@ -2,6 +2,9 @@
   "name": "fitsync-monorepo",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=24.15.0"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -13,8 +16,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,prisma}\""
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
     "turbo": "^1.13.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   }
 }

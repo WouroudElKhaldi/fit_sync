@@ -1,0 +1,512 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Workout Calendar</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#482900",
+              "primary-container": "#a078ff",
+              "inverse-on-surface": "#27313f",
+              "secondary-fixed-dim": "#c8c6c3",
+              "surface-bright": "#303a48",
+              primary: "#d0bcff",
+              "tertiary-fixed": "#ffdcbb",
+              "surface-container-lowest": "#050f1c",
+              "surface-container-low": "#121c2a",
+              "secondary-fixed": "#e4e2de",
+              "on-tertiary-container": "#3f2300",
+              "on-primary-fixed": "#23005c",
+              "tertiary-container": "#ca801e",
+              "on-error-container": "#ffdad6",
+              "on-background": "#d9e3f6",
+              "surface-container": "#16202e",
+              "inverse-primary": "#6d3bd7",
+              "surface-dim": "#091421",
+              "surface-variant": "#2b3544",
+              "outline-variant": "#494454",
+              surface: "#091421",
+              "on-surface-variant": "#cbc3d7",
+              "on-secondary-container": "#b6b5b1",
+              "on-surface": "#d9e3f6",
+              "on-secondary-fixed-variant": "#474744",
+              "tertiary-fixed-dim": "#ffb869",
+              "secondary-container": "#474744",
+              background: "#091421",
+              outline: "#958ea0",
+              "on-primary-fixed-variant": "#5516be",
+              "surface-container-high": "#212b39",
+              "on-primary-container": "#340080",
+              "primary-fixed": "#e9ddff",
+              "on-secondary-fixed": "#1b1c1a",
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary": "#30312e",
+              "error-container": "#93000a",
+              tertiary: "#ffb869",
+              "inverse-surface": "#d9e3f6",
+              error: "#ffb4ab",
+              "surface-tint": "#d0bcff",
+              secondary: "#c8c6c3",
+              "on-tertiary-fixed": "#2c1700",
+              "on-primary": "#3c0091",
+              "on-error": "#690005",
+              "surface-container-highest": "#2b3544",
+              "primary-fixed-dim": "#d0bcff",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "touch-target-min": "48px",
+              "stack-sm": "8px",
+              gutter: "16px",
+              "stack-lg": "24px",
+              "margin-mobile": "20px",
+              "stack-md": "16px",
+            },
+            fontFamily: {
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "body-base": ["Plus Jakarta Sans"],
+              "display-xl": ["Plus Jakarta Sans"],
+              "numeric-data": ["Plus Jakarta Sans"],
+              "label-caps": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-base": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+              "numeric-data": [
+                "20px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "-0.05em",
+                  fontWeight: "600",
+                },
+              ],
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.1em",
+                  fontWeight: "700",
+                },
+              ],
+              "display-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .glowing-ring {
+        box-shadow: 0 0 15px rgba(208, 188, 255, 0.5);
+        border: 2px solid #d0bcff;
+      }
+      .glow-button {
+        box-shadow: 0 0 20px rgba(208, 188, 255, 0.3);
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-[#1F2937] text-on-surface font-body-base antialiased pb-24">
+    <!-- Top App Bar -->
+    <header
+      class="w-full sticky top-0 z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl shadow-sm border-b border-white/10"
+    >
+      <div
+        class="flex items-center justify-between px-margin-mobile h-touch-target-min w-full"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            alt="User Profile"
+            class="w-8 h-8 rounded-full border border-white/20"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkADCwnzFivESuL6lUg5fofmwlk6gFf7rEouVcAsBBiiGc6slkiMnmdD51JzjZkH2Mg9-teAbaQECY0GIUgGeHxSBIXo8BZTo634p4duVfLyXDDlX3UpWTtBz-_leN83IP1tb8-e2ffl837-dPJOePIf7zfYkz770tUOleHcTp-B_9dXm4R-yBaXtS9d7vHNtwRMg_HQsTokFoS_agY1gCYfchSuHeyC_c45g-bItW-3-OMDVc6837ZVIbomkYYqdyk9ZMf8Qr2kE"
+          />
+        </div>
+        <h1
+          class="font-headline-md text-headline-md tracking-tighter text-primary dark:text-primary-fixed"
+        >
+          CALENDAR
+        </h1>
+        <button
+          class="hover:opacity-80 transition-opacity active:scale-95 transition-transform flex items-center justify-center w-8 h-8 text-on-surface-variant"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;wght&quot; 400"
+            >settings</span
+          >
+        </button>
+      </div>
+    </header>
+    <main
+      class="px-margin-mobile pt-stack-lg pb-stack-lg flex flex-col gap-stack-lg"
+    >
+      <!-- Calendar Section -->
+      <section class="flex flex-col gap-stack-md">
+        <div class="flex justify-between items-center px-2">
+          <button
+            class="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <h2 class="font-headline-md text-headline-md text-on-surface">
+            October 2023
+          </h2>
+          <button
+            class="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+        <div class="glass-panel rounded-xl p-stack-sm">
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              S
+            </div>
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              M
+            </div>
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              T
+            </div>
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              W
+            </div>
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              T
+            </div>
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              F
+            </div>
+            <div
+              class="text-center font-label-caps text-label-caps text-on-surface-variant"
+            >
+              S
+            </div>
+          </div>
+          <div class="grid grid-cols-7 gap-1">
+            <!-- Week 1 -->
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              1
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              2
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              3
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              4
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              5
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              6
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center text-on-surface-variant/50"
+            >
+              7
+            </div>
+            <!-- Week 2 -->
+            <div class="h-10 flex flex-col items-center justify-center">8</div>
+            <div class="h-10 flex flex-col items-center justify-center">9</div>
+            <div class="h-10 flex flex-col items-center justify-center">10</div>
+            <div class="h-10 flex flex-col items-center justify-center">11</div>
+            <div
+              class="h-10 flex flex-col items-center justify-center relative"
+            >
+              12
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-primary absolute bottom-1"
+              ></div>
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center relative"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center glowing-ring font-bold text-primary"
+              >
+                13
+              </div>
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-tertiary absolute bottom-0.5"
+              ></div>
+            </div>
+            <div
+              class="h-10 flex flex-col items-center justify-center relative"
+            >
+              14
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-primary absolute bottom-1"
+              ></div>
+            </div>
+            <!-- Week 3 -->
+            <div class="h-10 flex flex-col items-center justify-center">15</div>
+            <div
+              class="h-10 flex flex-col items-center justify-center relative"
+            >
+              16
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-tertiary absolute bottom-1"
+              ></div>
+            </div>
+            <div class="h-10 flex flex-col items-center justify-center">17</div>
+            <div class="h-10 flex flex-col items-center justify-center">18</div>
+            <div class="h-10 flex flex-col items-center justify-center">19</div>
+            <div class="h-10 flex flex-col items-center justify-center">20</div>
+            <div class="h-10 flex flex-col items-center justify-center">21</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-4 mt-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <span
+              class="font-label-caps text-label-caps text-on-surface-variant"
+              >Personal</span
+            >
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-tertiary"></div>
+            <span
+              class="font-label-caps text-label-caps text-on-surface-variant"
+              >Trainer Assigned</span
+            >
+          </div>
+        </div>
+      </section>
+      <!-- Today's Agenda -->
+      <section class="flex flex-col gap-stack-md">
+        <h3 class="font-headline-md text-headline-md text-on-surface">
+          Today's Agenda
+        </h3>
+        <!-- Card 1 -->
+        <div
+          class="glass-panel rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 right-0 w-32 h-32 bg-tertiary/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"
+          ></div>
+          <div class="flex justify-between items-start z-10">
+            <div>
+              <h4
+                class="font-numeric-data text-numeric-data text-on-surface mb-1"
+              >
+                Hypertrophy Pull Day
+              </h4>
+              <div
+                class="inline-flex items-center gap-1 px-2 py-1 rounded border border-tertiary/50 bg-tertiary/10 text-tertiary"
+              >
+                <span class="material-symbols-outlined text-[14px]"
+                  >person_check</span
+                >
+                <span class="font-label-caps text-label-caps"
+                  >Assigned by Marcus Vance</span
+                >
+              </div>
+            </div>
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-white/10"
+            >
+              <span class="material-symbols-outlined text-tertiary"
+                >fitness_center</span
+              >
+            </div>
+          </div>
+          <div
+            class="flex items-center justify-between border-t border-white/10 pt-4 z-10"
+          >
+            <div class="flex items-center gap-2 text-primary">
+              <span
+                class="material-symbols-outlined"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >check_circle</span
+              >
+              <span class="font-body-base font-semibold">Completed</span>
+            </div>
+            <div class="flex items-center gap-2 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]"
+                >line_weight</span
+              >
+              <span class="font-numeric-data text-numeric-data">12,450 kg</span>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div
+          class="glass-panel rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"
+          ></div>
+          <div class="flex justify-between items-start z-10">
+            <div>
+              <h4
+                class="font-numeric-data text-numeric-data text-on-surface mb-1"
+              >
+                Power Session
+              </h4>
+              <div
+                class="inline-flex items-center gap-1 px-2 py-1 rounded border border-primary/50 bg-primary/10 text-primary"
+              >
+                <span class="material-symbols-outlined text-[14px]"
+                  >assignment</span
+                >
+                <span class="font-label-caps text-label-caps"
+                  >Personal Plan</span
+                >
+              </div>
+            </div>
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-white/10"
+            >
+              <span class="material-symbols-outlined text-primary">bolt</span>
+            </div>
+          </div>
+          <div
+            class="flex items-center justify-between border-t border-white/10 pt-4 z-10"
+          >
+            <div class="flex items-center gap-2 text-on-surface-variant">
+              <span class="material-symbols-outlined">schedule</span>
+              <span class="font-body-base">Upcoming: 5:00 PM</span>
+            </div>
+            <button
+              class="bg-primary/20 text-primary hover:bg-primary/30 transition-colors px-4 py-2 rounded-lg font-body-base font-semibold border border-primary/30"
+            >
+              Start
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- FAB -->
+    <button
+      class="fixed bottom-[96px] right-6 w-14 h-14 bg-inverse-primary rounded-xl flex items-center justify-center glow-button hover:bg-primary-container transition-colors active:scale-95 z-40 text-white"
+    >
+      <span class="material-symbols-outlined" style="font-size: 28px">add</span>
+    </button>
+    <!-- Bottom Nav Bar -->
+    <nav
+      class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container/12 dark:bg-surface-container/12 backdrop-blur-xl border-t border-white/15 shadow-[0_-4px_20px_rgba(208,188,255,0.1)] flex justify-around items-center px-4 py-2 h-[72px] md:hidden"
+    >
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant p-stack-sm hover:bg-white/5 transition-colors active:scale-90 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined">home</span>
+      </button>
+      <button
+        class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-xl p-stack-sm hover:bg-white/5 transition-colors active:scale-90 transition-all duration-200"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >edit_note</span
+        >
+      </button>
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant p-stack-sm hover:bg-white/5 transition-colors active:scale-90 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined">insights</span>
+      </button>
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant p-stack-sm hover:bg-white/5 transition-colors active:scale-90 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined">storefront</span>
+      </button>
+      <button
+        class="flex flex-col items-center justify-center text-on-surface-variant p-stack-sm hover:bg-white/5 transition-colors active:scale-90 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined">chat</span>
+      </button>
+    </nav>
+  </body>
+</html>

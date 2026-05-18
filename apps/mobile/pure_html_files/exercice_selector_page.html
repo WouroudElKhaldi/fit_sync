@@ -1,0 +1,459 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Exercise Library Selector - FitSync Pro</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#2b3544",
+              "inverse-surface": "#d9e3f6",
+              "surface-container-highest": "#2b3544",
+              "primary-fixed-dim": "#d0bcff",
+              tertiary: "#ffb869",
+              secondary: "#c8c6c3",
+              "on-surface": "#d9e3f6",
+              "on-surface-variant": "#cbc3d7",
+              "surface-container-low": "#121c2a",
+              surface: "#091421",
+              "on-error-container": "#ffdad6",
+              primary: "#d0bcff",
+              "surface-container": "#16202e",
+              "tertiary-fixed-dim": "#ffb869",
+              "surface-container-high": "#212b39",
+              error: "#ffb4ab",
+              "surface-dim": "#091421",
+              "error-container": "#93000a",
+              "on-primary-fixed-variant": "#5516be",
+              "inverse-on-surface": "#27313f",
+              "on-primary-container": "#340080",
+              "inverse-primary": "#6d3bd7",
+              "secondary-container": "#474744",
+              "surface-bright": "#303a48",
+              "on-background": "#d9e3f6",
+              "on-secondary-container": "#b6b5b1",
+              "on-secondary": "#30312e",
+              outline: "#958ea0",
+              "on-tertiary-container": "#3f2300",
+              "on-secondary-fixed": "#1b1c1a",
+              "on-error": "#690005",
+              "tertiary-fixed": "#ffdcbb",
+              "on-secondary-fixed-variant": "#474744",
+              background: "#091421",
+              "primary-fixed": "#e9ddff",
+              "on-tertiary": "#482900",
+              "surface-container-lowest": "#050f1c",
+              "on-primary-fixed": "#23005c",
+              "primary-container": "#a078ff",
+              "outline-variant": "#494454",
+              "secondary-fixed": "#e4e2de",
+              "on-tertiary-fixed-variant": "#673d00",
+              "surface-tint": "#d0bcff",
+              "secondary-fixed-dim": "#c8c6c3",
+              "on-tertiary-fixed": "#2c1700",
+              "on-primary": "#3c0091",
+              "tertiary-container": "#ca801e",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "16px",
+              "touch-target-min": "48px",
+              "stack-md": "16px",
+              "margin-mobile": "20px",
+              "stack-sm": "8px",
+              "stack-lg": "24px",
+            },
+            fontFamily: {
+              "headline-md": ["Plus Jakarta Sans"],
+              "display-xl": ["Plus Jakarta Sans"],
+              "numeric-data": ["Plus Jakarta Sans"],
+              "label-caps": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-base": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+              "numeric-data": [
+                "20px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "-0.05em",
+                  fontWeight: "600",
+                },
+              ],
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.1em",
+                  fontWeight: "700",
+                },
+              ],
+              "display-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-base": [
+                "16px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "0em",
+                  fontWeight: "400",
+                },
+              ],
+              "body-lg": [
+                "18px",
+                {
+                  lineHeight: "28px",
+                  letterSpacing: "0em",
+                  fontWeight: "400",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #1f2937;
+        color: #fdfbf7;
+      }
+      /* Custom scrollbar hiding for horizontal list */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="antialiased min-h-screen flex flex-col font-body-base pb-32">
+    <!-- Sticky Header -->
+    <header
+      class="sticky top-0 z-40 bg-[#1F2937] pt-4 pb-2 border-b border-white/10"
+    >
+      <div
+        class="px-margin-mobile flex items-center justify-between h-touch-target-min mb-stack-md"
+      >
+        <button
+          class="w-touch-target-min h-touch-target-min flex items-center justify-start text-on-background active:scale-95 transition-transform"
+        >
+          <span class="material-symbols-outlined text-[28px]">close</span>
+        </button>
+        <h1
+          class="text-headline-md font-headline-md text-on-background absolute left-1/2 -translate-x-1/2"
+        >
+          Add Exercises
+        </h1>
+        <div class="w-touch-target-min h-touch-target-min"></div>
+        <!-- Placeholder for balance -->
+      </div>
+      <div class="px-margin-mobile mb-stack-md">
+        <div class="relative flex items-center h-touch-target-min">
+          <span
+            class="material-symbols-outlined absolute left-4 text-outline z-10"
+            >search</span
+          >
+          <input
+            class="w-full h-full bg-surface-container rounded-lg pl-12 pr-4 text-body-base font-body-base text-on-background placeholder:text-outline border border-white/20 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-[0_0_15px_rgba(208,188,255,0.05)] focus:shadow-[0_0_20px_rgba(208,188,255,0.2)]"
+            placeholder="Search exercises, muscles..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div
+        class="px-margin-mobile pb-2 overflow-x-auto no-scrollbar flex gap-stack-sm snap-x"
+      >
+        <button
+          class="snap-start shrink-0 h-10 px-6 rounded-full bg-primary text-on-primary font-numeric-data text-numeric-data text-sm flex items-center justify-center shadow-[0_0_15px_rgba(208,188,255,0.3)]"
+        >
+          All
+        </button>
+        <button
+          class="snap-start shrink-0 h-10 px-6 rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-numeric-data text-numeric-data text-sm flex items-center justify-center active:scale-95 transition-transform"
+        >
+          Chest
+        </button>
+        <button
+          class="snap-start shrink-0 h-10 px-6 rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-numeric-data text-numeric-data text-sm flex items-center justify-center active:scale-95 transition-transform"
+        >
+          Legs
+        </button>
+        <button
+          class="snap-start shrink-0 h-10 px-6 rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-numeric-data text-numeric-data text-sm flex items-center justify-center active:scale-95 transition-transform"
+        >
+          Back
+        </button>
+        <button
+          class="snap-start shrink-0 h-10 px-6 rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-numeric-data text-numeric-data text-sm flex items-center justify-center active:scale-95 transition-transform"
+        >
+          Dumbbell
+        </button>
+        <button
+          class="snap-start shrink-0 h-10 px-6 rounded-full bg-surface-container border border-white/10 text-on-surface-variant font-numeric-data text-numeric-data text-sm flex items-center justify-center active:scale-95 transition-transform"
+        >
+          Barbell
+        </button>
+      </div>
+    </header>
+    <!-- Main Content List -->
+    <main class="flex-1 flex flex-col">
+      <!-- CHEST Section -->
+      <section class="mt-stack-lg">
+        <div
+          class="px-margin-mobile py-2 sticky top-[164px] z-30 bg-[#1F2937]/90 backdrop-blur-sm border-b border-white/5"
+        >
+          <h2
+            class="text-label-caps font-label-caps text-outline uppercase tracking-widest"
+          >
+            CHEST
+          </h2>
+        </div>
+        <div class="flex flex-col">
+          <!-- Selected Exercise -->
+          <button
+            class="w-full flex items-center px-margin-mobile py-3 min-h-[64px] bg-primary/10 active:bg-primary/20 transition-colors text-left"
+          >
+            <div
+              class="w-12 h-12 rounded-lg bg-surface-container-high shrink-0 overflow-hidden border border-white/10 mr-4"
+            >
+              <img
+                alt="Person doing incline dumbbell press"
+                class="w-full h-full object-cover"
+                data-alt="A muscular athlete performing an incline dumbbell chest press in a dimly lit, premium modern gym. High contrast cinematic lighting highlights the metallic dumbbells and the athlete's focused expression. The overall aesthetic is dark mode corporate fitness, relying on deep blacks and crisp whites with a subtle violet tone to match the app's primary branding."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOzBLiObG_Ks8CIdCH1sKuS4meTkCaVmOVgo_HISKP0BNsFWigBwfxayyCMRzGGqx0MKFHyn0ZjSNZma_wvzAkaxzhPrFATpPszUKeSKz0gI2CI3AjAUeEIV7mCdTh3sy2Xt0CM7QJ0ein7F9y8AolQf6aF3lHryPH_0eCS_mJ1pnEpsIT8t56E4oHHiOcw7G0lJEbgoKxBIRV0C4X752To01gt-HW_9Fko2fAyiUY3rf-xKZ6ai_h5VlwxHQNN5fe6L7tZzno91Q"
+              />
+            </div>
+            <div class="flex-1 flex flex-col justify-center">
+              <span
+                class="text-body-base font-body-base font-bold text-on-background"
+                >Incline Dumbbell Press</span
+              >
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant mt-0.5 normal-case tracking-normal font-normal"
+                >Dumbbell • Upper Chest</span
+              >
+            </div>
+            <div
+              class="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 ml-4 shadow-[0_0_10px_rgba(208,188,255,0.4)]"
+            >
+              <span
+                class="material-symbols-outlined text-on-primary text-[16px] font-bold"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >check</span
+              >
+            </div>
+          </button>
+          <!-- Unselected Exercise -->
+          <button
+            class="w-full flex items-center px-margin-mobile py-3 min-h-[64px] border-b border-white/10 active:bg-white/5 transition-colors text-left"
+          >
+            <div
+              class="w-12 h-12 rounded-lg bg-surface-container-high shrink-0 overflow-hidden border border-white/10 mr-4"
+            >
+              <img
+                alt="Person doing flat bench press"
+                class="w-full h-full object-cover"
+                data-alt="A close up view of an athlete lifting a heavy barbell on a flat bench press. The setting is a sophisticated strength training facility with deep charcoal walls and subtle, focused spotlighting. The image maintains a high-contrast dark mode aesthetic, emphasizing the raw texture of the knurled barbell against a sleek, modern background, perfectly aligning with an elite fitness tracker vibe."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDlb7q6LqGKOQG7kxXmj4SGBKXp6xh9b1oS_nj_dmYlKdExazVZl3riUCSTak9_jUU5oNMojJZp-NDej-MdQKj3ndU4QVE8wpO7H3tJ8LRMLgQ927KmQwhhIw7Bq21QIlToYsrhoKP-EVteg214cfPmLWBGwekUgMrNFAEjCZ3cpHnbeAelxNxC2QKGTLIDDZV8q0rFhDGIT05GBGr5P4G-TP90vTYf6oQAQqxnReGiZTlfr3Jx_XvrZgj4fB-ygqPOTe0kXVC8E8"
+              />
+            </div>
+            <div class="flex-1 flex flex-col justify-center">
+              <span
+                class="text-body-base font-body-base font-bold text-on-background"
+                >Barbell Bench Press</span
+              >
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant mt-0.5 normal-case tracking-normal font-normal"
+                >Barbell • Middle Chest</span
+              >
+            </div>
+            <div
+              class="w-6 h-6 rounded-full border border-white/30 flex items-center justify-center shrink-0 ml-4"
+            ></div>
+          </button>
+          <!-- Unselected Exercise -->
+          <button
+            class="w-full flex items-center px-margin-mobile py-3 min-h-[64px] border-b border-white/10 active:bg-white/5 transition-colors text-left"
+          >
+            <div
+              class="w-12 h-12 rounded-lg bg-surface-container-high shrink-0 overflow-hidden border border-white/10 mr-4"
+            >
+              <div
+                class="w-full h-full flex items-center justify-center text-outline"
+              >
+                <span class="material-symbols-outlined">fitness_center</span>
+              </div>
+            </div>
+            <div class="flex-1 flex flex-col justify-center">
+              <span
+                class="text-body-base font-body-base font-bold text-on-background"
+                >Cable Crossover</span
+              >
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant mt-0.5 normal-case tracking-normal font-normal"
+                >Cable • Inner Chest</span
+              >
+            </div>
+            <div
+              class="w-6 h-6 rounded-full border border-white/30 flex items-center justify-center shrink-0 ml-4"
+            ></div>
+          </button>
+        </div>
+      </section>
+      <!-- LEGS Section -->
+      <section class="mt-stack-md">
+        <div
+          class="px-margin-mobile py-2 sticky top-[164px] z-30 bg-[#1F2937]/90 backdrop-blur-sm border-b border-white/5"
+        >
+          <h2
+            class="text-label-caps font-label-caps text-outline uppercase tracking-widest"
+          >
+            LEGS
+          </h2>
+        </div>
+        <div class="flex flex-col">
+          <!-- Selected Exercise -->
+          <button
+            class="w-full flex items-center px-margin-mobile py-3 min-h-[64px] bg-primary/10 active:bg-primary/20 transition-colors text-left"
+          >
+            <div
+              class="w-12 h-12 rounded-lg bg-surface-container-high shrink-0 overflow-hidden border border-white/10 mr-4"
+            >
+              <img
+                alt="Person doing barbell squats"
+                class="w-full h-full object-cover"
+                data-alt="A dedicated fitness enthusiast executing a heavy barbell back squat inside a luxury, high-performance training center. The environment is styled with deep, moody dark mode lighting, featuring sharp silhouettes and soft, glowing white accents. The image conveys elite physical effort while maintaining a clean, premium visual consistency required for a modern tech-driven fitness application."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsLazvxjDOIQvoSTrLA-RYRgvr3HFfcdeBs6b_j9HS-wzdyo1QKGkOy5KmuQIVKBobR6_GAhPPEhvlK6eCmqsadkKGCrQt7c68S09slgIVfnwjjkJyH1TW059rRnoCVqpJeo2Iw739Zntz_x-StTuKNtIAnMnqS84dMtuBA1yfobOZd6Zqk8BIqqH3QJviGb5N9utzwjn3FJ5nCW81TBDsc6IFQXcTPTdZGaI9Q7IrZR3gUklamRqT6O9-NDSYYOMqhAyEjyJd3Zw"
+              />
+            </div>
+            <div class="flex-1 flex flex-col justify-center">
+              <span
+                class="text-body-base font-body-base font-bold text-on-background"
+                >Barbell Squat</span
+              >
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant mt-0.5 normal-case tracking-normal font-normal"
+                >Barbell • Quads/Glutes</span
+              >
+            </div>
+            <div
+              class="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 ml-4 shadow-[0_0_10px_rgba(208,188,255,0.4)]"
+            >
+              <span
+                class="material-symbols-outlined text-on-primary text-[16px] font-bold"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >check</span
+              >
+            </div>
+          </button>
+          <!-- Unselected Exercise -->
+          <button
+            class="w-full flex items-center px-margin-mobile py-3 min-h-[64px] border-b border-white/10 active:bg-white/5 transition-colors text-left"
+          >
+            <div
+              class="w-12 h-12 rounded-lg bg-surface-container-high shrink-0 overflow-hidden border border-white/10 mr-4"
+            >
+              <div
+                class="w-full h-full flex items-center justify-center text-outline"
+              >
+                <span class="material-symbols-outlined">directions_run</span>
+              </div>
+            </div>
+            <div class="flex-1 flex flex-col justify-center">
+              <span
+                class="text-body-base font-body-base font-bold text-on-background"
+                >Leg Press</span
+              >
+              <span
+                class="text-label-caps font-label-caps text-on-surface-variant mt-0.5 normal-case tracking-normal font-normal"
+                >Machine • Quads</span
+              >
+            </div>
+            <div
+              class="w-6 h-6 rounded-full border border-white/30 flex items-center justify-center shrink-0 ml-4"
+            ></div>
+          </button>
+        </div>
+      </section>
+    </main>
+    <!-- Floating Action Bar -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-50 p-margin-mobile pb-8 bg-gradient-to-t from-[#1F2937] via-[#1F2937]/90 to-transparent pointer-events-none"
+    >
+      <div
+        class="glass-panel rounded-2xl p-4 flex items-center justify-between pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
+        <div class="flex flex-col">
+          <span
+            class="text-body-base font-body-base font-bold text-on-background"
+            >2 Selected</span
+          >
+        </div>
+        <button
+          class="h-14 px-8 rounded-[16px] bg-[#8B5CF6] text-white font-numeric-data text-numeric-data font-bold flex items-center justify-center shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),_0_0_20px_rgba(139,92,246,0.4)] active:scale-95 transition-all"
+        >
+          Add to Workout
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

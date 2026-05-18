@@ -1,0 +1,313 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>FitSync Pro - Role Selection</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#673d00",
+              "on-secondary": "#30312e",
+              "primary-fixed": "#e9ddff",
+              "on-secondary-fixed": "#1b1c1a",
+              "error-container": "#93000a",
+              error: "#ffb4ab",
+              tertiary: "#ffb869",
+              "inverse-surface": "#d9e3f6",
+              secondary: "#c8c6c3",
+              "surface-tint": "#d0bcff",
+              "on-error": "#690005",
+              "on-tertiary-fixed": "#2c1700",
+              "on-primary": "#3c0091",
+              "surface-container-highest": "#2b3544",
+              "primary-fixed-dim": "#d0bcff",
+              "on-secondary-fixed-variant": "#474744",
+              "on-surface": "#d9e3f6",
+              "secondary-container": "#474744",
+              "tertiary-fixed-dim": "#ffb869",
+              background: "#091421",
+              "surface-container-high": "#212b39",
+              "on-primary-fixed-variant": "#5516be",
+              outline: "#958ea0",
+              "on-primary-container": "#340080",
+              "on-primary-fixed": "#23005c",
+              "tertiary-container": "#ca801e",
+              "on-error-container": "#ffdad6",
+              "on-background": "#d9e3f6",
+              "surface-dim": "#091421",
+              "inverse-primary": "#6d3bd7",
+              "surface-container": "#16202e",
+              "surface-variant": "#2b3544",
+              "outline-variant": "#494454",
+              surface: "#091421",
+              "on-surface-variant": "#cbc3d7",
+              "on-secondary-container": "#b6b5b1",
+              "primary-container": "#a078ff",
+              "inverse-on-surface": "#27313f",
+              "on-tertiary": "#482900",
+              "surface-bright": "#303a48",
+              "secondary-fixed-dim": "#c8c6c3",
+              primary: "#d0bcff",
+              "on-tertiary-container": "#3f2300",
+              "surface-container-low": "#121c2a",
+              "surface-container-lowest": "#050f1c",
+              "secondary-fixed": "#e4e2de",
+              "tertiary-fixed": "#ffdcbb",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "touch-target-min": "48px",
+              gutter: "16px",
+              "stack-sm": "8px",
+              "margin-mobile": "20px",
+              "stack-lg": "24px",
+              "stack-md": "16px",
+            },
+            fontFamily: {
+              "label-caps": ["Plus Jakarta Sans"],
+              "numeric-data": ["Plus Jakarta Sans"],
+              "display-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "body-base": ["Plus Jakarta Sans"],
+              "display-xl": ["Plus Jakarta Sans"],
+            },
+            fontSize: {
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.1em",
+                  fontWeight: "700",
+                },
+              ],
+              "numeric-data": [
+                "20px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "-0.05em",
+                  fontWeight: "600",
+                },
+              ],
+              "display-lg": [
+                "36px",
+                {
+                  lineHeight: "44px",
+                  letterSpacing: "-0.03em",
+                  fontWeight: "800",
+                },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-base": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.04em",
+                  fontWeight: "800",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .icon-fill {
+        font-variation-settings:
+          "FILL" 1,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+
+      /* Glassmorphism utility based on guidelines */
+      .glass-panel {
+        background-color: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .glass-panel-hover:hover {
+        background-color: rgba(255, 255, 255, 0.18);
+        border-color: rgba(208, 188, 255, 0.4); /* Primary color hint */
+        box-shadow: 0 0 24px rgba(208, 188, 255, 0.1);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-background min-h-screen flex flex-col font-body-base overflow-x-hidden selection:bg-primary selection:text-on-primary"
+  >
+    <!-- TopAppBar Shared Component -->
+    <header
+      class="bg-surface/80 dark:bg-surface/80 backdrop-blur-xl docked full-width top-0 border-b border-white/10 flat no shadows fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min transition-all"
+    >
+      <div
+        class="flex items-center gap-stack-sm cursor-pointer hover:opacity-80 transition-opacity"
+      >
+        <div
+          class="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-surface-container flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined text-primary text-sm"
+            >person</span
+          >
+        </div>
+      </div>
+      <div class="flex-1 text-center">
+        <span
+          class="text-headline-md font-headline-md font-black tracking-tighter text-primary dark:text-primary"
+          >FITSYNC PRO</span
+        >
+      </div>
+      <div
+        class="flex items-center hover:opacity-80 transition-opacity cursor-pointer text-on-surface-variant dark:text-on-surface-variant"
+      >
+        <span class="material-symbols-outlined" data-icon="settings"
+          >settings</span
+        >
+      </div>
+    </header>
+    <!-- Main Content Canvas (Navigation Shell Suppressed for Onboarding Flow) -->
+    <main
+      class="flex-1 flex flex-col items-center justify-center px-margin-mobile pt-[80px] pb-stack-lg w-full max-w-6xl mx-auto min-h-screen"
+    >
+      <!-- Header Section -->
+      <div class="text-center mb-12 flex flex-col items-center">
+        <div
+          class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-stack-md border border-primary/20"
+        >
+          <span class="material-symbols-outlined text-primary text-3xl"
+            >route</span
+          >
+        </div>
+        <h1
+          class="text-display-lg font-display-lg text-on-background mb-stack-sm"
+        >
+          How will you use FitSync?
+        </h1>
+        <p
+          class="text-body-lg font-body-lg text-on-surface-variant max-w-md mx-auto"
+        >
+          Select your primary role to customize your high-performance dashboard
+          and toolset.
+        </p>
+      </div>
+      <!-- Role Selection Cards Grid -->
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg w-full max-w-4xl"
+      >
+        <!-- Athlete Card -->
+        <button
+          class="glass-panel glass-panel-hover rounded-xl p-8 flex flex-col items-center justify-center text-center group transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background min-h-[280px]"
+        >
+          <div
+            class="w-24 h-24 rounded-full bg-surface-container-highest flex items-center justify-center mb-stack-lg group-hover:bg-primary/20 transition-colors duration-300 relative"
+          >
+            <div
+              class="absolute inset-0 rounded-full border border-primary/0 group-hover:border-primary/50 transition-colors duration-300"
+            ></div>
+            <span
+              class="material-symbols-outlined text-5xl text-on-background group-hover:text-primary transition-colors duration-300"
+              data-weight="fill"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >directions_run</span
+            >
+          </div>
+          <h2
+            class="text-headline-md font-headline-md text-on-background group-hover:text-primary transition-colors mb-stack-sm"
+          >
+            I am an Athlete
+          </h2>
+          <p class="text-body-base font-body-base text-on-surface-variant">
+            Log workouts, track performance metrics, and push your limits.
+          </p>
+        </button>
+        <!-- Coach Card -->
+        <button
+          class="glass-panel glass-panel-hover rounded-xl p-8 flex flex-col items-center justify-center text-center group transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-tertiary focus:ring-offset-2 focus:ring-offset-background min-h-[280px]"
+        >
+          <div
+            class="w-24 h-24 rounded-full bg-surface-container-highest flex items-center justify-center mb-stack-lg group-hover:bg-tertiary/20 transition-colors duration-300 relative"
+          >
+            <div
+              class="absolute inset-0 rounded-full border border-tertiary/0 group-hover:border-tertiary/50 transition-colors duration-300"
+            ></div>
+            <span
+              class="material-symbols-outlined text-5xl text-on-background group-hover:text-tertiary transition-colors duration-300"
+              data-weight="fill"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >sports</span
+            >
+          </div>
+          <h2
+            class="text-headline-md font-headline-md text-on-background group-hover:text-tertiary transition-colors mb-stack-sm"
+          >
+            I am a Coach
+          </h2>
+          <p class="text-body-base font-body-base text-on-surface-variant">
+            Manage clients, design elite programs, and monitor athlete progress.
+          </p>
+        </button>
+      </div>
+      <!-- Subtle Footer Action -->
+      <div class="mt-12 text-center">
+        <button
+          class="text-label-caps font-label-caps text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 px-4 py-2"
+        >
+          <span class="material-symbols-outlined text-sm">help</span>
+          Need help deciding?
+        </button>
+      </div>
+    </main>
+  </body>
+</html>
