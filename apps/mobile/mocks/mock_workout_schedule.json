@@ -1,17 +1,17 @@
 [
   {
-    "id": "wp-1",
+    "id": "wp-today",
     "title": "Upper Body Power",
-    "description": "Heavy push and pull movements to build strength.",
-    "scheduledDate": "2024-05-20T14:00:00Z",
+    "description": "Heavy chest, back, and arm movements for maximum strength.",
+    "scheduledDate": "2026-05-19T14:00:00Z",
     "isRecurring": false,
     "createdById": "t-2001",
     "clientId": "u-1001",
-    "createdAt": "2024-05-15T09:00:00Z",
+    "createdAt": "2026-05-15T09:00:00Z",
     "exercises": [
       {
         "id": "we-1",
-        "workoutPlanId": "wp-1",
+        "workoutPlanId": "wp-today",
         "exerciseId": "e-1",
         "orderIndex": 1,
         "restTimeSec": 120,
@@ -21,36 +21,134 @@
           "name": "Barbell Bench Press"
         },
         "sets": [
-          {
-            "id": "ws-1",
-            "setIndex": 1,
-            "expectedReps": 5,
-            "expectedWeight": 80,
-            "actualReps": null,
-            "actualWeight": null,
-            "status": "PENDING"
-          },
-          {
-            "id": "ws-2",
-            "setIndex": 2,
-            "expectedReps": 5,
-            "expectedWeight": 80,
-            "actualReps": null,
-            "actualWeight": null,
-            "status": "PENDING"
-          },
-          {
-            "id": "ws-3",
-            "setIndex": 3,
-            "expectedReps": 5,
-            "expectedWeight": 80,
-            "actualReps": null,
-            "actualWeight": null,
-            "status": "PENDING"
-          }
+          { "id": "ws-1", "setIndex": 1, "expectedReps": 5, "expectedWeight": 80, "actualReps": null, "actualWeight": null, "status": "PENDING" },
+          { "id": "ws-2", "setIndex": 2, "expectedReps": 5, "expectedWeight": 80, "actualReps": null, "actualWeight": null, "status": "PENDING" },
+          { "id": "ws-3", "setIndex": 3, "expectedReps": 5, "expectedWeight": 85, "actualReps": null, "actualWeight": null, "status": "PENDING" }
+        ]
+      },
+      {
+        "id": "we-2",
+        "workoutPlanId": "wp-today",
+        "exerciseId": "e-2",
+        "orderIndex": 2,
+        "restTimeSec": 90,
+        "notes": "Keep your elbows tucked and squeeze at the top.",
+        "exercise": {
+          "id": "e-2",
+          "name": "Dumbbell Row"
+        },
+        "sets": [
+          { "id": "ws-4", "setIndex": 1, "expectedReps": 10, "expectedWeight": 25, "actualReps": null, "actualWeight": null, "status": "PENDING" },
+          { "id": "ws-5", "setIndex": 2, "expectedReps": 10, "expectedWeight": 25, "actualReps": null, "actualWeight": null, "status": "PENDING" }
         ]
       }
     ],
+    "session": null
+  },
+  {
+    "id": "wp-tomorrow",
+    "title": "Pull Day B",
+    "description": "Posterior chain focus - deadlifts, pulldowns, and bicep curls.",
+    "scheduledDate": "2026-05-20T10:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2026-05-15T09:00:00Z",
+    "exercises": [
+      {
+        "id": "we-3",
+        "workoutPlanId": "wp-tomorrow",
+        "exerciseId": "e-3",
+        "orderIndex": 1,
+        "restTimeSec": 180,
+        "notes": "Ensure proper lower back alignment.",
+        "exercise": {
+          "id": "e-3",
+          "name": "Conventional Deadlift"
+        },
+        "sets": [
+          { "id": "ws-6", "setIndex": 1, "expectedReps": 5, "expectedWeight": 140, "actualReps": null, "actualWeight": null, "status": "PENDING" },
+          { "id": "ws-7", "setIndex": 2, "expectedReps": 5, "expectedWeight": 140, "actualReps": null, "actualWeight": null, "status": "PENDING" }
+        ]
+      }
+    ],
+    "session": null
+  },
+  {
+    "id": "wp-yesterday",
+    "title": "Legs Heavy A",
+    "description": "Quad and glute hypertrophy focus - heavy squats and extensions.",
+    "scheduledDate": "2026-05-18T09:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2026-05-15T09:00:00Z",
+    "exercises": [
+      {
+        "id": "we- squat",
+        "workoutPlanId": "wp-yesterday",
+        "exerciseId": "e- squat",
+        "orderIndex": 1,
+        "restTimeSec": 150,
+        "notes": "Full depth squats.",
+        "exercise": {
+          "id": "e- squat",
+          "name": "Barbell Squat"
+        },
+        "sets": [
+          { "id": "ws- squat-1", "setIndex": 1, "expectedReps": 8, "expectedWeight": 100, "actualReps": 8, "actualWeight": 100, "status": "COMPLETED" },
+          { "id": "ws- squat-2", "setIndex": 2, "expectedReps": 8, "expectedWeight": 100, "actualReps": 8, "actualWeight": 100, "status": "COMPLETED" }
+        ]
+      }
+    ],
+    "session": null
+  },
+  {
+    "id": "wp-lastweek",
+    "title": "Metabolic Conditioning",
+    "description": "High-intensity cardio circuit to push VO2 max.",
+    "scheduledDate": "2026-05-12T08:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2026-05-10T09:00:00Z",
+    "exercises": [],
+    "session": null
+  },
+  {
+    "id": "wp-nextmonth-1",
+    "title": "Hypertrophy Block W1D1",
+    "description": "High volume upper body session to kick off the new block.",
+    "scheduledDate": "2026-06-01T10:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2026-05-18T09:00:00Z",
+    "exercises": [],
+    "session": null
+  },
+  {
+    "id": "wp-nextmonth-2",
+    "title": "Hypertrophy Block W1D2",
+    "description": "High volume legs session focusing on quad sweep.",
+    "scheduledDate": "2026-06-03T10:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2026-05-18T09:00:00Z",
+    "exercises": [],
+    "session": null
+  },
+  {
+    "id": "wp-lastyear-1",
+    "title": "FitSync Pro Launch Workout",
+    "description": "Our inaugural baseline performance assessment session.",
+    "scheduledDate": "2025-05-19T09:00:00Z",
+    "isRecurring": false,
+    "createdById": "t-2001",
+    "clientId": "u-1001",
+    "createdAt": "2025-05-15T09:00:00Z",
+    "exercises": [],
     "session": null
   }
 ]

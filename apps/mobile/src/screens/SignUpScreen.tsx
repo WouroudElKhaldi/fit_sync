@@ -6,20 +6,22 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   ScrollView,
   Modal
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../navigation/types';
 import { BlurView } from 'expo-blur';
+import { useAppTheme } from '../context/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 };
 
 export default function SignUpScreen({ navigation }: Props) {
+  const { isDark, toggleTheme, colors } = useAppTheme();
+  
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [dob, setDob] = useState('');
@@ -99,10 +101,8 @@ export default function SignUpScreen({ navigation }: Props) {
     // 2. Perform mock Sign Up
     setIsLoading(true);
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1200));
-      // Successfully created account - redirect to role selection
-      navigation.replace('RoleSelection');
+      navigation.replace('EmailVerification', { email: email.toLowerCase().trim() });
     } catch (error) {
       setErrorMessage('An unexpected error occurred. Please try again.');
     } finally {
@@ -113,16 +113,45 @@ export default function SignUpScreen({ navigation }: Props) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-surface-dim relative"
+      className="flex-1 relative"
+      style={{ backgroundColor: colors.background }}
     >
-      {/* Ambient Background Glow */}
-      <View className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <View className="absolute -top-1/4 -left-1/4 w-3/4 h-3/4 bg-primary rounded-full opacity-10" style={{ transform: [{ scale: 1.5 }] }} />
-        <View className="absolute -bottom-1/4 -right-1/4 w-3/4 h-3/4 bg-tertiary rounded-full opacity-5" style={{ transform: [{ scale: 1.5 }] }} />
-      </View>
+      {/* Dynamic Floating Theme Toggle Button */}
+      <TouchableOpacity 
+        style={{ 
+          position: 'absolute', 
+          top: 56, 
+          right: 24, 
+          zIndex: 50, 
+          width: 44, 
+          height: 44, 
+          borderRadius: 22, 
+          backgroundColor: colors.surfaceContainerHigh, 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          borderColor: colors.border, 
+          borderWidth: 1,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4
+        }}
+        onPress={toggleTheme}
+      >
+        <MaterialIcons name={isDark ? "wb-sunny" : "nights-stay"} size={22} color={colors.primary} />
+      </TouchableOpacity>
+
+      {/* Ambient Background Glow (Only in Dark Mode for aesthetic depth) */}
+      {isDark && (
+        <View className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <View className="absolute -top-1/4 -left-1/4 w-3/4 h-3/4 bg-primary rounded-full opacity-10" style={{ transform: [{ scale: 1.5 }] }} />
+          <View className="absolute -bottom-1/4 -right-1/4 w-3/4 h-3/4 bg-tertiary rounded-full opacity-5" style={{ transform: [{ scale: 1.5 }] }} />
+        </View>
+      )}
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16 }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingTop: 80, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         className="z-10"
       >
@@ -130,44 +159,57 @@ export default function SignUpScreen({ navigation }: Props) {
 
           {/* Logo Header */}
           <View className="items-center flex flex-col gap-1">
-            <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center border border-primary/20">
-              <MaterialIcons name="person-add" size={20} color="#d0bcff" />
+            <View 
+              className="w-10 h-10 rounded-full items-center justify-center border"
+              style={{ backgroundColor: isDark ? 'rgba(208, 188, 255, 0.1)' : 'rgba(109, 59, 215, 0.1)', borderColor: colors.border }}
+            >
+              <MaterialIcons name="person-add" size={20} color={colors.primary} />
             </View>
-            <Text className="font-bold text-[20px] tracking-tight text-primary uppercase">
+            <Text className="font-bold text-[20px] tracking-tight uppercase" style={{ color: colors.primary }}>
               Create Account
             </Text>
-            <Text className="text-[13px] text-on-surface-variant text-center">
+            <Text className="text-[13px] text-center" style={{ color: colors.textMuted }}>
               Join the performance community today.
             </Text>
           </View>
 
           {/* Error Message Alert */}
           {errorMessage ? (
-            <View className="bg-error-container/30 border border-error/30 rounded-xl p-4 flex-row items-center gap-3">
+            <View 
+              className="border rounded-xl p-4 flex-row items-center gap-3"
+              style={{ 
+                backgroundColor: isDark ? 'rgba(147, 0, 10, 0.2)' : 'rgba(255, 180, 171, 0.2)', 
+                borderColor: isDark ? 'rgba(147, 0, 10, 0.4)' : 'rgba(255, 180, 171, 0.4)' 
+              }}
+            >
               <MaterialIcons name="error-outline" size={20} color="#ffb4ab" />
-              <Text className="text-error font-body-base flex-1">{errorMessage}</Text>
+              <Text className="font-body-base flex-1 font-bold" style={{ color: isDark ? '#ffb4ab' : '#93000a' }}>{errorMessage}</Text>
             </View>
           ) : null}
 
-          {/* Form Container */}
+          {/* Form Container (Glass panel in dark mode, pure white card in light mode) */}
           <BlurView 
-            intensity={70} 
-            tint="dark" 
-            className="rounded-xl overflow-hidden p-4 flex flex-col gap-3" 
-            style={styles.glassSurface}
+            intensity={isDark ? 70 : 0} 
+            tint={isDark ? "dark" : "light"} 
+            className="rounded-xl overflow-hidden p-4 flex flex-col gap-3 border" 
+            style={{
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
+              borderColor: colors.border
+            }}
           >
 
             {/* Full Name */}
             <View className="flex flex-col gap-1">
-              <Text className="font-label-caps text-[11px] text-on-surface-variant uppercase">
+              <Text className="font-label-caps text-[11px] uppercase" style={{ color: colors.textMuted }}>
                 Full Name
               </Text>
               <View className="relative justify-center">
-                <MaterialIcons name="person" size={18} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+                <MaterialIcons name="person" size={18} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
                 <TextInput
-                  className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] text-on-surface border border-white/20"
+                  className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] border"
+                  style={{ borderColor: colors.border, color: colors.text }}
                   placeholder="John Doe"
-                  placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                  placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                   value={fullName}
                   onChangeText={setFullName}
                   autoCapitalize="words"
@@ -177,15 +219,16 @@ export default function SignUpScreen({ navigation }: Props) {
 
             {/* Username */}
             <View className="flex flex-col gap-1">
-              <Text className="font-label-caps text-[11px] text-on-surface-variant uppercase">
+              <Text className="font-label-caps text-[11px] uppercase" style={{ color: colors.textMuted }}>
                 Username
               </Text>
               <View className="relative justify-center">
-                <MaterialIcons name="alternate-email" size={18} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+                <MaterialIcons name="alternate-email" size={18} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
                 <TextInput
-                  className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] text-on-surface border border-white/20"
+                  className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] border"
+                  style={{ borderColor: colors.border, color: colors.text }}
                   placeholder="johndoe"
-                  placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                  placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                   value={username}
                   onChangeText={(val) => setUsername(val.toLowerCase().trim())}
                   autoCapitalize="none"
@@ -196,16 +239,17 @@ export default function SignUpScreen({ navigation }: Props) {
 
             {/* Date of Birth Trigger */}
             <View className="flex flex-col gap-1">
-              <Text className="font-label-caps text-[11px] text-on-surface-variant uppercase">
+              <Text className="font-label-caps text-[11px] uppercase" style={{ color: colors.textMuted }}>
                 Date of Birth
               </Text>
               <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                 <View pointerEvents="none" className="relative justify-center">
-                  <MaterialIcons name="calendar-today" size={18} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+                  <MaterialIcons name="calendar-today" size={18} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
                   <TextInput
-                    className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] text-on-surface border border-white/20"
+                    className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] border"
+                    style={{ borderColor: colors.border, color: colors.text }}
                     placeholder="Select Date of Birth"
-                    placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                    placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                     value={dob ? dob : ''}
                     editable={false}
                   />
@@ -215,15 +259,16 @@ export default function SignUpScreen({ navigation }: Props) {
 
             {/* Email Address */}
             <View className="flex flex-col gap-1">
-              <Text className="font-label-caps text-[11px] text-on-surface-variant uppercase">
+              <Text className="font-label-caps text-[11px] uppercase" style={{ color: colors.textMuted }}>
                 Email Address
               </Text>
               <View className="relative justify-center">
-                <MaterialIcons name="mail" size={18} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+                <MaterialIcons name="mail" size={18} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
                 <TextInput
-                  className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] text-on-surface border border-white/20"
+                  className="w-full h-[42px] rounded-lg pl-12 pr-4 text-[14px] border"
+                  style={{ borderColor: colors.border, color: colors.text }}
                   placeholder="athlete@fitsync.pro"
-                  placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                  placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                   value={email}
                   onChangeText={(val) => setEmail(val.toLowerCase().trim())}
                   keyboardType="email-address"
@@ -234,54 +279,57 @@ export default function SignUpScreen({ navigation }: Props) {
 
             {/* Password */}
             <View className="flex flex-col gap-1">
-              <Text className="font-label-caps text-[11px] text-on-surface-variant uppercase">
+              <Text className="font-label-caps text-[11px] uppercase" style={{ color: colors.textMuted }}>
                 Password
               </Text>
               <View className="relative justify-center">
-                <MaterialIcons name="lock" size={18} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+                <MaterialIcons name="lock" size={18} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
                 <TextInput
-                  className="w-full h-[42px] rounded-lg pl-12 pr-12 text-[14px] text-on-surface border border-white/20"
+                  className="w-full h-[42px] rounded-lg pl-12 pr-12 text-[14px] border"
+                  style={{ borderColor: colors.border, color: colors.text }}
                   placeholder="••••••••"
-                  placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                  placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity
-                  className="absolute right-4 z-1"
+                  className="absolute right-4 z-10"
                   onPress={() => setShowPassword(!showPassword)}
                 >
-                  <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={18} color="#cbc3d7" />
+                  <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={18} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Submit Button */}
             <TouchableOpacity
-              className="bg-primary w-full h-[48px] rounded-xl mt-3 flex-row items-center justify-center gap-2"
+              className="w-full h-[48px] rounded-xl mt-3 flex-row items-center justify-center gap-2"
+              style={{ backgroundColor: colors.primary }}
               onPress={handleSignUp}
               disabled={isLoading}
             >
-              <Text className="text-[16px] text-on-primary font-semibold">
+              <Text className="text-[16px] font-bold" style={{ color: colors.onPrimary }}>
                 {isLoading ? 'Creating...' : 'Create Account'}
               </Text>
-              {!isLoading && <MaterialIcons name="arrow-forward" size={20} color="#3c0091" />}
+              {!isLoading && <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />}
             </TouchableOpacity>
           </BlurView>
 
           {/* Secondary Action */}
           <View className="items-center mt-stack-sm flex-row justify-center">
-            <Text className="font-body-base text-body-base text-on-surface-variant">
+            <Text className="font-body-base text-body-base" style={{ color: colors.textMuted }}>
               Already have an account?{' '}
             </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text className="text-primary font-bold">Sign In</Text>
+              <Text className="font-bold" style={{ color: colors.primary }}>Sign In</Text>
             </TouchableOpacity>
           </View>
 
         </View>
       </ScrollView>
-      {/* Beautiful Custom Slide-up Date Picker Modal */}
+
+      {/* Slide-up Date Picker Modal */}
       <Modal
         visible={showDatePicker}
         transparent={true}
@@ -294,16 +342,24 @@ export default function SignUpScreen({ navigation }: Props) {
           onPress={() => setShowDatePicker(false)}
         >
           <View 
-            className="bg-[#16202e] border-t border-white/10 rounded-t-[32px] p-6 max-h-[70%] flex flex-col gap-6"
-            style={styles.modalSurface}
+            className="border-t rounded-t-[32px] p-6 max-h-[70%] flex flex-col gap-6"
+            style={{ 
+              backgroundColor: colors.card, 
+              borderTopColor: colors.border,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 10,
+              elevation: 20
+            }}
           >
             {/* Header */}
-            <View className="flex-row justify-between items-center pb-2 border-b border-white/15">
-              <Text className="text-[20px] font-bold text-white font-headline-md">
+            <View className="flex-row justify-between items-center pb-2 border-b" style={{ borderBottomColor: colors.border }}>
+              <Text className="text-[20px] font-bold font-headline-md" style={{ color: colors.text }}>
                 Select Date of Birth
               </Text>
               <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                <MaterialIcons name="close" size={24} color="#cbc3d7" />
+                <MaterialIcons name="close" size={24} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -312,20 +368,26 @@ export default function SignUpScreen({ navigation }: Props) {
               
               {/* Day Column */}
               <View className="flex-1 flex flex-col gap-2">
-                <Text className="text-center font-label-caps text-label-caps text-on-surface-variant text-[12px] uppercase tracking-wider font-bold">
+                <Text className="text-center font-label-caps text-label-caps text-[12px] uppercase tracking-wider font-bold" style={{ color: colors.textMuted }}>
                   Day
                 </Text>
                 <ScrollView 
                   showsVerticalScrollIndicator={false}
-                  className="bg-white/5 rounded-xl border border-white/10"
+                  className="rounded-xl border"
+                  style={{ backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)', borderColor: colors.border }}
                 >
                   {Array.from({ length: getDaysInMonth(selMonth, selYear) }, (_, i) => i + 1).map((d) => (
                     <TouchableOpacity 
                       key={d} 
-                      className={`py-3 items-center ${selDay === d ? 'bg-primary/25 border-y border-primary/30' : ''}`}
+                      className="py-3 items-center"
+                      style={{ 
+                        backgroundColor: selDay === d ? (isDark ? 'rgba(208, 188, 255, 0.25)' : 'rgba(109, 59, 215, 0.15)') : 'transparent',
+                        borderVerticalColor: selDay === d ? colors.primary : 'transparent',
+                        borderVerticalWidth: selDay === d ? 1 : 0
+                      }}
                       onPress={() => setSelDay(d)}
                     >
-                      <Text className={`text-[16px] ${selDay === d ? 'text-primary font-bold' : 'text-on-surface-variant'}`}>
+                      <Text className="text-[16px]" style={{ color: selDay === d ? colors.primary : colors.textMuted, fontWeight: selDay === d ? 'bold' : 'normal' }}>
                         {d}
                       </Text>
                     </TouchableOpacity>
@@ -335,27 +397,32 @@ export default function SignUpScreen({ navigation }: Props) {
 
               {/* Month Column */}
               <View className="flex-[1.5] flex flex-col gap-2">
-                <Text className="text-center font-label-caps text-label-caps text-on-surface-variant text-[12px] uppercase tracking-wider font-bold">
+                <Text className="text-center font-label-caps text-label-caps text-[12px] uppercase tracking-wider font-bold" style={{ color: colors.textMuted }}>
                   Month
                 </Text>
                 <ScrollView 
                   showsVerticalScrollIndicator={false}
-                  className="bg-white/5 rounded-xl border border-white/10"
+                  className="rounded-xl border"
+                  style={{ backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)', borderColor: colors.border }}
                 >
                   {months.map((m, idx) => (
                     <TouchableOpacity 
                       key={m} 
-                      className={`py-3 items-center ${selMonth === idx ? 'bg-primary/25 border-y border-primary/30' : ''}`}
+                      className="py-3 items-center"
+                      style={{ 
+                        backgroundColor: selMonth === idx ? (isDark ? 'rgba(208, 188, 255, 0.25)' : 'rgba(109, 59, 215, 0.15)') : 'transparent',
+                        borderVerticalColor: selMonth === idx ? colors.primary : 'transparent',
+                        borderVerticalWidth: selMonth === idx ? 1 : 0
+                      }}
                       onPress={() => {
                         setSelMonth(idx);
-                        // Adjust day if selected day exceeds new month's length
                         const maxDays = getDaysInMonth(idx, selYear);
                         if (selDay > maxDays) {
                           setSelDay(maxDays);
                         }
                       }}
                     >
-                      <Text className={`text-[16px] ${selMonth === idx ? 'text-primary font-bold' : 'text-on-surface-variant'}`}>
+                      <Text className="text-[16px]" style={{ color: selMonth === idx ? colors.primary : colors.textMuted, fontWeight: selMonth === idx ? 'bold' : 'normal' }}>
                         {m}
                       </Text>
                     </TouchableOpacity>
@@ -365,27 +432,32 @@ export default function SignUpScreen({ navigation }: Props) {
 
               {/* Year Column */}
               <View className="flex-1 flex flex-col gap-2">
-                <Text className="text-center font-label-caps text-label-caps text-on-surface-variant text-[12px] uppercase tracking-wider font-bold">
+                <Text className="text-center font-label-caps text-label-caps text-[12px] uppercase tracking-wider font-bold" style={{ color: colors.textMuted }}>
                   Year
                 </Text>
                 <ScrollView 
                   showsVerticalScrollIndicator={false}
-                  className="bg-white/5 rounded-xl border border-white/10"
+                  className="rounded-xl border"
+                  style={{ backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)', borderColor: colors.border }}
                 >
                   {years.map((y) => (
                     <TouchableOpacity 
                       key={y} 
-                      className={`py-3 items-center ${selYear === y ? 'bg-primary/25 border-y border-primary/30' : ''}`}
+                      className="py-3 items-center"
+                      style={{ 
+                        backgroundColor: selYear === y ? (isDark ? 'rgba(208, 188, 255, 0.25)' : 'rgba(109, 59, 215, 0.15)') : 'transparent',
+                        borderVerticalColor: selYear === y ? colors.primary : 'transparent',
+                        borderVerticalWidth: selYear === y ? 1 : 0
+                      }}
                       onPress={() => {
                         setSelYear(y);
-                        // Adjust day if selected day exceeds new year's month length (e.g. leap year Feb 29)
                         const maxDays = getDaysInMonth(selMonth, y);
                         if (selDay > maxDays) {
                           setSelDay(maxDays);
                         }
                       }}
                     >
-                      <Text className={`text-[16px] ${selYear === y ? 'text-primary font-bold' : 'text-on-surface-variant'}`}>
+                      <Text className="text-[16px]" style={{ color: selYear === y ? colors.primary : colors.textMuted, fontWeight: selYear === y ? 'bold' : 'normal' }}>
                         {y}
                       </Text>
                     </TouchableOpacity>
@@ -397,20 +469,22 @@ export default function SignUpScreen({ navigation }: Props) {
             {/* Actions */}
             <View className="flex-row gap-4 mt-2">
               <TouchableOpacity 
-                className="flex-1 h-[50px] border border-white/20 rounded-[12px] items-center justify-center"
+                className="flex-1 h-[50px] border rounded-[12px] items-center justify-center"
+                style={{ borderColor: colors.border }}
                 onPress={() => setShowDatePicker(false)}
               >
-                <Text className="text-white font-bold text-[16px]">Cancel</Text>
+                <Text className="font-bold text-[16px]" style={{ color: colors.text }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="flex-1 h-[50px] bg-primary rounded-[12px] items-center justify-center"
+                className="flex-1 h-[50px] rounded-[12px] items-center justify-center"
+                style={{ backgroundColor: colors.primary }}
                 onPress={() => {
                   const formattedDate = `${selYear}-${String(selMonth + 1).padStart(2, '0')}-${String(selDay).padStart(2, '0')}`;
                   setDob(formattedDate);
                   setShowDatePicker(false);
                 }}
               >
-                <Text className="text-on-primary font-bold text-[16px]">Confirm</Text>
+                <Text className="font-bold text-[16px]" style={{ color: colors.onPrimary }}>Confirm</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -419,19 +493,3 @@ export default function SignUpScreen({ navigation }: Props) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  glassSurface: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  modalSurface: {
-    backgroundColor: '#16202e',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 20,
-  }
-});

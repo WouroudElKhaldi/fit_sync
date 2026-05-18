@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../navigation/types';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'TrainerProfile'>;
@@ -10,7 +10,7 @@ type Props = {
 
 export default function TrainerProfileScreen({ navigation }: Props) {
   return (
-    <View className="flex-1 bg-background pt-12 pb-24">
+    <View className="flex-1 bg-background pt-12">
       {/* Top App Bar */}
       <View className="w-full bg-surface/80 border-b border-white/10 z-50 px-margin-mobile py-4 flex-row justify-between items-center">
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -22,7 +22,7 @@ export default function TrainerProfileScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-margin-mobile pt-6" contentContainerStyle={{ gap: 24, paddingBottom: 80 }}>
+      <ScrollView className="flex-1 px-margin-mobile pt-6" contentContainerStyle={{ gap: 24, paddingBottom: 110 }}>
         {/* Profile Header */}
         <View className="rounded-xl overflow-hidden bg-white/10 border border-white/15">
           <View className="h-48 w-full bg-surface-container relative">

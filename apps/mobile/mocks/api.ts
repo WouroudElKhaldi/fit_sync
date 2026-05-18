@@ -5,6 +5,8 @@ import workoutSchedule from './mock_workout_schedule.json';
 // Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+let schedulesInMemory = [...workoutSchedule];
+
 export const api = {
   /**
    * Fetches the current user's profile information, including their trainer details.
@@ -27,7 +29,16 @@ export const api = {
    */
   getWorkoutSchedule: async () => {
     await delay(500);
-    return workoutSchedule;
+    return schedulesInMemory;
+  },
+
+  /**
+   * Adds a newly planned workout to the schedule list.
+   */
+  addWorkoutPlan: async (plan: any) => {
+    await delay(300);
+    schedulesInMemory.push(plan);
+    return { success: true, plan };
   },
   
   /**
@@ -37,6 +48,24 @@ export const api = {
   logSetCompletion: async (setId: string, actualReps: number, actualWeight: number) => {
     await delay(300);
     console.log(`[API MOCK] Logged set ${setId} with ${actualReps} reps @ ${actualWeight}kg`);
+    
+    // Update local set completion status
+    schedulesInMemory.forEach(plan => {
+      if (plan.exercises) {
+        plan.exercises.forEach(ex => {
+          if (ex.sets) {
+            ex.sets.forEach(set => {
+              if (set.id === setId) {
+                set.actualReps = actualReps;
+                set.actualWeight = actualWeight;
+                set.status = 'COMPLETED';
+              }
+            });
+          }
+        });
+      }
+    });
+
     return { success: true, setId, actualReps, actualWeight, status: 'COMPLETED' };
   }
 };

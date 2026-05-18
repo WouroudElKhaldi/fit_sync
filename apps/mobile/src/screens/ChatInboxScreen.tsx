@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../navigation/types';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'MainTabs'>;
@@ -10,7 +10,7 @@ type Props = {
 
 export default function ChatInboxScreen({ navigation }: Props) {
   return (
-    <View className="flex-1 bg-background pt-12 pb-24">
+    <View className="flex-1 bg-background pt-12">
       {/* Top App Bar */}
       <View className="w-full bg-surface/80 border-b border-white/10 z-50 px-margin-mobile py-4 flex-row justify-between items-center">
         <View className="flex-row items-center gap-3">
@@ -24,7 +24,7 @@ export default function ChatInboxScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-margin-mobile pt-6" contentContainerStyle={{ gap: 24, paddingBottom: 40 }}>
+      <ScrollView className="flex-1 px-margin-mobile pt-6" contentContainerStyle={{ gap: 24, paddingBottom: 96 }}>
         {/* Header Section */}
         <View className="flex-row justify-between items-end">
           <View>

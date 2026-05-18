@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../navigation/types';
 import { api } from '../../mocks/api';
 import { BlurView } from 'expo-blur';
+import { useAppTheme } from '../context/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
 };
 
 export default function LoginScreen({ navigation }: Props) {
+  const { isDark, toggleTheme, colors } = useAppTheme();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +23,6 @@ export default function LoginScreen({ navigation }: Props) {
     setIsLoading(true);
     try {
       const userProfile = await api.getUserProfile();
-      // Simulate login success
       navigation.replace('MainTabs');
     } catch (e) {
       console.error(e);
@@ -32,44 +34,77 @@ export default function LoginScreen({ navigation }: Props) {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-surface-dim relative items-center justify-center p-margin-mobile"
+      className="flex-1 relative items-center justify-center p-margin-mobile"
+      style={{ backgroundColor: colors.background }}
     >
-      {/* Ambient Background Glow */}
-      <View className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <View className="absolute -top-1/4 -left-1/4 w-3/4 h-3/4 bg-primary rounded-full opacity-10" style={{ transform: [{ scale: 1.5 }] }} />
-        <View className="absolute -bottom-1/4 -right-1/4 w-3/4 h-3/4 bg-tertiary rounded-full opacity-5" style={{ transform: [{ scale: 1.5 }] }} />
-      </View>
+      {/* Dynamic Floating Theme Toggle Button */}
+      <TouchableOpacity 
+        style={{ 
+          position: 'absolute', 
+          top: 56, 
+          right: 24, 
+          zIndex: 50, 
+          width: 44, 
+          height: 44, 
+          borderRadius: 22, 
+          backgroundColor: colors.surfaceContainerHigh, 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          borderColor: colors.border, 
+          borderWidth: 1,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4
+        }}
+        onPress={toggleTheme}
+      >
+        <MaterialIcons name={isDark ? "wb-sunny" : "nights-stay"} size={22} color={colors.primary} />
+      </TouchableOpacity>
+
+      {/* Ambient Background Glow (Only in Dark Mode for aesthetic depth) */}
+      {isDark && (
+        <View className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <View className="absolute -top-1/4 -left-1/4 w-3/4 h-3/4 bg-primary rounded-full opacity-10" style={{ transform: [{ scale: 1.5 }] }} />
+          <View className="absolute -bottom-1/4 -right-1/4 w-3/4 h-3/4 bg-tertiary rounded-full opacity-5" style={{ transform: [{ scale: 1.5 }] }} />
+        </View>
+      )}
 
       <View className="w-full max-w-[400px] z-10 flex flex-col gap-stack-lg">
         {/* Logo Header */}
         <View className="items-center mb-stack-lg flex flex-col gap-stack-sm">
-          <MaterialIcons name="fitness-center" size={48} color="#d0bcff" />
-          <Text className="font-display-lg text-display-lg tracking-tighter text-primary">
+          <MaterialIcons name="fitness-center" size={48} color={colors.primary} />
+          <Text className="font-display-lg text-display-lg tracking-tighter font-black" style={{ color: colors.primary }}>
             FITSYNC PRO
           </Text>
-          <Text className="font-body-base text-body-base text-on-surface-variant">
+          <Text className="font-body-base text-body-base font-bold" style={{ color: colors.textMuted }}>
             Elite Performance Tracking
           </Text>
         </View>
 
-        {/* Login Form Container */}
+        {/* Login Form Container (Glass surface in dark mode, clean white card in light mode) */}
         <BlurView 
-          intensity={70} 
-          tint="dark" 
-          className="rounded-xl overflow-hidden p-6 flex flex-col gap-stack-md" 
-          style={styles.glassSurface}
+          intensity={isDark ? 70 : 0} 
+          tint={isDark ? "dark" : "light"} 
+          className="rounded-xl overflow-hidden p-6 flex flex-col gap-stack-md border" 
+          style={{
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
+            borderColor: colors.border
+          }}
         >
           {/* Email Input */}
           <View className="flex flex-col gap-2">
-            <Text className="font-label-caps text-label-caps text-on-surface-variant uppercase">
+            <Text className="font-label-caps text-label-caps uppercase" style={{ color: colors.textMuted }}>
               Email Address
             </Text>
             <View className="relative justify-center">
-              <MaterialIcons name="mail" size={20} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+              <MaterialIcons name="mail" size={20} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
               <TextInput
-                className="w-full h-touch-target-min rounded-lg pl-12 pr-4 font-body-base text-body-base text-on-surface border border-white/20"
+                className="w-full h-touch-target-min rounded-lg pl-12 pr-4 font-body-base text-body-base border"
+                style={{ borderColor: colors.border, color: colors.text }}
                 placeholder="athlete@fitsync.pro"
-                placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -81,63 +116,57 @@ export default function LoginScreen({ navigation }: Props) {
           {/* Password Input */}
           <View className="flex flex-col gap-2">
             <View className="flex-row justify-between items-center">
-              <Text className="font-label-caps text-label-caps text-on-surface-variant uppercase">
+              <Text className="font-label-caps text-label-caps uppercase" style={{ color: colors.textMuted }}>
                 Password
               </Text>
-              <TouchableOpacity>
-                <Text className="font-label-caps text-label-caps text-primary">Forgot?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text className="font-label-caps text-label-caps font-bold" style={{ color: colors.primary }}>Forgot?</Text>
               </TouchableOpacity>
             </View>
             <View className="relative justify-center">
-              <MaterialIcons name="lock" size={20} color="#cbc3d7" style={{ position: 'absolute', left: 16, zIndex: 1 }} />
+              <MaterialIcons name="lock" size={20} color={colors.textMuted} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
               <TextInput
-                className="w-full h-touch-target-min rounded-lg pl-12 pr-12 font-body-base text-body-base text-on-surface border border-white/20"
+                className="w-full h-touch-target-min rounded-lg pl-12 pr-12 font-body-base text-body-base border"
+                style={{ borderColor: colors.border, color: colors.text }}
                 placeholder="••••••••"
-                placeholderTextColor="rgba(203, 195, 215, 0.5)"
+                placeholderTextColor={isDark ? 'rgba(203, 195, 215, 0.4)' : 'rgba(94, 96, 100, 0.5)'}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity 
-                className="absolute right-4 z-1" 
+                className="absolute right-4 z-10" 
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={20} color="#cbc3d7" />
+                <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Submit Button */}
           <TouchableOpacity
-          className="bg-primary w-full h-[48px] rounded-xl mt-4 flex-row items-center justify-center gap-2"
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text className="text-[16px] text-on-primary font-semibold">
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </Text>
-          {!isLoading && <MaterialIcons name="arrow-forward" size={20} color="#3c0091" />}
-        </TouchableOpacity>
+            className="w-full h-[48px] rounded-xl mt-4 flex-row items-center justify-center gap-2"
+            style={{ backgroundColor: colors.primary }}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <Text className="text-[16px] font-bold" style={{ color: colors.onPrimary }}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </Text>
+            {!isLoading && <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />}
+          </TouchableOpacity>
         </BlurView>
 
         {/* Secondary Action */}
         <View className="items-center mt-stack-sm flex-row justify-center">
-          <Text className="font-body-base text-body-base text-on-surface-variant">
+          <Text className="font-body-base text-body-base" style={{ color: colors.textMuted }}>
             New to FitSync Pro?{' '}
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-            <Text className="text-primary font-bold">Create Account</Text>
+            <Text className="font-bold" style={{ color: colors.primary }}>Create Account</Text>
           </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  glassSurface: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  }
-});

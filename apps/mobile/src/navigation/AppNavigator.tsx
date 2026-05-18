@@ -1,11 +1,16 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useAppTheme } from '../context/ThemeContext';
 
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import EmailVerificationScreen from '../screens/EmailVerificationScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import VerifyResetCodeScreen from '../screens/VerifyResetCodeScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import HomeScreen from '../screens/HomeScreen';
 import WorkoutLoggerScreen from '../screens/WorkoutLoggerScreen';
 import WorkoutBuilderScreen from '../screens/WorkoutBuilderScreen';
@@ -20,27 +25,7 @@ import RoleSelectionScreen from '../screens/RoleSelectionScreen';
 import TrainerMarketplaceScreen from '../screens/TrainerMarketplaceScreen';
 import TrainerProfileScreen from '../screens/TrainerProfileScreen';
 
-export type RootStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
-  RoleSelection: undefined;
-  MainTabs: undefined;
-  WorkoutLogger: { planId: string };
-  WorkoutBuilder: undefined;
-  ExerciseSelector: undefined;
-  PostWorkoutSummary: undefined;
-  ActiveChat: undefined;
-  Settings: undefined;
-  TrainerProfile: undefined;
-};
-
-export type MainTabParamList = {
-  Home: undefined;
-  Log: undefined;
-  Analytics: undefined;
-  Market: undefined;
-  Chat: undefined;
-};
+import { RootStackParamList, MainTabParamList } from './types';
 
 // 1. Declare Global Types for v7 useNavigation hooks
 declare global {
@@ -61,35 +46,51 @@ const TAB_ICONS: Record<keyof MainTabParamList, keyof typeof MaterialIcons.glyph
   Chat: 'chat-bubble',
 };
 
-// 3. New React Navigation v7 Unified Dark Theme System
-const AppTheme = {
+// 3. Dynamic Light & Dark Theme Definitions
+const AppDarkTheme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    primary: '#d0bcff',          // primary color for links/actions
-    background: '#091421',       // prevents "white flash" on screen transition
-    card: '#16202e',             // surface container for navigation bars
-    text: '#ffffff',             // default text colors
-    border: 'transparent',       // borders between navigation elements
+    primary: '#d0bcff',          // primary lavender accent
+    background: '#091421',       // deep space dark background
+    card: '#16202e',             // elevated dark container surface
+    text: '#ffffff',
+    border: 'transparent',
+    notification: '#ffb4ab',
+  },
+};
+
+const AppLightTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#6D3BD7',          // vibrant royal purple accent
+    background: '#F4F5F7',       // elegant light-gray background
+    card: '#FFFFFF',             // bright white elevated card surface
+    text: '#1A1C1E',
+    border: 'transparent',
     notification: '#ffb4ab',
   },
 };
 
 function MainTabNavigator() {
+  const { isDark, colors } = useAppTheme();
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#16202e',
-          borderTopWidth: 0,
+          backgroundColor: colors.card,
+          borderTopWidth: isDark ? 0 : 1,
+          borderTopColor: colors.border,
           elevation: 0,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#d0bcff',
-        tabBarInactiveTintColor: '#958ea0',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: isDark ? '#958ea0' : '#8A8C90',
         tabBarIcon: ({ color, size }) => {
           const iconName = TAB_ICONS[route.name];
           return <MaterialIcons name={iconName} size={size} color={color} />;
@@ -106,17 +107,23 @@ function MainTabNavigator() {
 }
 
 export default function AppNavigator() {
+  const { isDark, colors } = useAppTheme();
+  
   return (
-    <NavigationContainer theme={AppTheme}>
+    <NavigationContainer theme={isDark ? AppDarkTheme : AppLightTheme}>
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#091421' },
+          contentStyle: { backgroundColor: colors.background },
         }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="VerifyResetCode" component={VerifyResetCodeScreen} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         <Stack.Screen name="WorkoutLogger" component={WorkoutLoggerScreen} />
