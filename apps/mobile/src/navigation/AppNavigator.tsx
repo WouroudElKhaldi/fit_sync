@@ -5,6 +5,7 @@ import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import LoginScreen from '../screens/LoginScreen';
+import SignUpScreen from '../screens/SignUpScreen';
 import HomeScreen from '../screens/HomeScreen';
 import WorkoutLoggerScreen from '../screens/WorkoutLoggerScreen';
 import WorkoutBuilderScreen from '../screens/WorkoutBuilderScreen';
@@ -21,6 +22,7 @@ import TrainerProfileScreen from '../screens/TrainerProfileScreen';
 
 export type RootStackParamList = {
   Login: undefined;
+  SignUp: undefined;
   RoleSelection: undefined;
   MainTabs: undefined;
   WorkoutLogger: { planId: string };
@@ -40,17 +42,17 @@ export type MainTabParamList = {
   Chat: undefined;
 };
 
-// 1. Declare Global Types so useNavigation() is strictly typed across your entire app
+// 1. Declare Global Types for v7 useNavigation hooks
 declare global {
   namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
+    interface RootParamList extends RootStackParamList { }
   }
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// 2. Map routes to strictly typed icons to eliminate TS string warnings
+// 2. Map routes to strictly typed icons
 const TAB_ICONS: Record<keyof MainTabParamList, keyof typeof MaterialIcons.glyphMap> = {
   Home: 'home',
   Log: 'fitness-center',
@@ -59,12 +61,17 @@ const TAB_ICONS: Record<keyof MainTabParamList, keyof typeof MaterialIcons.glyph
   Chat: 'chat-bubble',
 };
 
-// 3. Create a custom theme to match your NativeWind background and stop the "white flash"
+// 3. New React Navigation v7 Unified Dark Theme System
 const AppTheme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    background: '#091421', 
+    primary: '#d0bcff',          // primary color for links/actions
+    background: '#091421',       // prevents "white flash" on screen transition
+    card: '#16202e',             // surface container for navigation bars
+    text: '#ffffff',             // default text colors
+    border: 'transparent',       // borders between navigation elements
+    notification: '#ffb4ab',
   },
 };
 
@@ -74,17 +81,16 @@ function MainTabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#16202e', // surface-container
+          backgroundColor: '#16202e',
           borderTopWidth: 0,
           elevation: 0,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#d0bcff', // primary
-        tabBarInactiveTintColor: '#958ea0', // outline
+        tabBarActiveTintColor: '#d0bcff',
+        tabBarInactiveTintColor: '#958ea0',
         tabBarIcon: ({ color, size }) => {
-          // Look up the exact icon safely from the map
           const iconName = TAB_ICONS[route.name];
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
@@ -106,10 +112,11 @@ export default function AppNavigator() {
         initialRouteName="Login"
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#091421' }, // background
+          contentStyle: { backgroundColor: '#091421' },
         }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         <Stack.Screen name="WorkoutLogger" component={WorkoutLoggerScreen} />

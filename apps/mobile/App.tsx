@@ -1,14 +1,14 @@
-import "./global.css";
 import React from 'react';
+import './global.css';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
-    <>
-    {/* <h1>Hello</h1> */}
+    <SafeAreaProvider>
+      <StatusBar style="light" />
       <AppNavigator />
-      {/* <StatusBar style="light" /> */}
-    </>
+    </SafeAreaProvider>
   );
 }

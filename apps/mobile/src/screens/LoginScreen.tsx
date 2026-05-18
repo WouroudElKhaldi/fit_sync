@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { api } from '../../mocks/api';
+import { BlurView } from 'expo-blur';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -52,7 +53,12 @@ export default function LoginScreen({ navigation }: Props) {
         </View>
 
         {/* Login Form Container */}
-        <View className="bg-white/10 rounded-xl p-6 flex flex-col gap-stack-md" style={styles.glassSurface}>
+        <BlurView 
+          intensity={70} 
+          tint="dark" 
+          className="rounded-xl overflow-hidden p-6 flex flex-col gap-stack-md" 
+          style={styles.glassSurface}
+        >
           {/* Email Input */}
           <View className="flex flex-col gap-2">
             <Text className="font-label-caps text-label-caps text-on-surface-variant uppercase">
@@ -102,24 +108,24 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
 
           {/* Submit Button */}
-          <TouchableOpacity 
-            className="bg-primary w-full h-[56px] rounded-[16px] mt-stack-sm flex-row items-center justify-center gap-2"
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <Text className="font-headline-md text-[24px] text-on-primary font-bold">
-              {isLoading ? 'Signing In...' : 'Sign In'}
-            </Text>
-            {!isLoading && <MaterialIcons name="arrow-forward" size={24} color="#3c0091" />}
-          </TouchableOpacity>
-        </View>
+          <TouchableOpacity
+          className="bg-primary w-full h-[48px] rounded-xl mt-4 flex-row items-center justify-center gap-2"
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text className="text-[16px] text-on-primary font-semibold">
+            {isLoading ? 'Signing In...' : 'Sign In'}
+          </Text>
+          {!isLoading && <MaterialIcons name="arrow-forward" size={20} color="#3c0091" />}
+        </TouchableOpacity>
+        </BlurView>
 
         {/* Secondary Action */}
         <View className="items-center mt-stack-sm flex-row justify-center">
           <Text className="font-body-base text-body-base text-on-surface-variant">
             New to FitSync Pro?{' '}
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Text className="text-primary font-bold">Create Account</Text>
           </TouchableOpacity>
         </View>
