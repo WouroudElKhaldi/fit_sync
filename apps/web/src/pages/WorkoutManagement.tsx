@@ -1,12 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import workoutTemplates from '../data/workoutTemplates.json';
+import { useAuth } from '../context/AuthContext';
 import NotificationModal from '../components/NotificationModal';
+
+type WorkoutPlanDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  scheduledDate: string | null;
+  clientId: string;
+  client: {
+    id: string;
+    fullName: string;
+  };
+  exercises: any[];
+  session: any | null;
+};
 
 const WorkoutManagement: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const [plans, setPlans] = useState<WorkoutPlanDetail[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [triggerReload, setTriggerReload] = useState(0);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("All");
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   // Modal State
   const [modalConfig, setModalConfig] = useState<{
@@ -25,65 +50,142 @@ const WorkoutManagement: React.FC = () => {
 
   const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
-  const filteredWorkouts = workoutTemplates.filter(workout =>
-    (filterType === "All" || workout.name.toLowerCase().includes(filterType.toLowerCase())) &&
-    workout.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Load programs/plans
+  useEffect(() => {
+    if (!user) return;
 
-  const stats = [
-    { label: 'Total Protocols', value: '128', icon: 'fitness_center', color: 'primary' },
-    { label: 'Most Deployed', value: 'Hypertrophy Push', icon: 'trending_up', color: 'tertiary' },
-    { label: 'System Compliance', value: '94.2%', icon: 'bolt', color: 'emerald-500' },
-    { label: 'Protocol Drafts', value: '12', icon: 'edit_square', color: 'error' },
-  ];
+    const fetchPlans = async () => {
+      setIsLoading(true);
+      setError(null);
+      const token = localStorage.getItem('fitsync_token');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      try {
+        const response = await fetch(`http://localhost:3000/workouts/plans/trainer/${user.id}`, { headers });
+        if (!response.ok) {
+          throw new Error('Failed to synchronize workout database');
+        }
+        const data = await response.json();
+        setPlans(data);
+      } catch (err: any) {
+        console.error('Error fetching plans:', err);
+        setError(err.message || 'An error occurred while loading workouts.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, [user, triggerReload]);
+
+  const filteredWorkouts = useMemo(() => {
+    return plans.filter(plan => {
+      const matchesSearch = plan.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (plan.client?.fullName && plan.client.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = filterType === "All" || plan.title.toLowerCase().includes(filterType.toLowerCase());
+      return matchesSearch && matchesCategory;
+    });
+  }, [plans, searchQuery, filterType]);
+
+  const totalPages = Math.ceil(filteredWorkouts.length / pageSize);
+
+  const paginatedWorkouts = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredWorkouts.slice(startIndex, startIndex + pageSize);
+  }, [filteredWorkouts, currentPage, pageSize]);
+
+  // Reset page number on search/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType]);
+
+  const stats = useMemo(() => {
+    const activeWorkouts = plans.filter(p => !p.session?.completedAt).length;
+    const completedWorkouts = plans.filter(p => p.session?.completedAt).length;
+    return [
+      { label: 'Active Pipeline', value: activeWorkouts, icon: 'fitness_center', color: 'primary' },
+      { label: 'Completed Workouts', value: completedWorkouts, icon: 'trending_up', color: 'tertiary' },
+      { label: 'Roster Utilization', value: `${plans.length > 0 ? Math.round((activeWorkouts / plans.length) * 100) : 0}%`, icon: 'bolt', color: 'emerald-500' },
+      { label: 'Total Workouts', value: plans.length, icon: 'edit_square', color: 'error' },
+    ];
+  }, [plans]);
 
   const handleExport = () => {
     setModalConfig({
       isOpen: true,
       title: 'Initialize Data Export',
-      message: 'The movement library and tactical protocols are being compiled into an encrypted CSV archive.',
+      message: 'The exercise library and workout plans are being compiled into an encrypted CSV archive.',
       type: 'info',
       onConfirm: closeModal
     });
   };
 
-  const handleDeployFeatured = () => {
+  const handleDeletePlan = (plan: WorkoutPlanDetail) => {
     setModalConfig({
       isOpen: true,
-      title: 'Initialize Mass Deployment',
-      message: 'The "Elite Performance Macro-Cycle" is ready for bulk distribution to high-tier athlete terminals.',
-      type: 'warning',
-      onConfirm: () => {
+      title: 'Delete Workout?',
+      message: `Are you sure you want to delete the workout "${plan.title}" for ${plan.client?.fullName || 'Athlete'}? This cannot be undone.`,
+      type: 'danger',
+      onConfirm: async () => {
         closeModal();
-        setModalConfig({
-          isOpen: true,
-          title: 'Deployment Authorized',
-          message: 'The macro-cycle has been added to the tactical pipeline for all eligible subjects.',
-          type: 'success',
-          onConfirm: closeModal
-        });
+        const token = localStorage.getItem('fitsync_token');
+        try {
+          const response = await fetch(`http://localhost:3000/workouts/plans/${plan.id}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (!response.ok) throw new Error('Failed to delete workout');
+          setTriggerReload(prev => prev + 1);
+        } catch (err: any) {
+          console.error(err);
+        }
       }
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p className="text-on-surface-variant/60 font-bold uppercase tracking-widest text-xs">Accessing Workout Database...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center max-w-md mx-auto">
+        <span className="material-symbols-outlined text-error text-5xl">warning</span>
+        <h2 className="text-xl font-bold">Workout Sync Failure</h2>
+        <p className="text-on-surface-variant/60 text-sm">{error}</p>
+        <button onClick={() => setTriggerReload(prev => prev + 1)} className="mt-4 px-6 py-2.5 bg-primary text-on-primary font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer">Retry Connection</button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-10 pb-10">
       {/* Top Header */}
       <div className="border-b border-secondary-container/10 pb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl md:text-5xl font-black text-on-surface mb-2 tracking-tighter uppercase leading-none">
-            Program Architecture
+          <h2 className="font-black text-on-surface mb-2 tracking-tighter uppercase leading-none">
+            Workout Architecture
           </h2>
-          <p className="text-base text-on-surface-variant font-medium italic opacity-60">
-            "Architect, manage, and deploy your professional training ecosystem."
-          </p>
+          <blockquote className="text-on-surface-variant font-medium italic opacity-60">
+            "Architect, manage, and publish your professional training ecosystem."
+          </blockquote>
         </div>
         <button 
           onClick={() => navigate('/workout-builder')}
-          className="bg-primary text-on-primary h-14 px-10 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-3 hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-primary/20"
+          className="bg-primary text-on-primary h-14 px-10 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-3 hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-primary/20 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[22px]">add_circle</span>
-          New Program
+          New Workout
         </button>
       </div>
 
@@ -92,7 +194,7 @@ const WorkoutManagement: React.FC = () => {
         {stats.map((stat, i) => (
           <div key={i} className="bg-surface-container-low/40 backdrop-blur-xl border border-secondary-container/10 p-8 rounded-[32px] shadow-xl hover-card-motion group relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(208,188,255,0.02),transparent)]"></div>
-            <div className={`w-12 h-12 rounded-xl bg-surface-container-high/60 border border-secondary-container/10 flex items-center justify-center text-${stat.color} mb-6 group-hover:scale-110 transition-transform shadow-lg relative z-10`}>
+            <div className={`w-12 h-12 rounded-xl bg-surface-container-high/60 border border-secondary-container/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform shadow-lg relative z-10`}>
               <span className="material-symbols-outlined text-[24px]">{stat.icon}</span>
             </div>
             <p className="text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em] relative z-10 opacity-40">{stat.label}</p>
@@ -109,7 +211,7 @@ const WorkoutManagement: React.FC = () => {
             <input
               type="text"
               className="w-full bg-surface-container-low/60 border border-secondary-container/10 rounded-xl py-3 pl-14 pr-6 text-[13px] font-bold text-on-surface focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all shadow-inner uppercase tracking-tight"
-              placeholder="Search programs..."
+              placeholder="Search workouts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -122,15 +224,15 @@ const WorkoutManagement: React.FC = () => {
                 className="bg-surface-container-high/40 border border-secondary-container/5 text-on-surface text-[9px] font-black uppercase tracking-widest px-8 py-3 rounded-xl hover:bg-surface-container-high transition-all focus:outline-none appearance-none cursor-pointer pr-12 shadow-sm"
               >
                 <option value="All">All Categories</option>
-                <option value="Hypertrophy">Hypertrophy</option>
-                <option value="Strength">Strength</option>
-                <option value="Endurance">Endurance</option>
+                <option value="Push">Push Pattern</option>
+                <option value="Pull">Pull Pattern</option>
+                <option value="Legs">Leg Patterns</option>
               </select>
               <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary opacity-30 pointer-events-none text-[18px]">expand_more</span>
             </div>
             <button 
               onClick={handleExport}
-              className="flex items-center gap-3 px-8 py-3 bg-surface-container-high/40 border border-secondary-container/5 text-on-surface-variant/60 hover:text-primary rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-surface-container-high transition-all shadow-sm active:scale-95"
+              className="flex items-center gap-3 px-8 py-3 bg-surface-container-high/40 border border-secondary-container/5 text-on-surface-variant/60 hover:text-primary rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-surface-container-high transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">file_download</span>
               Export
@@ -142,130 +244,91 @@ const WorkoutManagement: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-surface-container-high/20 border-b border-secondary-container/5">
-                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Protocol Architecture</th>
-                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Classification</th>
-                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Mechanical Volume</th>
-                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Temporal Spec</th>
-                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em] text-right">Operational Status</th>
+                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Workout Title</th>
+                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Subject Assigned</th>
+                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Mechanical Spec</th>
+                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Publish Schedule</th>
+                <th className="px-8 py-5 text-[9px] font-black text-on-surface-variant uppercase tracking-[0.2em] text-right">Operations</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-secondary-container/5">
-              {filteredWorkouts.map((workout) => (
-                <tr key={workout.id} className="hover:bg-primary/[0.02] transition-all group cursor-pointer">
+              {paginatedWorkouts.map((workout) => (
+                <tr key={workout.id} className="hover:bg-primary/[0.02] transition-all group cursor-pointer" onClick={() => navigate(`/workout-builder?planId=${workout.id}`)}>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-5">
                       <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
                         <span className="material-symbols-outlined text-[22px]">terminal</span>
                       </div>
                       <div>
-                         <span className="text-base font-black text-on-surface block group-hover:text-primary transition-colors uppercase tracking-tight leading-none mb-1">{workout.name}</span>
-                         <span className="text-[8px] font-black text-on-surface-variant/40 uppercase tracking-widest">Protocol v2.4</span>
+                         <span className="text-base font-black text-on-surface block group-hover:text-primary transition-colors uppercase tracking-tight leading-none mb-1">{workout.title}</span>
+                         <span className="text-[8px] font-black text-on-surface-variant/40 uppercase tracking-widest">{workout.description || 'No description spec'}</span>
                       </div>
                     </div>
                   </td>
                   <td className="px-8 py-6">
                     <span className="px-4 py-1 rounded-lg bg-primary/5 text-primary border border-primary/10 text-[9px] font-black uppercase tracking-widest shadow-sm">
-                      {workout.name.includes('Push') ? 'Push Pattern' : 'Pull Pattern'}
+                      {workout.client?.fullName || 'Athlete Profile'}
                     </span>
                   </td>
                   <td className="px-8 py-6">
-                    <div className="flex items-center gap-3">
-                       <div className="w-20 h-1 bg-surface-container-high rounded-full overflow-hidden shadow-inner">
-                          <div className="h-full bg-primary w-2/3 shadow-[0_0_8px_rgba(208,188,255,0.3)]"></div>
-                       </div>
-                       <span className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">{workout.exercises} Mod</span>
-                    </div>
+                    <span className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">
+                       {workout.exercises?.length ?? 0} Exercises Mod
+                    </span>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2 text-on-surface-variant/60 font-black text-[11px] uppercase tracking-tight">
-                      <span className="material-symbols-outlined text-[18px] opacity-30">schedule</span>
-                      {workout.duration}
+                       <span className="material-symbols-outlined text-[18px] opacity-30">schedule</span>
+                       {workout.scheduledDate ? new Date(workout.scheduledDate).toLocaleDateString() : 'Unscheduled'}
                     </div>
                   </td>
-                  <td className="px-8 py-6 text-right">
-                    <button className="px-6 py-2.5 bg-surface-container-high/40 border border-secondary-container/5 text-on-surface-variant/60 hover:text-primary hover:bg-surface-container-high text-[9px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-95">
-                      Open Module
+                  <td className="px-8 py-6 text-right" onClick={(e) => e.stopPropagation()}>
+                    <button 
+                      onClick={() => handleDeletePlan(workout)}
+                      className="px-4 py-2 bg-surface-container-high/40 border border-error/20 hover:bg-error hover:text-white text-error text-[9px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
               ))}
+              {filteredWorkouts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-8 py-20 text-center">
+                    <div className="flex flex-col items-center gap-4 opacity-5">
+                      <span className="material-symbols-outlined text-[48px]">fitness_center</span>
+                      <p className="text-lg font-black uppercase tracking-[0.5em]">No Workouts</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      </section>
 
-      {/* Featured Template & Activity Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-surface-container-low/40 backdrop-blur-xl border border-secondary-container/10 rounded-[40px] p-10 relative overflow-hidden group shadow-2xl min-h-[380px] hover-card-motion flex flex-col justify-center">
-          <div className="absolute inset-0 z-0">
-            <img
-              alt=""
-              className="w-full h-full object-cover opacity-10 transition-transform duration-[2s] group-hover:scale-105"
-              src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent"></div>
-          </div>
-          <div className="relative z-10 h-full flex flex-col justify-center">
-            <div className="flex items-center gap-4 mb-8">
-               <span className="bg-primary/20 text-primary border border-primary/20 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.3em] shadow-lg">Prime Archive</span>
-               <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-emerald-400 text-[8px] font-black uppercase tracking-widest">98% Efficacy</span>
-               </div>
-            </div>
-            <h3 className="text-3xl md:text-5xl leading-tight font-black text-on-surface mb-6 tracking-tighter uppercase">
-              The Elite Performance<br/><span className="text-primary">Macro-Cycle</span>
-            </h3>
-            <p className="text-on-surface-variant/60 text-base font-medium max-w-xl mb-10 leading-relaxed italic">
-              "Our most comprehensive 12-week program for professional athletes. Optimized for concurrent strength and hypertrophy gains."
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <button onClick={handleDeployFeatured} className="bg-primary text-on-primary h-14 px-10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-primary/30 active:scale-95 flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px]">rocket_launch</span>
-                Deploy Protocol
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="px-8 py-5 border-t border-secondary-container/5 flex items-center justify-between bg-surface-container-high/10">
+            <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest">
+              Page {currentPage} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant/30 hover:bg-primary/10 hover:text-primary disabled:opacity-20 transition-all border border-secondary-container/10 disabled:cursor-not-allowed bg-surface-container-low shadow-md cursor-pointer active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
               </button>
-              <button className="bg-surface-container-high/60 backdrop-blur-md text-on-surface-variant/80 h-14 px-10 rounded-xl font-black text-[10px] uppercase tracking-widest border border-secondary-container/5 hover:text-primary transition-all shadow-xl active:scale-95 flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px]">tune</span>
-                Modify Specs
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant/30 hover:bg-primary/10 hover:text-primary disabled:opacity-20 transition-all border border-secondary-container/10 disabled:cursor-not-allowed bg-surface-container-low shadow-md cursor-pointer active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
               </button>
             </div>
           </div>
-        </div>
-        
-        <div className="bg-surface-container-low/40 backdrop-blur-xl border border-secondary-container/10 rounded-[32px] p-8 flex flex-col gap-8 shadow-xl hover-card-motion relative overflow-hidden group/activity">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(208,188,255,0.02),transparent)]"></div>
-          <div className="flex items-center justify-between relative z-10">
-            <div>
-               <h4 className="text-lg font-black text-on-surface uppercase tracking-tight leading-none mb-1">Logic Updates</h4>
-               <span className="text-[8px] font-black text-on-surface-variant/40 uppercase tracking-widest">Real-time telemetry</span>
-            </div>
-            <span className="material-symbols-outlined text-on-surface-variant/10 text-[28px]">history</span>
-          </div>
-          <div className="space-y-4 relative z-10">
-            {[
-              { text: "Macro-Cycle V2 Updated", time: "2m ago", icon: "terminal", color: "emerald-400" },
-              { text: "Published: Leg Day C", time: "1h ago", icon: "publish", color: "primary" },
-              { text: "Deployed to 12 Subjects", time: "3h ago", icon: "sensors", color: "tertiary" }
-            ].map((activity, i) => (
-              <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-high/40 border border-secondary-container/5 group-hover/item:bg-surface-container-high transition-all group/item shadow-sm">
-                <div className={`w-10 h-10 rounded-xl bg-surface-container-high border border-secondary-container/10 text-${activity.color} flex items-center justify-center shrink-0 group-hover/item:scale-110 transition-transform shadow-md`}>
-                  <span className="material-symbols-outlined text-[20px]">{activity.icon}</span>
-                </div>
-                <div>
-                  <p className="text-xs font-black text-on-surface leading-tight uppercase tracking-tight">
-                    {activity.text}
-                  </p>
-                  <p className="text-[9px] font-black text-on-surface-variant/20 uppercase mt-1 tracking-widest">
-                    {activity.time} • SECURE_LOG
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button className="mt-auto w-full py-4 border border-secondary-container/10 rounded-xl text-[9px] font-black uppercase tracking-widest text-on-surface-variant/60 hover:text-primary hover:bg-primary/5 transition-all shadow-lg active:scale-95 relative z-10">
-            Access Master Logs
-          </button>
-        </div>
+        )}
       </section>
 
       <NotificationModal
@@ -275,7 +338,7 @@ const WorkoutManagement: React.FC = () => {
         type={modalConfig.type}
         onConfirm={modalConfig.onConfirm}
         onCancel={closeModal}
-        confirmLabel="Authorize"
+        confirmLabel={modalConfig.type === 'danger' ? 'Delete' : 'Authorize'}
       />
     </div>
   );

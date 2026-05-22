@@ -54,9 +54,10 @@ import { ChatGateway } from './message/chat.gateway';
 
 // Notifications
 import { NotificationModule } from './notification/notification.module';
+import { SupportModule } from './support/support.module';
 
 @Module({
-  imports: [NotificationModule],
+  imports: [NotificationModule, SupportModule],
   controllers: [
     AppController,
     AuthController,

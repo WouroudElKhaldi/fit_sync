@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import usersData from '../data/users.json';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const ALL_SPECIALTIES = [
   "Strength Training",
@@ -12,19 +13,49 @@ const ALL_SPECIALTIES = [
 ];
 
 const TrainerPortfolioEditor: React.FC = () => {
-  const trainerUser = usersData.find(u => u.role === 'TRAINER');
-  
-  // Use state to manage the form, initializing from mock data if available
-  const [isActive, setIsActive] = useState(trainerUser?.trainerProfile?.marketplaceActive ?? true);
-  const [bio, setBio] = useState(trainerUser?.trainerProfile?.bio || "");
-  const [education, setEducation] = useState(trainerUser?.trainerProfile?.education || "");
-  const [certifications, setCertifications] = useState<string[]>(trainerUser?.trainerProfile?.certifications || []);
-  const [newCert, setNewCert] = useState("");
-  const [specialties, setSpecialties] = useState<string[]>(trainerUser?.trainerProfile?.specialties || []);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  if (!trainerUser) {
-    return <div className="p-8">Trainer profile not found.</div>;
-  }
+  const [isLoading, setIsLoading] = useState(true);
+  const [trainerUser, setTrainerUser] = useState<any>(null);
+
+  const [isActive, setIsActive] = useState(true);
+  const [bio, setBio] = useState("");
+  const [education, setEducation] = useState("");
+  const [certifications, setCertifications] = useState<string[]>([]);
+  const [newCert, setNewCert] = useState("");
+  const [specialties, setSpecialties] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchTrainerProfile = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('fitsync_token');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      try {
+        const response = await fetch(`http://localhost:3000/users/${user.id}`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          setTrainerUser(data);
+          
+          const profile = data.trainerProfile || {};
+          setIsActive(profile.marketplaceActive ?? true);
+          setBio(profile.bio || data.bio || "");
+          setEducation(profile.education || "");
+          setCertifications(profile.certifications || []);
+          setSpecialties(profile.specialties || []);
+        }
+      } catch (err) {
+        console.error('Failed to load portfolio details:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrainerProfile();
+  }, [user]);
 
   const handleAddCert = () => {
     if (newCert.trim() && !certifications.includes(newCert.trim())) {
@@ -45,16 +76,56 @@ const TrainerPortfolioEditor: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
-    console.log("Saving Portfolio:", {
-      isActive,
+  const handleSave = async () => {
+    if (!user) return;
+    const token = localStorage.getItem('fitsync_token');
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    };
+
+    const payload = {
       bio,
-      education,
-      certifications,
-      specialties
-    });
-    alert("Portfolio updated successfully!");
+      trainerProfile: {
+        bio,
+        education,
+        certifications,
+        specialties,
+        marketplaceActive: isActive
+      }
+    };
+
+    try {
+      const response = await fetch(`http://localhost:3000/users/${user.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update portfolio registry');
+      }
+
+      alert("Portfolio updated successfully!");
+      navigate('/profile');
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "An error occurred during portfolio save.");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p className="text-on-surface-variant/60 font-bold uppercase tracking-widest text-xs">Loading Portfolio Architect...</p>
+      </div>
+    );
+  }
+
+  if (!trainerUser) {
+    return <div className="p-8">Trainer profile not found.</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20">
@@ -86,22 +157,12 @@ const TrainerPortfolioEditor: React.FC = () => {
 
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Avatar & Basic Info (Left Col on Desktop) */}
+        {/* Avatar Card (Left Col on Desktop) */}
         <div className="md:col-span-4 space-y-6">
-          {/* Avatar Card */}
           <div className="bg-surface-container-low border border-secondary-container/10 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
-            <div className="relative group cursor-pointer mb-6">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/50 group-hover:border-primary transition-colors relative">
-                <img
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                  src={trainerUser.avatar}
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="material-symbols-outlined text-white">
-                    photo_camera
-                  </span>
-                </div>
+            <div className="relative group mb-6">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/50 group-hover:border-primary transition-colors relative flex items-center justify-center bg-primary/10 text-primary text-4xl font-black">
+                {trainerUser.fullName?.charAt(0) || 'T'}
               </div>
             </div>
             <h3 className="text-[20px] leading-[28px] font-semibold text-on-surface mb-1 font-['Plus_Jakarta_Sans']">
@@ -110,12 +171,6 @@ const TrainerPortfolioEditor: React.FC = () => {
             <p className="text-[12px] leading-[16px] font-medium text-primary uppercase tracking-wider mb-3 font-['Plus_Jakarta_Sans']">
               Elite Trainer
             </p>
-            <p className="text-[16px] leading-[24px] text-on-surface-variant text-sm mb-6 font-['Plus_Jakarta_Sans']">
-              Los Angeles, CA
-            </p>
-            <button className="w-full bg-transparent border border-secondary-container/30 text-on-surface py-2 px-4 rounded-lg text-[14px] leading-[20px] font-semibold hover:bg-surface-container-highest transition-colors font-['Plus_Jakarta_Sans']">
-              Update Photo
-            </button>
           </div>
         </div>
 
@@ -169,7 +224,7 @@ const TrainerPortfolioEditor: React.FC = () => {
                   {certifications.map(cert => (
                     <span key={cert} className="inline-flex items-center gap-1 bg-surface-container text-on-surface px-3 py-1 rounded-md text-sm border border-secondary-container/20 font-['Plus_Jakarta_Sans']">
                       {cert}
-                      <button onClick={() => handleRemoveCert(cert)} className="hover:text-error transition-colors flex items-center justify-center">
+                      <button onClick={() => handleRemoveCert(cert)} className="hover:text-error transition-colors flex items-center justify-center cursor-pointer">
                         <span className="material-symbols-outlined text-[16px]">close</span>
                       </button>
                     </span>
@@ -184,7 +239,7 @@ const TrainerPortfolioEditor: React.FC = () => {
                     onChange={(e) => setNewCert(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddCert()}
                   />
-                  <button onClick={handleAddCert} className="bg-surface-container-high border border-secondary-container/30 text-on-surface px-4 py-2 rounded-lg hover:bg-surface-container-highest transition-colors font-semibold text-sm font-['Plus_Jakarta_Sans']">
+                  <button onClick={handleAddCert} className="bg-surface-container-high border border-secondary-container/30 text-on-surface px-4 py-2 rounded-lg hover:bg-surface-container-highest transition-colors font-semibold text-sm font-['Plus_Jakarta_Sans'] cursor-pointer">
                     Add
                   </button>
                 </div>
@@ -219,10 +274,10 @@ const TrainerPortfolioEditor: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-3">
-            <button className="bg-transparent text-on-surface-variant py-3 px-6 rounded-lg text-[14px] leading-5 font-semibold hover:text-on-surface hover:bg-surface-container-highest transition-colors font-['Plus_Jakarta_Sans']">
+            <button onClick={() => navigate('/profile')} className="bg-transparent text-on-surface-variant py-3 px-6 rounded-lg text-[14px] leading-5 font-semibold hover:text-on-surface hover:bg-surface-container-highest transition-colors font-['Plus_Jakarta_Sans'] cursor-pointer">
               Discard Changes
             </button>
-            <button onClick={handleSave} className="bg-primary text-on-primary py-3 px-8 rounded-lg text-[14px] leading-5 font-semibold hover:bg-primary-fixed transition-colors shadow-[0_0_15px_rgba(208,188,255,0.3)] font-['Plus_Jakarta_Sans']">
+            <button onClick={handleSave} className="bg-primary text-on-primary py-3 px-8 rounded-lg text-[14px] leading-5 font-semibold hover:bg-primary-fixed transition-colors shadow-[0_0_15px_rgba(208,188,255,0.3)] font-['Plus_Jakarta_Sans'] cursor-pointer">
               Save Portfolio
             </button>
           </div>

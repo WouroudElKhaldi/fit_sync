@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Delete,
-  Param,
-  Body,
-} from '@nestjs/common';
+import { Controller, Post, Get, Delete, Param, Body } from '@nestjs/common';
 import { BiometricService } from './biometric.service';
 
 @Controller('biometrics')

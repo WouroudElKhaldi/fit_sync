@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import exercisesData from '../data/exercises.json';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import NotificationModal from '../components/NotificationModal';
 
 type Exercise = {
@@ -28,10 +29,27 @@ type WorkoutExercise = {
 };
 
 const WorkoutBuilder: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const planId = queryParams.get('planId');
+
   const [templateName, setTemplateName] = useState("Hypertrophy Push Day");
   const [description, setDescription] = useState("Focus on chest, shoulders, and triceps volume.");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [scheduledDateTime, setScheduledDateTime] = useState(() => {
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
+
   const [isSaving, setIsSaving] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>([]);
 
@@ -51,19 +69,94 @@ const WorkoutBuilder: React.FC = () => {
   });
 
   const categories = ["All", "Barbell", "Dumbbell", "Cable", "Machine"];
-  const filteredLibrary = (exercisesData as Exercise[]).filter(ex => 
-    (selectedCategory === "All" || ex.name.toLowerCase().includes(selectedCategory.toLowerCase())) &&
-    ex.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
+  // Load exercises database, trainer's clients, and active workout details if editing
+  useEffect(() => {
+    const fetchResources = async () => {
+      const token = localStorage.getItem('fitsync_token');
+      const headers = { Authorization: `Bearer ${token}` };
+      try {
+        const [exRes, clRes] = await Promise.all([
+          fetch('http://localhost:3000/exercises', { headers }),
+          fetch(`http://localhost:3000/trainers/clients?trainerId=${user?.id}`, { headers })
+        ]);
+        
+        let fetchedExercises: Exercise[] = [];
+        if (exRes.ok) {
+          fetchedExercises = await exRes.json();
+          setExercises(fetchedExercises);
+        }
+        
+        let clientsData: any[] = [];
+        if (clRes.ok) {
+          clientsData = await clRes.json();
+          setClients(clientsData);
+        }
+
+        const stateClientId = location.state?.targetClientId;
+
+        if (planId) {
+          const planRes = await fetch(`http://localhost:3000/workouts/plans/${planId}`, { headers });
+          if (planRes.ok) {
+            const planData = await planRes.json();
+            setTemplateName(planData.title || "");
+            setDescription(planData.description || "");
+            setSelectedClient(planData.clientId || "");
+            if (planData.scheduledDate) {
+              const d = new Date(planData.scheduledDate);
+              const pad = (n: number) => String(n).padStart(2, '0');
+              setScheduledDateTime(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
+            }
+            
+            const mappedExercises = planData.exercises.map((pEx: any) => {
+              return {
+                id: pEx.id,
+                exerciseId: pEx.exerciseId,
+                name: pEx.exercise?.name || "Exercise Module",
+                notes: pEx.notes || "",
+                sets: pEx.sets.map((s: any) => ({
+                  id: s.id,
+                  type: 'Working',
+                  weight: String(s.expectedWeight),
+                  reps: String(s.expectedReps),
+                  rest: String(pEx.restTimeSec || 60)
+                }))
+              };
+            });
+            setWorkoutExercises(mappedExercises);
+          }
+        } else {
+          if (stateClientId) {
+            setSelectedClient(stateClientId);
+          } else if (clientsData.length > 0) {
+            setSelectedClient(clientsData[0].id);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load builder resources:', err);
+      }
+    };
+
+    if (user) {
+      fetchResources();
+    }
+  }, [user, planId, location.state]);
+
+  const filteredLibrary = useMemo(() => {
+    return exercises.filter(ex => 
+      (selectedCategory === "All" || ex.name.toLowerCase().includes(selectedCategory.toLowerCase())) &&
+      ex.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [exercises, selectedCategory, searchQuery]);
+
   const addExerciseToWorkout = (ex: Exercise) => {
     const newEx: WorkoutExercise = {
-      id: `we-${Date.now()}`,
+      id: `we-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       exerciseId: ex.id,
       name: ex.name,
-      sets: [{ id: `s-${Date.now()}`, type: 'Working', weight: '', reps: '10', rest: '60s' }],
+      sets: [{ id: `s-${Date.now()}`, type: 'Working', weight: '20', reps: '10', rest: '60' }],
       notes: ''
     };
     setWorkoutExercises([...workoutExercises, newEx]);
@@ -81,8 +174,8 @@ const WorkoutBuilder: React.FC = () => {
   const removeExercise = (id: string) => {
     setModalConfig({
       isOpen: true,
-      title: 'Remove Block?',
-      message: 'This exercise block and all its set parameters will be purged from the current blueprint.',
+      title: 'Remove Exercise Block?',
+      message: 'This exercise block and all its set parameters will be deleted from the current workout.',
       type: 'danger',
       onConfirm: () => {
         setWorkoutExercises(prev => prev.filter(ex => ex.id !== id));
@@ -96,7 +189,7 @@ const WorkoutBuilder: React.FC = () => {
       if (ex.id === workoutExId) {
         return {
           ...ex,
-          sets: [...ex.sets, { id: `s-${Date.now()}`, type: 'Working', weight: '', reps: '10', rest: '60s' }]
+          sets: [...ex.sets, { id: `s-${Date.now()}`, type: 'Working', weight: '20', reps: '10', rest: '60' }]
         };
       }
       return ex;
@@ -112,18 +205,116 @@ const WorkoutBuilder: React.FC = () => {
     }));
   };
 
-  const handleSaveTemplate = (isGlobal: boolean) => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+  const updateSetField = (workoutExId: string, setId: string, field: 'weight' | 'reps' | 'rest', value: string) => {
+    setWorkoutExercises(workoutExercises.map(ex => {
+      if (ex.id === workoutExId) {
+        return {
+          ...ex,
+          sets: ex.sets.map(s => s.id === setId ? { ...s, [field]: value } : s)
+        };
+      }
+      return ex;
+    }));
+  };
+
+  const updateExerciseNotes = (workoutExId: string, value: string) => {
+    setWorkoutExercises(workoutExercises.map(ex => {
+      if (ex.id === workoutExId) {
+        return { ...ex, notes: value };
+      }
+      return ex;
+    }));
+  };
+
+  const handleSaveTemplate = async () => {
+    if (!selectedClient) {
       setModalConfig({
         isOpen: true,
-        title: 'Registry Updated',
-        message: `Protocol has been successfully ${isGlobal ? 'published to the global movement library' : 'saved to your private blueprints'}.`,
-        type: 'success',
+        title: 'Validation Failure',
+        message: 'A target client profile must be selected to save and schedule a workout plan.',
+        type: 'warning',
         onConfirm: closeModal
       });
-    }, 800);
+      return;
+    }
+
+    if (workoutExercises.length === 0) {
+      setModalConfig({
+        isOpen: true,
+        title: 'Empty Workout',
+        message: 'Please append at least one exercise block to the workout canvas.',
+        type: 'warning',
+        onConfirm: closeModal
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    const token = localStorage.getItem('fitsync_token');
+    
+    // Construct payload strictly mapping CreateWorkoutPlanSchema
+    const payload = {
+      clientId: selectedClient,
+      title: templateName,
+      description: description,
+      scheduledDate: new Date(scheduledDateTime).toISOString(),
+      isRecurring: false,
+      exercises: workoutExercises.map((we, idx) => ({
+        exerciseId: we.exerciseId,
+        orderIndex: idx,
+        restTimeSec: parseInt(we.sets[0]?.rest) || 60,
+        notes: we.notes,
+        sets: we.sets.map((s, sIdx) => ({
+          setIndex: sIdx,
+          expectedReps: parseInt(s.reps) || 10,
+          expectedWeight: parseFloat(s.weight) || 0
+        }))
+      }))
+    };
+
+    try {
+      const url = planId 
+        ? `http://localhost:3000/workouts/plans/${planId}`
+        : `http://localhost:3000/workouts/plans?trainerId=${user?.id}`;
+      const method = planId ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save workout plan entry');
+      }
+
+      setModalConfig({
+        isOpen: true,
+        title: planId ? 'Workout Updated' : 'Workout Published',
+        message: planId 
+          ? 'The training workout has been successfully updated.'
+          : 'The training workout has been successfully published and scheduled.',
+        type: 'success',
+        onConfirm: () => {
+          closeModal();
+          navigate('/workouts');
+        }
+      });
+    } catch (err: any) {
+      console.error(err);
+      setModalConfig({
+        isOpen: true,
+        title: 'Publish Failed',
+        message: err.message || 'An error occurred during workout publishing.',
+        type: 'danger',
+        onConfirm: closeModal
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -175,7 +366,7 @@ const WorkoutBuilder: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-[10px] font-black text-on-surface uppercase tracking-tight truncate leading-none mb-1">{ex.name}</h3>
-                <span className="text-[7px] font-black text-on-surface-variant/40 uppercase tracking-widest leading-none block">Protocol</span>
+                <span className="text-[7px] font-black text-on-surface-variant/40 uppercase tracking-widest leading-none block">Exercise</span>
               </div>
               <div className="w-5 h-5 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-inner">
                 <span className="material-symbols-outlined text-primary text-[12px] font-black">add</span>
@@ -185,22 +376,39 @@ const WorkoutBuilder: React.FC = () => {
         </div>
       </aside>
 
-      {/* Center: Template Canvas */}
+      {/* Center: Workout Canvas */}
       <section className="flex-1 bg-surface-container-low/40 overflow-y-auto p-6 no-scrollbar relative z-10">
-        <div className="max-w-(--max-width-content) mx-auto space-y-(--spacing-section-gap) pb-10">
+        <div className="max-w-[800px] mx-auto space-y-8 pb-10">
           {/* Canvas Header */}
           <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6 border-b border-secondary-container/10 pb-6 relative">
-            <div className="flex-1 relative z-10">
-              <div className="flex items-center gap-3 mb-2">
+            <div className="flex-1 relative z-10 space-y-4">
+              <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shadow-xl">
                    <span className="material-symbols-outlined text-primary text-[18px] fill">design_services</span>
                 </div>
-                <div>
-                   <span className="bg-primary/20 text-primary text-[7px] px-2 py-0.5 rounded-full font-black uppercase tracking-[0.2em] border border-primary/30">Blueprint</span>
-                </div>
+                 <div className="flex items-center gap-2 flex-wrap">
+                    <span className="bg-primary/20 text-primary text-[7px] px-2 py-0.5 rounded-full font-black uppercase tracking-[0.2em] border border-primary/30">Workout</span>
+                    <select 
+                       value={selectedClient} 
+                       onChange={e => setSelectedClient(e.target.value)} 
+                       className="bg-surface-container-high border border-secondary-container/15 rounded-lg px-3 py-1 text-[8px] font-black text-primary uppercase tracking-widest outline-none cursor-pointer shadow-sm"
+                    >
+                      <option value="">Select Athlete Target…</option>
+                      {clients.map(c => <option key={c.id} value={c.id}>{c.fullName}</option>)}
+                    </select>
+                    <div className="flex items-center gap-1.5 ml-2">
+                      <span className="text-[7px] font-black text-on-surface-variant/40 uppercase tracking-widest">Schedule:</span>
+                      <input
+                        type="datetime-local"
+                        value={scheduledDateTime}
+                        onChange={e => setScheduledDateTime(e.target.value)}
+                        className="bg-surface-container-high border border-secondary-container/15 rounded-lg px-3 py-1 text-[8px] font-black text-primary uppercase tracking-widest outline-none cursor-pointer shadow-sm text-center focus:border-primary transition-all"
+                      />
+                    </div>
+                 </div>
               </div>
               <input
-                className="w-full bg-transparent border-none focus:ring-0 text-2xl font-black text-on-surface py-1 outline-none uppercase tracking-tighter placeholder:opacity-5 h-auto leading-none mb-1"
+                className="w-full bg-transparent border-none focus:ring-0 text-2xl font-black text-on-surface py-1 outline-none uppercase tracking-tighter placeholder:opacity-10 h-auto leading-none mb-1"
                 type="text"
                 value={templateName}
                 placeholder="UNTITLED"
@@ -208,7 +416,7 @@ const WorkoutBuilder: React.FC = () => {
               />
               <div className="flex items-start gap-4 text-on-surface-variant/40 group/desc">
                  <textarea
-                  className="flex-1 bg-transparent border-none focus:ring-0 text-[10px] font-medium resize-none h-auto py-1 italic outline-none leading-relaxed placeholder:text-on-surface-variant/10 transition-all"
+                  className="w-full bg-transparent border-none focus:ring-0 text-[10px] font-medium resize-none h-auto py-1 italic outline-none leading-relaxed placeholder:text-on-surface-variant/10 transition-all"
                   placeholder="Append objectives..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -217,25 +425,20 @@ const WorkoutBuilder: React.FC = () => {
             </div>
             <div className="flex flex-row xl:flex-col gap-2 shrink-0 relative z-10">
               <button 
-                onClick={() => handleSaveTemplate(false)}
-                className="px-5 py-2.5 bg-surface-container-high/40 backdrop-blur-md border border-secondary-container/10 text-[8px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 shadow-lg group flex items-center gap-2 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:rotate-12 transition-transform">inventory_2</span>
-                Draft
-              </button>
-              <button 
-                onClick={() => handleSaveTemplate(true)}
+                onClick={handleSaveTemplate}
                 disabled={isSaving}
                 className="px-5 py-2.5 bg-primary text-on-primary text-[8px] font-black uppercase tracking-[0.2em] rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-xl shadow-primary/30 active:scale-95 group flex items-center gap-2 cursor-pointer"
               >
-                <span className={`material-symbols-outlined text-[16px] ${isSaving ? 'animate-spin' : 'group-hover:-translate-y-0.5'} transition-transform`}>{isSaving ? 'sync' : 'rocket_launch'}</span>
-                {isSaving ? 'Syncing...' : 'Deploy'}
+                <span className={`material-symbols-outlined text-[16px] ${isSaving ? 'animate-spin' : 'group-hover:-translate-y-0.5'} transition-transform`}>
+                  {isSaving ? 'sync' : 'rocket_launch'}
+                </span>
+                {isSaving ? 'Publishing...' : planId ? 'Update Workout' : 'Publish Workout'}
               </button>
             </div>
           </div>
 
           {/* Canvas Area */}
-          <div className="space-y-(--spacing-card-gap)">
+          <div className="space-y-6">
             {workoutExercises.map((workoutEx, idx) => (
               <div key={workoutEx.id} className="glass-card !p-0 overflow-hidden shadow-xl hover-card-motion group relative">
                 {/* Block Header */}
@@ -274,9 +477,9 @@ const WorkoutBuilder: React.FC = () => {
                   <div className="grid grid-cols-[32px_1fr_70px_70px_70px_28px] gap-3 text-[7px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40 px-3">
                     <div className="text-center">Idx</div>
                     <div>Intensity</div>
-                    <div className="text-center">Load</div>
-                    <div className="text-center">Volume</div>
-                    <div className="text-center">Recovery</div>
+                    <div className="text-center">Load (KG)</div>
+                    <div className="text-center">Volume (Reps)</div>
+                    <div className="text-center">Recovery (Sec)</div>
                     <div></div>
                   </div>
                   
@@ -285,15 +488,34 @@ const WorkoutBuilder: React.FC = () => {
                       <div key={set.id} className="grid grid-cols-[32px_1fr_70px_70px_70px_28px] gap-3 items-center bg-surface-container-high/20 px-3 py-1.5 rounded-xl border border-secondary-container/5 hover:border-primary/20 hover:bg-primary/[0.02] transition-all group/set shadow-sm">
                         <div className="text-center text-[10px] font-black text-on-surface-variant/10">#{sIdx + 1}</div>
                         <div className="relative">
-                           <select className="w-full bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black uppercase tracking-tight text-on-surface focus:border-primary/40 focus:ring-4 focus:ring-primary/5 outline-none cursor-pointer appearance-none shadow-sm">
-                              <option>Working</option>
-                              <option>Warmup</option>
-                              <option>Failure</option>
+                           <select 
+                              value={set.type}
+                              onChange={(e) => updateSetField(workoutEx.id, set.id, 'type' as any, e.target.value)}
+                              className="w-full bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black uppercase tracking-tight text-on-surface focus:border-primary/40 focus:ring-4 focus:ring-primary/5 outline-none cursor-pointer appearance-none shadow-sm"
+                           >
+                              <option value="Working">Working</option>
+                              <option value="Warmup">Warmup</option>
+                              <option value="Failure">Failure</option>
                            </select>
                         </div>
-                        <input className="bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-on-surface focus:border-primary/40 outline-none text-center shadow-sm" placeholder="KG" defaultValue={set.weight} />
-                        <input className="bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-on-surface focus:border-primary/40 outline-none text-center shadow-sm" placeholder="REPS" defaultValue={set.reps} />
-                        <input className="bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-on-surface focus:border-primary/40 outline-none text-center shadow-sm" placeholder="REST" defaultValue={set.rest} />
+                        <input 
+                           className="bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-on-surface focus:border-primary/40 outline-none text-center shadow-sm" 
+                           placeholder="KG" 
+                           value={set.weight} 
+                           onChange={(e) => updateSetField(workoutEx.id, set.id, 'weight', e.target.value)}
+                        />
+                        <input 
+                           className="bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-on-surface focus:border-primary/40 outline-none text-center shadow-sm" 
+                           placeholder="REPS" 
+                           value={set.reps} 
+                           onChange={(e) => updateSetField(workoutEx.id, set.id, 'reps', e.target.value)}
+                        />
+                        <input 
+                           className="bg-surface-container-low/40 border border-secondary-container/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-on-surface focus:border-primary/40 outline-none text-center shadow-sm" 
+                           placeholder="REST" 
+                           value={set.rest} 
+                           onChange={(e) => updateSetField(workoutEx.id, set.id, 'rest', e.target.value)}
+                        />
                         <button 
                           onClick={() => removeSet(workoutEx.id, set.id)}
                           className="w-6 h-6 rounded-lg text-on-surface-variant/10 hover:text-error hover:bg-error/10 transition-all flex items-center justify-center opacity-0 group-hover/set:opacity-100 cursor-pointer"
@@ -310,7 +532,7 @@ const WorkoutBuilder: React.FC = () => {
                       className="flex items-center gap-2 px-3 py-1.5 bg-primary/5 text-primary text-[7px] font-black uppercase tracking-[0.2em] rounded-lg hover:bg-primary hover:text-on-primary transition-all border border-primary/10 shadow-lg active:scale-95 group cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[14px] group-hover:rotate-90 transition-transform duration-500">add_circle</span>
-                      Append
+                      Append Set
                     </button>
                     <div className="flex-1 bg-surface-container-high/20 rounded-lg border border-secondary-container/5 p-0.5 flex items-center px-3 shadow-inner">
                        <span className="material-symbols-outlined text-primary/20 mr-2 text-[14px]">terminal</span>
@@ -318,6 +540,8 @@ const WorkoutBuilder: React.FC = () => {
                         className="flex-1 bg-transparent border-none text-[9px] font-bold text-on-surface italic placeholder:text-on-surface-variant/10 focus:ring-0 py-1 outline-none"
                         placeholder="Tactical cues..."
                         type="text"
+                        value={workoutEx.notes}
+                        onChange={(e) => updateExerciseNotes(workoutEx.id, e.target.value)}
                       />
                     </div>
                   </div>
@@ -332,7 +556,7 @@ const WorkoutBuilder: React.FC = () => {
                 </div>
                 <div className="text-center relative z-10">
                    <h4 className="text-xl font-black uppercase tracking-[0.3em] mb-2 text-on-surface opacity-10">Standby</h4>
-                   <p className="text-xs font-medium italic text-on-surface-variant/40">Select movement modules to initialize blueprint.</p>
+                   <p className="text-xs font-medium italic text-on-surface-variant/40">Select movement modules to initialize workout.</p>
                 </div>
               </div>
             )}
@@ -348,7 +572,7 @@ const WorkoutBuilder: React.FC = () => {
         type={modalConfig.type}
         onConfirm={modalConfig.onConfirm}
         onCancel={closeModal}
-        confirmLabel={modalConfig.type === 'danger' ? 'Purge' : 'Authorize'}
+        confirmLabel="Acknowledge"
         cancelLabel="Abort"
       />
     </div>

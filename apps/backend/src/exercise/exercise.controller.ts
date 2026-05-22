@@ -71,7 +71,8 @@ export class ExerciseController {
   @Post(':exerciseId/muscles')
   async addMuscleTarget(
     @Param('exerciseId') exerciseId: string,
-    @Body() payload: { muscleId?: string; targetType?: 'PRIMARY' | 'SECONDARY' },
+    @Body()
+    payload: { muscleId?: string; targetType?: 'PRIMARY' | 'SECONDARY' },
   ) {
     if (!payload.muscleId || !payload.targetType) {
       throw new BadRequestException('muscleId and targetType are required');
@@ -107,4 +108,3 @@ export class ExerciseController {
     return this.exerciseAdminService.removeMuscleTarget(exerciseId, muscleId);
   }
 }
-

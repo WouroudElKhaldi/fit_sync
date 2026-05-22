@@ -40,7 +40,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send_message')
   async handleSendMessage(
-    @MessageBody() payload: { senderId: string; receiverId: string; content: string },
+    @MessageBody()
+    payload: { senderId: string; receiverId: string; content: string },
     @ConnectedSocket() client: Socket,
   ) {
     const message = await this.messageService.sendMessage(payload.senderId, {
@@ -49,10 +50,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     // Room ID can be a sorted combination of user IDs for private chat
-    const conversationId = [payload.senderId, payload.receiverId].sort().join('-');
-    
+    const conversationId = [payload.senderId, payload.receiverId]
+      .sort()
+      .join('-');
+
     this.server.to(conversationId).emit('receive_message', message);
-    
+
     // Also notify the receiver specifically if they are not in the room
     this.server.to(payload.receiverId).emit('new_notification', {
       type: 'NEW_MESSAGE',
@@ -72,7 +75,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       clientId: payload.clientId,
       message: 'A user wants to hire you!',
     });
-    
-    console.log(`Trainer request from ${payload.clientId} to ${payload.trainerId}`);
+
+    console.log(
+      `Trainer request from ${payload.clientId} to ${payload.trainerId}`,
+    );
   }
 }

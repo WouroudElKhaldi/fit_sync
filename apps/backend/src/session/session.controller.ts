@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Headers } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { SetStatus } from '@fitsync/shared-types';
+import { prisma } from '@fitsync/database';
 
 @Controller('workouts/sessions')
 export class SessionController {
@@ -60,5 +61,27 @@ export class SessionController {
     @Body() payload: { trainerFeedback?: string; trainerRating?: number },
   ) {
     return this.sessionService.submitTrainerFeedback(sessionId, payload);
+  }
+
+  @Get('trainer/:trainerId')
+  async getTrainerClientsSessions(
+    @Param('trainerId') trainerId: string,
+    @Headers('authorization') authHeader?: string,
+  ) {
+    let isAdmin = false;
+    if (authHeader) {
+      const parts = authHeader.split(' ');
+      if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+        const token = parts[1];
+        if (token.startsWith('mock-jwt-token-')) {
+          const callerId = token.replace('mock-jwt-token-', '');
+          const caller = await prisma.user.findUnique({ where: { id: callerId } });
+          if (caller?.role === 'ADMIN') {
+            isAdmin = true;
+          }
+        }
+      }
+    }
+    return this.sessionService.getTrainerClientsSessions(trainerId, isAdmin);
   }
 }

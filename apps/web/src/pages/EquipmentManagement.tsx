@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import equipmentData from "../data/equipment.json";
+import React, { useState, useEffect } from "react";
 import NotificationModal from "../components/NotificationModal";
 
 type Equipment = {
@@ -12,25 +11,14 @@ type Equipment = {
 };
 
 const EquipmentManagement: React.FC = () => {
-  const [equipment, setEquipment] = useState<Equipment[]>(
-    (equipmentData as any[]).map((eq) => ({
-      ...eq,
-      description:
-        eq.description ||
-        "Professional grade facility asset optimized for high-performance training.",
-      status: eq.status || "Available",
-      category: eq.category || "Strength",
-      image:
-        eq.image ||
-        "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&q=80",
-    })),
-  );
+  const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [viewingEquipment, setViewingEquipment] = useState<Equipment | null>(
-    null,
-  );
+  const [viewingEquipment, setViewingEquipment] = useState<Equipment | null>(null);
+  const [triggerReload, setTriggerReload] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [formData, setFormData] = useState<Partial<Equipment>>({
     name: "",
     description: "",
@@ -56,48 +44,95 @@ const EquipmentManagement: React.FC = () => {
   const closeModal = () =>
     setModalConfig((prev) => ({ ...prev, isOpen: false }));
 
-  const filteredEquipment = equipment.filter(
+  // Fetch equipment list on mount
+  useEffect(() => {
+    const fetchEquipment = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('fitsync_token');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      try {
+        const response = await fetch('http://localhost:3000/equipment', { headers });
+        if (response.ok) {
+          const data = await response.json();
+          // Map to match frontend attributes
+          const mapped = data.map((eq: any) => ({
+            id: eq.id,
+            name: eq.name,
+            description: "Professional grade facility asset optimized for high-performance training.",
+            category: "Strength",
+            status: "Available",
+            image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&q=80"
+          }));
+          setEquipmentList(mapped);
+        }
+      } catch (err) {
+        console.error('Failed to load equipment list:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEquipment();
+  }, [triggerReload]);
+
+  const filteredEquipment = equipmentList.filter(
     (eq) =>
       eq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       eq.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleSave = () => {
-    if (editingId) {
-      setEquipment((prev) =>
-        prev.map((eq) =>
-          eq.id === editingId ? ({ ...eq, ...formData } as Equipment) : eq,
-        ),
-      );
-    } else {
-      const newEq: Equipment = {
-        id: `eq-${Date.now()}`,
-        name: formData.name || "New Equipment",
-        description: formData.description || "Facility asset description...",
-        category: formData.category || "Strength",
-        status: formData.status || "Available",
-        image:
-          "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&q=80",
-      };
-      setEquipment([newEq, ...equipment]);
-    }
-    setShowAddPanel(false);
-    setEditingId(null);
-    setFormData({
-      name: "",
-      description: "",
-      category: "Strength",
-      status: "Available",
-    });
+  const handleSave = async () => {
+    const token = localStorage.getItem('fitsync_token');
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    };
 
-    setModalConfig({
-      isOpen: true,
-      title: editingId ? "Registry Synchronized" : "Asset Registered",
-      message:
-        "The facility inventory has been updated and synchronized with the local management node.",
-      type: "success",
-      onConfirm: closeModal,
-    });
+    try {
+      if (editingId) {
+        const response = await fetch(`http://localhost:3000/equipment/${editingId}`, {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ name: formData.name })
+        });
+        if (!response.ok) throw new Error('Failed to update equipment');
+      } else {
+        const response = await fetch('http://localhost:3000/equipment', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ name: formData.name })
+        });
+        if (!response.ok) throw new Error('Failed to create equipment');
+      }
+
+      setShowAddPanel(false);
+      setEditingId(null);
+      setFormData({
+        name: "",
+        description: "",
+        category: "Strength",
+        status: "Available",
+      });
+      setTriggerReload(prev => prev + 1);
+
+      setModalConfig({
+        isOpen: true,
+        title: editingId ? "Registry Synchronized" : "Asset Registered",
+        message: "The facility inventory has been updated and synchronized with the local management node.",
+        type: "success",
+        onConfirm: closeModal,
+      });
+    } catch (err: any) {
+      console.error(err);
+      setModalConfig({
+        isOpen: true,
+        title: "Operation Failed",
+        message: err.message || "An error occurred during saving equipment.",
+        type: "danger",
+        onConfirm: closeModal,
+      });
+    }
   };
 
   const handleEdit = (eq: Equipment) => {
@@ -110,27 +145,47 @@ const EquipmentManagement: React.FC = () => {
     setModalConfig({
       isOpen: true,
       title: "Decommission Asset?",
-      message:
-        "This will permanently remove the equipment record from the facility database. This action cannot be reversed without manual re-entry.",
+      message: "This will permanently remove the equipment record from the facility database. This action cannot be reversed without manual re-entry.",
       type: "danger",
-      onConfirm: () => {
-        setEquipment((prev) => prev.filter((eq) => eq.id !== id));
+      onConfirm: async () => {
         closeModal();
+        const token = localStorage.getItem('fitsync_token');
+        try {
+          const response = await fetch(`http://localhost:3000/equipment/${id}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          if (!response.ok) throw new Error('Failed to decommissioning equipment');
+          setTriggerReload(prev => prev + 1);
+        } catch (err: any) {
+          console.error(err);
+        }
       },
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p className="text-on-surface-variant/60 font-bold uppercase tracking-widest text-xs">Loading Inventory Registry...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-[var(--spacing-section-gap)] pb-10 relative">
       {/* Header Section */}
       <div className="border-b border-secondary-container/20 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-on-surface mb-1 tracking-tighter uppercase leading-none">
+          <h2 className="font-black text-on-surface mb-1 tracking-tighter uppercase leading-none">
             Facility Inventory
           </h2>
-          <p className="text-xs text-on-surface-variant font-medium italic opacity-60">
+          <blockquote className="text-on-surface-variant font-medium italic opacity-60">
             "Manage and monitor your premium facility hardware assets."
-          </p>
+          </blockquote>
         </div>
         <button
           onClick={() => {
@@ -143,7 +198,7 @@ const EquipmentManagement: React.FC = () => {
             });
             setShowAddPanel(true);
           }}
-          className="bg-primary text-on-primary h-12 px-8 rounded-xl font-black uppercase tracking-widest flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-primary/30 text-[10px]"
+          className="bg-primary text-on-primary h-12 px-8 rounded-xl font-black uppercase tracking-widest flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-primary/30 text-[10px] cursor-pointer"
         >
           <span className="material-symbols-outlined text-[20px]">add_box</span>
           Register Asset
@@ -169,7 +224,7 @@ const EquipmentManagement: React.FC = () => {
             <div className="px-4 py-2 bg-primary/10 rounded-xl border border-primary/20 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
               <span className="text-[8px] font-black text-primary uppercase tracking-widest">
-                {equipment.length} Hardware Modules
+                {equipmentList.length} Hardware Modules
               </span>
             </div>
           </div>
@@ -250,7 +305,7 @@ const EquipmentManagement: React.FC = () => {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setViewingEquipment(eq)}
-                        className="w-9 h-9 rounded-xl bg-surface-container-high border border-secondary-container/10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all shadow-lg active:scale-90"
+                        className="w-9 h-9 rounded-xl bg-surface-container-high border border-secondary-container/10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all shadow-lg active:scale-90 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[20px]">
                           visibility
@@ -258,7 +313,7 @@ const EquipmentManagement: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleEdit(eq)}
-                        className="w-9 h-9 rounded-xl bg-surface-container-high border border-secondary-container/10 flex items-center justify-center text-on-surface-variant hover:text-amber-400 transition-all shadow-lg active:scale-90"
+                        className="w-9 h-9 rounded-xl bg-surface-container-high border border-secondary-container/10 flex items-center justify-center text-on-surface-variant hover:text-amber-400 transition-all shadow-lg active:scale-90 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[20px]">
                           edit_square
@@ -266,7 +321,7 @@ const EquipmentManagement: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(eq.id)}
-                        className="w-9 h-9 rounded-xl bg-surface-container-high border border-secondary-container/10 flex items-center justify-center text-on-surface-variant hover:text-error transition-all shadow-lg active:scale-90"
+                        className="w-9 h-9 rounded-xl bg-surface-container-high border border-secondary-container/10 flex items-center justify-center text-on-surface-variant hover:text-error transition-all shadow-lg active:scale-90 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[20px]">
                           delete_sweep
@@ -303,7 +358,7 @@ const EquipmentManagement: React.FC = () => {
               </div>
               <button
                 onClick={() => setViewingEquipment(null)}
-                className="w-10 h-10 rounded-xl bg-surface-container-high hover:bg-error/10 hover:text-error flex items-center justify-center transition-all shadow-2xl active:scale-90 border border-secondary-container/10"
+                className="w-10 h-10 rounded-xl bg-surface-container-high hover:bg-error/10 hover:text-error flex items-center justify-center transition-all shadow-2xl active:scale-90 border border-secondary-container/10 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">
                   close
@@ -362,9 +417,9 @@ const EquipmentManagement: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setViewingEquipment(null)}
-                  className="w-full py-3.5 bg-surface-container-highest border border-secondary-container/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all shadow-xl active:scale-95"
+                  className="w-full py-3.5 bg-surface-container-highest border border-secondary-container/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all shadow-xl active:scale-95 cursor-pointer"
                 >
-                  Purge Dossier Access
+                  Close view
                 </button>
               </div>
             </div>
@@ -389,7 +444,7 @@ const EquipmentManagement: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowAddPanel(false)}
-                className="w-10 h-10 rounded-xl hover:bg-error/10 hover:text-error text-on-surface-variant transition-all flex items-center justify-center border border-secondary-container/10 shadow-lg active:scale-90"
+                className="w-10 h-10 rounded-xl hover:bg-error/10 hover:text-error text-on-surface-variant transition-all flex items-center justify-center border border-secondary-container/10 shadow-lg active:scale-90 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[24px]">
                   close
@@ -400,7 +455,7 @@ const EquipmentManagement: React.FC = () => {
             <div className="flex-1 space-y-8 pr-2 no-scrollbar overflow-y-auto">
               <div className="space-y-3">
                 <label className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest px-3 border-l-2 border-primary">
-                  Nomenclature
+                  Nomenclature Name
                 </label>
                 <input
                   className="w-full bg-surface-container-high/60 border border-secondary-container/20 rounded-xl py-3 px-6 text-on-surface font-black text-base focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none shadow-inner uppercase tracking-tight"
@@ -413,7 +468,7 @@ const EquipmentManagement: React.FC = () => {
               </div>
               <div className="space-y-3">
                 <label className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest px-3 border-l-2 border-primary">
-                  Classification
+                  Classification Category
                 </label>
                 <div className="relative">
                   <select
@@ -475,13 +530,13 @@ const EquipmentManagement: React.FC = () => {
             <div className="pt-8 flex gap-4 border-t border-secondary-container/20 mt-8 bg-surface-container-low">
               <button
                 onClick={() => setShowAddPanel(false)}
-                className="flex-1 py-4 bg-surface-container-high text-on-surface text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-surface-bright transition-all shadow-lg active:scale-95"
+                className="flex-1 py-4 bg-surface-container-high text-on-surface text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-surface-bright transition-all shadow-lg active:scale-95 cursor-pointer"
               >
                 Discard
               </button>
               <button
                 onClick={handleSave}
-                className="flex-[2] py-4 bg-primary text-on-primary text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 shadow-2xl shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="flex-[2] py-4 bg-primary text-on-primary text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 shadow-2xl shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">
                   verified

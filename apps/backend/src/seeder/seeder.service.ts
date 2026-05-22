@@ -33,7 +33,9 @@ export class SeederService implements OnModuleInit {
       }
 
       if (!seedPath) {
-        this.logger.warn('master_exercises.json not found. Please ensure it exists at the project root.');
+        this.logger.warn(
+          'master_exercises.json not found. Please ensure it exists at the project root.',
+        );
         return;
       }
 
@@ -68,7 +70,9 @@ export class SeederService implements OnModuleInit {
       // 4. Insert Exercises
       this.logger.log(`Seeding ${data.exercises.length} exercises...`);
       for (const ex of data.exercises) {
-        const equipmentId = ex.equipment ? equipmentMap.get(ex.equipment) : undefined;
+        const equipmentId = ex.equipment
+          ? equipmentMap.get(ex.equipment)
+          : undefined;
 
         // Upsert Exercise
         const exercise = await prisma.exercise.upsert({
@@ -101,12 +105,12 @@ export class SeederService implements OnModuleInit {
                 },
               },
               update: {
-                targetType: mMapping.type as any,
+                targetType: mMapping.type,
               },
               create: {
                 exerciseId: exercise.id,
                 muscleId: muscleObj.id,
-                targetType: mMapping.type as any,
+                targetType: mMapping.type,
               },
             });
           }

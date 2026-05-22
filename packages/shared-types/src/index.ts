@@ -3,6 +3,7 @@ import { z } from 'zod';
 export enum Role {
   USER = 'USER',
   TRAINER = 'TRAINER',
+  ADMIN = 'ADMIN',
 }
 
 export enum SetStatus {

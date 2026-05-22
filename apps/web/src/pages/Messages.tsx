@@ -224,7 +224,7 @@ const Messages: React.FC = () => {
 
           <div className="flex-1 overflow-y-auto p-12 space-y-10 no-scrollbar relative">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(208,188,255,0.02),transparent)] pointer-events-none"></div>
-            {activeChat.messages.map((msg, i) => {
+            {activeChat.messages.map((msg) => {
               const isTrainer = msg.senderId === "u-trainer-1";
               return (
                 <div key={msg.id} className={`flex flex-col gap-3 max-w-[70%] animate-in fade-in slide-in-from-bottom-4 duration-500 ${isTrainer ? "items-end self-end" : "items-start self-start"}`}>

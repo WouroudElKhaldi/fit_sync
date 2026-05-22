@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import usersData from "../data/users.json";
+import React, { useState, useEffect } from "react";
 import NotificationModal from "../components/NotificationModal";
+import { useAuth } from "../context/AuthContext";
 
 const AccountSettings: React.FC = () => {
-  // Mock current trainer profile from JSON
-  const trainer = usersData.find(u => u.role === 'TRAINER') || usersData[0];
-
+  const { user } = useAuth();
+  
   // State for user preferences
-  const [weightUnit, setWeightUnit] = useState<"metric" | "imperial">("metric");
-  const [distanceUnit, setDistanceUnit] = useState<"metric" | "imperial">("metric");
+  const [weightUnit, setWeightUnit] = useState<"KG" | "LB">("KG");
+  const [lengthUnit, setLengthUnit] = useState<"CM" | "IN">("CM");
   const [leadTime, setLeadTime] = useState<number>(60);
   const [pushNotifications, setPushNotifications] = useState<boolean>(true);
   const [dailyDigest, setDailyDigest] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Modal State
   const [modalConfig, setModalConfig] = useState<{
@@ -31,18 +31,77 @@ const AccountSettings: React.FC = () => {
 
   const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
-  const handleSave = () => {
+  // Load preferences from backend on mount
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchPreferences = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('fitsync_token');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      try {
+        const response = await fetch(`http://localhost:3000/users/${user.id}`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          setWeightUnit(data.weightUnit || "KG");
+          setLengthUnit(data.lengthUnit || "CM");
+          setLeadTime(data.notificationLeadMinutes || 60);
+        }
+      } catch (err) {
+        console.error('Failed to load user configuration:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPreferences();
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!user) return;
     setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
+
+    const token = localStorage.getItem('fitsync_token');
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    };
+
+    try {
+      const response = await fetch(`http://localhost:3000/users/${user.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          weightUnit,
+          lengthUnit,
+          notificationLeadMinutes: leadTime
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to synchronize user configuration');
+      }
+
       setModalConfig({
         isOpen: true,
         title: 'Configuration Synced',
-        message: 'Your neural preferences and automated protocols have been successfully synchronized with the core database.',
+        message: 'Your biomechanical standards and automated notification protocols have been successfully synchronized with the core database.',
         type: 'success',
         onConfirm: closeModal
       });
-    }, 1200);
+    } catch (err: any) {
+      console.error(err);
+      setModalConfig({
+        isOpen: true,
+        title: 'Sync Failed',
+        message: err.message || 'An error occurred during preference synchronization.',
+        type: 'danger',
+        onConfirm: closeModal
+      });
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -52,8 +111,8 @@ const AccountSettings: React.FC = () => {
       message: 'This will revert all current configuration changes to their default state. This action cannot be undone.',
       type: 'danger',
       onConfirm: () => {
-        setWeightUnit("metric");
-        setDistanceUnit("metric");
+        setWeightUnit("KG");
+        setLengthUnit("CM");
         setLeadTime(60);
         setPushNotifications(true);
         setDailyDigest(false);
@@ -61,6 +120,17 @@ const AccountSettings: React.FC = () => {
       }
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p className="text-on-surface-variant/60 font-bold uppercase tracking-widest text-xs">Loading Preferences Matrix...</p>
+      </div>
+    );
+  }
+
+  const activeUser = user || { fullName: "Athlete", email: "", role: "USER" };
 
   return (
     <div className="w-full space-y-[var(--spacing-section-gap)] pb-10">
@@ -75,15 +145,6 @@ const AccountSettings: React.FC = () => {
            </p>
         </div>
         <div className="flex gap-4">
-           <div className="px-5 py-2.5 bg-surface-container-high/60 backdrop-blur-md rounded-xl border border-secondary-container/10 flex items-center gap-3 shadow-xl">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                 <span className="material-symbols-outlined text-[20px]">verified_user</span>
-              </div>
-              <div className="flex flex-col">
-                 <span className="text-[7px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">System Integrity</span>
-                 <span className="text-[10px] font-black text-on-surface uppercase leading-tight">Encrypted</span>
-              </div>
-           </div>
         </div>
       </div>
 
@@ -95,23 +156,18 @@ const AccountSettings: React.FC = () => {
               <div className="flex flex-col items-center text-center mb-6 relative z-10">
                  <div className="relative group/avatar mb-6">
                     <div className="absolute inset-0 bg-primary/20 blur-3xl opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-1000"></div>
-                    <img src={trainer.avatar || ''} className="w-32 h-32 rounded-[40px] object-cover border-2 border-primary/20 shadow-[0_20px_40px_rgba(0,0,0,0.4)] group-hover/avatar:border-primary transition-all duration-700 relative z-10 grayscale hover:grayscale-0" alt="" />
-                    <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-on-primary rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-90 z-20">
-                       <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-                    </button>
+                    <div className="w-32 h-32 rounded-[40px] border-2 border-primary/20 shadow-[0_20px_40px_rgba(0,0,0,0.4)] group-hover/avatar:border-primary transition-all duration-700 relative z-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-3xl">
+                      {activeUser.fullName?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
                  </div>
-                 <h3 className="text-xl font-black text-on-surface uppercase tracking-tight mb-1">{trainer.fullName}</h3>
-                 <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 shadow-inner">Elite Practitioner</span>
+                 <h3 className="text-xl font-black text-on-surface uppercase tracking-tight mb-1">{activeUser.fullName}</h3>
+                 <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 shadow-inner">Active {activeUser.role}</span>
               </div>
               
               <div className="space-y-3 pt-6 border-t border-secondary-container/10 relative z-10">
                  <div className="flex justify-between items-center px-4 py-3.5 bg-surface-container-high/40 rounded-2xl border border-secondary-container/5 hover:bg-surface-container-high transition-all">
-                    <span className="text-[8px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">Rank</span>
-                    <span className="text-sm font-black text-on-surface">TOP 1%</span>
-                 </div>
-                 <div className="flex justify-between items-center px-4 py-3.5 bg-surface-container-high/40 rounded-2xl border border-secondary-container/5 hover:bg-surface-container-high transition-all">
-                    <span className="text-[8px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">Cohorts</span>
-                    <span className="text-sm font-black text-on-surface">12 CLIENTS</span>
+                    <span className="text-[8px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">System Email</span>
+                    <span className="text-sm font-black text-on-surface">{activeUser.email}</span>
                  </div>
               </div>
            </div>
@@ -164,17 +220,17 @@ const AccountSettings: React.FC = () => {
                 <label className="text-[8px] font-black text-on-surface-variant uppercase tracking-[0.2em] px-2 block opacity-40">Biomass</label>
                 <div className="flex p-1.5 bg-surface-container-high/60 backdrop-blur-md rounded-2xl border border-secondary-container/10 shadow-inner">
                   <button
-                    onClick={() => setWeightUnit("metric")}
+                    onClick={() => setWeightUnit("KG")}
                     className={`flex-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${
-                      weightUnit === "metric" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
+                      weightUnit === "KG" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
                     }`}
                   >
                     Metric (KG)
                   </button>
                   <button
-                    onClick={() => setWeightUnit("imperial")}
+                    onClick={() => setWeightUnit("LB")}
                     className={`flex-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${
-                      weightUnit === "imperial" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
+                      weightUnit === "LB" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
                     }`}
                   >
                     Imperial (LB)
@@ -186,17 +242,17 @@ const AccountSettings: React.FC = () => {
                 <label className="text-[8px] font-black text-on-surface-variant uppercase tracking-[0.2em] px-2 block opacity-40">Spatial Metrics</label>
                 <div className="flex p-1.5 bg-surface-container-high/60 backdrop-blur-md rounded-2xl border border-secondary-container/10 shadow-inner">
                   <button
-                    onClick={() => setDistanceUnit("metric")}
+                    onClick={() => setLengthUnit("CM")}
                     className={`flex-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${
-                      distanceUnit === "metric" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
+                      lengthUnit === "CM" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
                     }`}
                   >
                     Standard (CM)
                   </button>
                   <button
-                    onClick={() => setDistanceUnit("imperial")}
+                    onClick={() => setLengthUnit("IN")}
                     className={`flex-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${
-                      distanceUnit === "imperial" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
+                      lengthUnit === "IN" ? "bg-primary text-on-primary shadow-xl shadow-primary/30" : "text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high"
                     }`}
                   >
                     US Custom (IN)
@@ -281,14 +337,14 @@ const AccountSettings: React.FC = () => {
           <div className="flex justify-end gap-4 pt-4">
             <button 
               onClick={handleDiscard} 
-              className="px-8 py-4 bg-surface-container-high/60 backdrop-blur-md text-on-surface text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 shadow-xl border border-secondary-container/10"
+              className="px-8 py-4 bg-surface-container-high/60 backdrop-blur-md text-on-surface text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 shadow-xl border border-secondary-container/10 cursor-pointer"
             >
               Reset Matrix
             </button>
             <button 
               onClick={handleSave} 
               disabled={isSyncing}
-              className="px-10 py-4 bg-primary text-on-primary text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 shadow-[0_15px_40px_rgba(208,188,255,0.3)] transition-all active:scale-95 disabled:opacity-50 flex items-center gap-3 group"
+              className="px-10 py-4 bg-primary text-on-primary text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 shadow-[0_15px_40px_rgba(208,188,255,0.3)] transition-all active:scale-95 disabled:opacity-50 flex items-center gap-3 group cursor-pointer"
             >
               <span className={`material-symbols-outlined text-[20px] ${isSyncing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}>sync</span>
               {isSyncing ? 'Synchronizing...' : 'Commit Configuration'}

@@ -1,12 +1,20 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import usersData from "../data/users.json";
+import { useAuth } from "../context/AuthContext";
 import NotificationModal from "../components/NotificationModal";
 
 const ClientDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [timeRange, setTimeRange] = useState('3M');
+  const [triggerReload, setTriggerReload] = useState(0);
+
+  const [clientData, setClientData] = useState<any>(null);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Modal State
   const [modalConfig, setModalConfig] = useState<{
@@ -23,19 +31,88 @@ const ClientDetails: React.FC = () => {
     onConfirm: () => {},
   });
 
-  const client = useMemo(() => {
-    return usersData.find((u) => u.id === id && u.role === "USER");
-  }, [id]);
-
   const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
-  const handleDecommissionSession = (sessionName: string) => {
+  // Load client details
+  useEffect(() => {
+    if (!user || !id) return;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      const token = localStorage.getItem('fitsync_token');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      try {
+        const [progressRes, plansRes] = await Promise.all([
+          fetch(`http://localhost:3000/trainers/clients/${id}/progress?trainerId=${user.id}`, { headers }),
+          fetch(`http://localhost:3000/workouts/plans/trainer/${user.id}`, { headers }),
+        ]);
+
+        if (!progressRes.ok || !plansRes.ok) {
+          throw new Error('Failed to load subject dossier from node');
+        }
+
+        const progressData = await progressRes.json();
+        const plansData = await plansRes.json();
+
+        setClientData(progressData);
+        setPlans(plansData);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || 'An error occurred while fetching client details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id, user, triggerReload]);
+
+  const biometrics = useMemo(() => {
+    return clientData?.biometricsTimeline || [];
+  }, [clientData]);
+
+  const latestWeight = useMemo(() => {
+    if (biometrics.length === 0) return 'N/A';
+    return biometrics[biometrics.length - 1].weight;
+  }, [biometrics]);
+
+  const latestHeight = useMemo(() => {
+    if (biometrics.length === 0) return 'N/A';
+    const log = biometrics.find((b: any) => b.height);
+    return log ? log.height : 'N/A';
+  }, [biometrics]);
+
+  const scheduledSessions = useMemo(() => {
+    return plans.filter(p => p.clientId === id && !p.session?.completedAt);
+  }, [plans, id]);
+
+  const handleDecommissionSession = (plan: any) => {
     setModalConfig({
       isOpen: true,
       title: 'Decommission Session?',
-      message: `You are about to cancel the "${sessionName}" protocol. This will remove the session from the deployment pipeline and notify the athlete.`,
+      message: `You are about to cancel the "${plan.title}" protocol. This will remove the session from the deployment pipeline and notify the athlete.`,
       type: 'warning',
-      onConfirm: closeModal
+      onConfirm: async () => {
+        closeModal();
+        const token = localStorage.getItem('fitsync_token');
+        try {
+          const response = await fetch(`http://localhost:3000/workouts/plans/${plan.id}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (!response.ok) throw new Error('Failed to decommission plan');
+          setTriggerReload(prev => prev + 1);
+        } catch (err: any) {
+          console.error(err);
+        }
+      }
     });
   };
 
@@ -52,15 +129,63 @@ const ClientDetails: React.FC = () => {
      });
   };
 
-  if (!client) {
+  // SVG Trendline calculations
+  const chartPath = useMemo(() => {
+    if (biometrics.length === 0) return "M40,150 L760,150";
+    const width = 800;
+    const height = 200;
+    const padding = 40;
+    const maxVal = Math.max(...biometrics.map((b: any) => b.weight), 100);
+    const minVal = Math.min(...biometrics.map((b: any) => b.weight), 40);
+    const range = maxVal - minVal || 10;
+
+    const mapped = biometrics.map((b: any, idx: number) => {
+      const x = (idx / Math.max(biometrics.length - 1, 1)) * (width - padding * 2) + padding;
+      const y = height - (((b.weight - minVal) / range) * (height - padding * 2) + padding);
+      return { x, y };
+    });
+
+    let d = `M${mapped[0].x},${mapped[0].y}`;
+    for (let i = 1; i < mapped.length; i++) {
+      const prev = mapped[i - 1];
+      const curr = mapped[i];
+      const cpX1 = prev.x + (curr.x - prev.x) / 2;
+      const cpY1 = prev.y;
+      const cpX2 = prev.x + (curr.x - prev.x) / 2;
+      const cpY2 = curr.y;
+      d += ` C${cpX1},${cpY1} ${cpX2},${cpY2} ${curr.x},${curr.y}`;
+    }
+    return d;
+  }, [biometrics]);
+
+  const chartFillPath = useMemo(() => {
+    if (biometrics.length === 0) return "";
+    const path = chartPath;
+    const width = 800;
+    const padding = 40;
+    const firstX = (0 / Math.max(biometrics.length - 1, 1)) * (width - padding * 2) + padding;
+    const lastX = ((biometrics.length - 1) / Math.max(biometrics.length - 1, 1)) * (width - padding * 2) + padding;
+    return `${path} L${lastX},180 L${firstX},180 Z`;
+  }, [biometrics, chartPath]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p className="text-on-surface-variant/60 font-bold uppercase tracking-widest text-xs">Synchronizing athlete profile telemetry...</p>
+      </div>
+    );
+  }
+
+  if (error || !clientData?.client) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
         <div className="w-24 h-24 rounded-[32px] bg-error/10 flex items-center justify-center border border-error/20">
            <span className="material-symbols-outlined text-5xl text-error/30">person_off</span>
         </div>
         <div className="text-center">
-           <h2 className="text-4xl font-black text-on-surface uppercase tracking-tighter leading-none mb-2">Subject Data Expired</h2>
-           <p className="text-on-surface-variant font-medium italic opacity-60">"The requested biometric profile could not be retrieved from the central node."</p>
+           <h2 className="font-black text-on-surface uppercase tracking-tighter leading-none mb-2">Subject Data Expired</h2>
+           <blockquote className="text-on-surface-variant font-medium italic opacity-60">"The requested biometric profile could not be retrieved from the central node."</blockquote>
         </div>
         <button
           onClick={() => navigate("/clients")}
@@ -73,18 +198,20 @@ const ClientDetails: React.FC = () => {
     );
   }
 
+  const { client, trainingSessions } = clientData;
+
   return (
     <div className="w-full space-y-12 pb-20">
       <div className="flex items-center gap-6 mb-10">
         <button
           onClick={() => navigate("/clients")}
-          className="w-14 h-14 bg-surface-container-high border border-secondary-container/10 rounded-2xl text-on-surface-variant hover:text-primary transition-all flex items-center justify-center shadow-xl active:scale-90"
+          className="w-14 h-14 bg-surface-container-high border border-secondary-container/10 rounded-2xl text-on-surface-variant hover:text-primary transition-all flex items-center justify-center shadow-xl active:scale-90 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[28px]">arrow_back</span>
         </button>
         <div>
-          <h2 className="text-[32px] md:text-[40px] font-black text-on-surface uppercase tracking-tighter leading-none">Subject Dossier</h2>
-          <p className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-1">Authorized Profile Access Level II</p>
+          <h2 className="font-black text-on-surface uppercase tracking-tighter leading-none">Subject Dossier</h2>
+          <blockquote className="text-on-surface-variant/40 uppercase tracking-widest mt-1">Authorized Profile Access Level II</blockquote>
         </div>
       </div>
 
@@ -94,17 +221,9 @@ const ClientDetails: React.FC = () => {
         
         <div className="relative shrink-0">
           <div className="w-48 h-48 rounded-[48px] border-8 border-primary/5 p-2 transition-all group-hover:border-primary/20 bg-surface-container-high shadow-inner">
-            {client.avatar ? (
-              <img
-                alt=""
-                className="w-full h-full object-cover rounded-[36px] shadow-2xl"
-                src={client.avatar}
-              />
-            ) : (
-              <div className="w-full h-full rounded-[36px] bg-surface-container flex items-center justify-center text-5xl text-on-surface-variant font-black">
-                {client.fullName.substring(0, 2).toUpperCase()}
-              </div>
-            )}
+            <div className="w-full h-full rounded-[36px] bg-primary/10 flex items-center justify-center text-6xl text-primary font-black shadow-inner">
+              {client.fullName.substring(0, 2).toUpperCase()}
+            </div>
           </div>
           <div className="absolute -bottom-2 -right-2 bg-emerald-500 w-12 h-12 rounded-2xl border-4 border-surface-container-low shadow-2xl flex items-center justify-center">
              <span className="material-symbols-outlined text-white text-[24px] font-black fill">verified</span>
@@ -119,9 +238,9 @@ const ClientDetails: React.FC = () => {
                </h1>
                <div className="flex items-center gap-3">
                   <span className="bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                    Optimization Goal: {client.goal || "General Performance"}
+                    Optimization Goal: Active Protocol
                   </span>
-                  <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest">SUB_ID: {client.id}</span>
+                  <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest">SUB_ID: {client.id.slice(0, 8)}</span>
                </div>
             </div>
           </div>
@@ -132,20 +251,14 @@ const ClientDetails: React.FC = () => {
               </div>
               <span className="text-sm font-bold">{client.email}</span>
             </div>
-            <div className="flex items-center gap-4 hover:text-primary transition-all cursor-pointer group/link">
-              <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center border border-secondary-container/10 group-hover/link:border-primary transition-all">
-                <span className="material-symbols-outlined text-[20px] opacity-40 group-hover/link:opacity-100">call</span>
-              </div>
-              <span className="text-sm font-bold">+1 (555) 000-{client.id.slice(-4)}</span>
-            </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 mt-4 md:mt-0 relative z-10">
-          <button className="px-10 py-5 bg-surface-container-high border border-secondary-container/10 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-surface-container-highest transition-all shadow-xl active:scale-95">
+          <button onClick={() => setTriggerReload(prev => prev + 1)} className="px-10 py-5 bg-surface-container-high border border-secondary-container/10 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-surface-container-highest transition-all shadow-xl active:scale-95 cursor-pointer">
             Synchronize Data
           </button>
-          <button onClick={handleAssignProtocol} className="px-12 py-5 bg-primary text-on-primary rounded-2xl font-black text-[10px] uppercase tracking-widest hover:brightness-110 transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-4 active:scale-95">
+          <button onClick={handleAssignProtocol} className="px-12 py-5 bg-primary text-on-primary rounded-2xl font-black text-[10px] uppercase tracking-widest hover:brightness-110 transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-4 active:scale-95 cursor-pointer">
             <span className="material-symbols-outlined text-[20px]">add_task</span>
             Deploy Protocol
           </button>
@@ -166,9 +279,9 @@ const ClientDetails: React.FC = () => {
           </div>
           <div className="space-y-6 relative z-10">
             {[
-              { label: 'Current Mass', value: '62', unit: 'KG', color: 'on-surface' },
-              { label: 'Verticality', value: '165', unit: 'CM', color: 'on-surface' },
-              { label: 'Adipose Level', value: '22', unit: '%', color: 'primary' }
+              { label: 'Current Mass', value: latestWeight, unit: client.weightUnit || 'KG', color: 'on-surface' },
+              { label: 'Verticality', value: latestHeight, unit: client.lengthUnit || 'CM', color: 'on-surface' },
+              { label: 'Telemetry Logs', value: biometrics.length, unit: 'LOGS', color: 'primary' }
             ].map((stat, i) => (
               <div key={i} className="flex items-center justify-between p-6 bg-surface-container-high/40 rounded-3xl border border-secondary-container/5 group/row hover:bg-surface-container-high transition-all shadow-inner">
                 <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">{stat.label}</span>
@@ -220,11 +333,8 @@ const ClientDetails: React.FC = () => {
                   <stop offset="100%" stopColor="#d0bcff" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <path d="M0,180 Q100,160 200,170 T400,120 T600,80 T800,70 L800,200 L0,200 Z" fill="url(#purpleGradClient)" className="animate-pulse duration-[4s]" />
-              <path d="M0,180 Q100,160 200,170 T400,120 T600,80 T800,70" fill="none" stroke="#d0bcff" strokeLinecap="round" strokeWidth="6" className="drop-shadow-[0_0_15px_rgba(208,188,255,0.5)]" />
-              {[200, 400, 600, 800].map((cx, i) => (
-                <circle key={i} cx={cx} cy={[170, 120, 80, 70][i]} fill="#d0bcff" r="8" className="cursor-pointer hover:r-12 transition-all stroke-surface-container-low stroke-[4px]" />
-              ))}
+              <path d={chartFillPath} fill="url(#purpleGradClient)" className="animate-pulse duration-[4s]" />
+              <path d={chartPath} fill="none" stroke="#d0bcff" strokeLinecap="round" strokeWidth="6" className="drop-shadow-[0_0_15px_rgba(208,188,255,0.5)]" />
             </svg>
             <div className="flex justify-between mt-10 px-6 text-[9px] font-black text-on-surface-variant/30 uppercase tracking-[0.3em]">
               <span>Cycle Start</span>
@@ -250,28 +360,31 @@ const ClientDetails: React.FC = () => {
             </div>
           </div>
           <div className="space-y-4">
-            {[
-              { title: "Hypertrophy Lower Body [T1]", date: "JUN 12", duration: "55M", intensity: "HIGH" },
-              { title: "Metabolic Flux & Mobility", date: "JUN 10", duration: "40M", intensity: "MED" },
-              { title: "Neural Strength Prime A", date: "JUN 08", duration: "65M", intensity: "PEAK" },
-            ].map((workout, i) => (
-              <div key={i} onClick={() => navigate('/session-review')} className="flex items-center justify-between p-6 rounded-3xl bg-surface-container-high/40 hover:bg-emerald-500/5 transition-all group cursor-pointer border border-transparent hover:border-emerald-500/20 shadow-inner">
-                <div className="flex items-center gap-6">
-                   <div className="w-2 h-10 bg-emerald-500/20 rounded-full group-hover:bg-emerald-500 transition-all"></div>
-                   <div>
-                    <h4 className="text-sm font-black text-on-surface uppercase tracking-tight group-hover:text-emerald-500 transition-colors">
-                      {workout.title}
-                    </h4>
-                    <p className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-1">
-                      {workout.date} • {workout.duration} • INTENSITY: {workout.intensity}
-                    </p>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-on-surface-variant/20 group-hover:text-emerald-500 transition-all group-hover:translate-x-2">
-                  arrow_forward_ios
-                </span>
+            {trainingSessions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-on-surface-variant/40">
+                <span className="material-symbols-outlined text-4xl mb-2">history</span>
+                <span className="text-xs font-bold uppercase tracking-wider">No completed sessions yet</span>
               </div>
-            ))}
+            ) : (
+              trainingSessions.slice(0, 5).map((workout: any, i: number) => (
+                <div key={i} onClick={() => navigate('/session-review')} className="flex items-center justify-between p-6 rounded-3xl bg-surface-container-high/40 hover:bg-emerald-500/5 transition-all group cursor-pointer border border-transparent hover:border-emerald-500/20 shadow-inner">
+                  <div className="flex items-center gap-6">
+                     <div className="w-2 h-10 bg-emerald-500/20 rounded-full group-hover:bg-emerald-500 transition-all"></div>
+                     <div>
+                      <h4 className="text-sm font-black text-on-surface uppercase tracking-tight group-hover:text-emerald-500 transition-colors">
+                        {workout.title}
+                      </h4>
+                      <p className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-1">
+                        {new Date(workout.completedAt).toLocaleDateString()} • Volume: {Math.round(workout.totalVolume)} kg
+                      </p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-on-surface-variant/20 group-hover:text-emerald-500 transition-all group-hover:translate-x-2">
+                    arrow_forward_ios
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -287,50 +400,63 @@ const ClientDetails: React.FC = () => {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="p-8 rounded-[32px] bg-primary/5 border border-primary/20 shadow-2xl relative overflow-hidden group/active">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                 <span className="material-symbols-outlined text-4xl animate-spin-slow">settings</span>
+            {scheduledSessions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-on-surface-variant/40">
+                <span className="material-symbols-outlined text-4xl mb-2">event_busy</span>
+                <span className="text-xs font-bold uppercase tracking-wider">No active deployment protocol</span>
               </div>
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-xl border border-primary/20">
-                    <span className="material-symbols-outlined text-[36px] fill">event</span>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-black text-on-surface uppercase tracking-tight">Functional Core 4.0</h4>
-                    <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2 flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                      Tomorrow • 10:00 AM (45M)
-                    </p>
-                  </div>
-                </div>
-                <button onClick={() => handleDecommissionSession("Functional Core 4.0")} className="w-14 h-14 rounded-2xl flex items-center justify-center text-on-surface-variant/40 hover:bg-error/10 hover:text-error transition-all shadow-md bg-surface-container-low border border-secondary-container/10 active:scale-90">
-                  <span className="material-symbols-outlined text-[28px]">delete_sweep</span>
-                </button>
-              </div>
-            </div>
+            ) : (
+              <>
+                {/* Active upcoming plan */}
+                {(() => {
+                  const first = scheduledSessions[0];
+                  return (
+                    <div className="p-8 rounded-[32px] bg-primary/5 border border-primary/20 shadow-2xl relative overflow-hidden group/active mb-4">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                         <span className="material-symbols-outlined text-4xl animate-spin-slow">settings</span>
+                      </div>
+                      <div className="flex items-center justify-between relative z-10">
+                        <div className="flex items-center gap-6">
+                          <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-xl border border-primary/20">
+                            <span className="material-symbols-outlined text-[36px] fill">event</span>
+                          </div>
+                          <div>
+                            <h4 className="text-lg font-black text-on-surface uppercase tracking-tight">{first.title}</h4>
+                            <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2 flex items-center gap-3">
+                              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                              {first.scheduledDate ? new Date(first.scheduledDate).toLocaleString() : 'Not Scheduled'}
+                            </p>
+                          </div>
+                        </div>
+                        <button onClick={() => handleDecommissionSession(first)} className="w-14 h-14 rounded-2xl flex items-center justify-center text-on-surface-variant/40 hover:bg-error/10 hover:text-error transition-all shadow-md bg-surface-container-low border border-secondary-container/10 active:scale-90 cursor-pointer">
+                          <span className="material-symbols-outlined text-[28px]">delete_sweep</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
 
-            {[
-              { title: "Metabolic Blast [H1]", date: "JUN 16", duration: "60M" },
-              { title: "Recovery Flux Level I", date: "JUN 18", duration: "30M" },
-            ].map((session, i) => (
-              <div key={i} className="flex items-center justify-between p-6 rounded-3xl bg-surface-container-high/40 hover:bg-primary/5 transition-all group cursor-pointer border border-transparent hover:border-primary/20 shadow-inner">
-                <div className="flex items-center gap-6">
-                   <div className="w-2 h-10 bg-primary/20 rounded-full group-hover:bg-primary transition-all"></div>
-                   <div>
-                    <h4 className="text-sm font-black text-on-surface uppercase tracking-tight group-hover:text-primary transition-colors">
-                      {session.title}
-                    </h4>
-                    <p className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-1">
-                      {session.date} • {session.duration}
-                    </p>
+                {/* Next scheduled plans */}
+                {scheduledSessions.slice(1, 4).map((session: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between p-6 rounded-3xl bg-surface-container-high/40 hover:bg-primary/5 transition-all group cursor-pointer border border-transparent hover:border-primary/20 shadow-inner">
+                    <div className="flex items-center gap-6">
+                       <div className="w-2 h-10 bg-primary/20 rounded-full group-hover:bg-primary transition-all"></div>
+                       <div>
+                        <h4 className="text-sm font-black text-on-surface uppercase tracking-tight group-hover:text-primary transition-colors">
+                          {session.title}
+                        </h4>
+                        <p className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-1">
+                          {session.scheduledDate ? new Date(session.scheduledDate).toLocaleDateString() : 'Unscheduled'}
+                        </p>
+                      </div>
+                    </div>
+                    <button onClick={() => handleDecommissionSession(session)} className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant/30 hover:bg-error/10 hover:text-error transition-all cursor-pointer">
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
                   </div>
-                </div>
-                <span className="material-symbols-outlined text-on-surface-variant/20 group-hover:text-primary transition-all">
-                  tune
-                </span>
-              </div>
-            ))}
+                ))}
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -342,7 +468,7 @@ const ClientDetails: React.FC = () => {
         type={modalConfig.type}
         onConfirm={modalConfig.onConfirm}
         onCancel={closeModal}
-        confirmLabel={modalConfig.type === 'danger' || modalConfig.type === 'warning' ? 'Purge Data' : 'Initialize'}
+        confirmLabel={modalConfig.type === 'danger' || modalConfig.type === 'warning' ? 'Decommission' : 'Initialize'}
       />
     </div>
   );

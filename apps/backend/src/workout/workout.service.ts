@@ -151,4 +151,35 @@ export class WorkoutService {
       workout: s.workoutPlan.title,
     }));
   }
+
+  async getTrainerPlans(trainerId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: trainerId },
+    });
+
+    const whereClause =
+      user && user.role === 'ADMIN' ? undefined : { createdById: trainerId };
+
+    return prisma.workoutPlan.findMany({
+      where: whereClause,
+      include: {
+        client: {
+          select: { id: true, fullName: true, email: true },
+        },
+        exercises: {
+          include: {
+            exercise: {
+              select: { name: true, equipment: true },
+            },
+            sets: {
+              orderBy: { setIndex: 'asc' },
+            },
+          },
+          orderBy: { orderIndex: 'asc' },
+        },
+        session: true,
+      },
+      orderBy: { scheduledDate: 'desc' },
+    });
+  }
 }

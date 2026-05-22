@@ -1,31 +1,207 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import usersData from '../data/users.json';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const TrainerProfile: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, updateUserLocal } = useAuth();
+  
+  const targetId = id || user?.id;
+  
+  const [trainerData, setTrainerData] = useState<any>(null);
+  const [clients, setClients] = useState<any[]>([]);
   const [clientFilter, setClientFilter] = useState<'active' | 'past'>('active');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const trainerUser = usersData.find(u => u.role === 'TRAINER');
-  const allClients = usersData.filter(u => u.role === 'USER');
+  // Dynamic Data Lists
+  const [completedSessions, setCompletedSessions] = useState<any[]>([]);
+  const [scheduledPlans, setScheduledPlans] = useState<any[]>([]);
 
-  // Filter clients based on mock "status" logic or just split them for demo
-  const displayedClients = allClients.filter(c => {
-    if (clientFilter === 'active') return c.status !== 'past';
-    return c.status === 'past';
+  // Editing State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: '',
+    email: '',
+    username: '',
+    password: '',
+    role: '',
+    bio: '',
+    education: '',
+    certifications: '',
+    specialties: '',
   });
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  if (!trainerUser || !trainerUser.trainerProfile) {
-    return <div className="p-8">Trainer profile not found.</div>;
-  }
+  const fetchProfileAndClients = async () => {
+    if (!targetId) return;
+    setIsLoading(true);
+    const token = localStorage.getItem('fitsync_token');
+    const headers = { Authorization: `Bearer ${token}` };
 
-  const { trainerProfile } = trainerUser;
+    try {
+      const [profileRes, clientsRes, sessionsRes, plansRes] = await Promise.all([
+        fetch(`http://localhost:3000/users/${targetId}`, { headers }),
+        fetch(`http://localhost:3000/trainers/clients?trainerId=${targetId}`, { headers }),
+        fetch(`http://localhost:3000/workouts/sessions/trainer/${targetId}`, { headers }),
+        fetch(`http://localhost:3000/workouts/plans/trainer/${targetId}`, { headers })
+      ]);
 
-  const handleActionClick = (action: string, id: string) => {
-    alert(`Mock Action: ${action} on item ID: ${id}`);
+      if (profileRes.ok) {
+        const pData = await profileRes.json();
+        setTrainerData(pData);
+      }
+      if (clientsRes.ok) {
+        setClients(await clientsRes.json());
+      }
+      if (sessionsRes.ok) {
+        const sData = await sessionsRes.json();
+        // Completed sessions have completedAt field filled
+        setCompletedSessions(sData.filter((s: any) => s.completedAt));
+      }
+      if (plansRes.ok) {
+        setScheduledPlans(await plansRes.json());
+      }
+    } catch (err) {
+      console.error('Failed to sync profile data:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const isTrainer = trainerUser?.role === 'TRAINER';
+  useEffect(() => {
+    fetchProfileAndClients();
+  }, [targetId]);
+
+  const activeUser = trainerData || user;
+  const isTrainer = activeUser?.role === 'TRAINER';
+  const trainerProfile = activeUser?.trainerProfile || {};
+  const rating = trainerProfile.rating || '5.0';
+  const bio = trainerProfile.bio || activeUser?.bio || 'Smashing physical milestones and building peak health.';
+  const education = trainerProfile.education || 'Elite Athletic Program – FitSync Systems';
+  const certifications = trainerProfile.certifications || ['FITSYNC-ATHLETE'];
+  const specialties = trainerProfile.specialties || ['Strength', 'Conditioning'];
+
+  const educationParts = education.split(' – ');
+  const educationDegree = educationParts[0] || 'B.S. Sports Science';
+  const educationSchool = educationParts[1] || 'University of Performance Athletics';
+
+  // Active vs Past clients logic
+  const displayedClients = clients.filter(c => {
+    const isPast = c.status === 'past';
+    return clientFilter === 'active' ? !isPast : isPast;
+  });
+
+  const handleStartEditing = () => {
+    setErrorMsg('');
+    setSuccessMsg('');
+    setEditForm({
+      fullName: activeUser?.fullName || '',
+      email: activeUser?.email || '',
+      username: activeUser?.username || '',
+      password: '',
+      role: activeUser?.role || 'TRAINER',
+      bio: activeUser?.bio || trainerProfile?.bio || '',
+      education: trainerProfile?.education || '',
+      certifications: certifications.join(', '),
+      specialties: specialties.join(', '),
+    });
+    setIsEditing(true);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setIsSaving(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const token = localStorage.getItem('fitsync_token');
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+
+    const payload: any = {
+      fullName: editForm.fullName,
+      email: editForm.email,
+      username: editForm.username,
+      bio: editForm.bio,
+      trainerProfile: {
+        education: editForm.education,
+        certifications: editForm.certifications.split(',').map(s => s.trim()).filter(Boolean),
+        specialties: editForm.specialties.split(',').map(s => s.trim()).filter(Boolean),
+        bio: editForm.bio,
+      }
+    };
+
+    if (editForm.password.trim()) {
+      payload.password = editForm.password;
+    }
+
+    if (user.role === 'ADMIN') {
+      payload.role = editForm.role;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3000/users/${targetId}?callerId=${user.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile information');
+      }
+
+      setTrainerData(data);
+      if (user.id === targetId) {
+        updateUserLocal(data);
+      }
+
+      setSuccessMsg('Profile settings successfully updated.');
+      setIsEditing(false);
+      fetchProfileAndClients();
+    } catch (err: any) {
+      setErrorMsg(err.message || 'An error occurred during updating.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    if (!window.confirm('Are you sure you want to delete this workout blueprint?')) return;
+    const token = localStorage.getItem('fitsync_token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    try {
+      const response = await fetch(`http://localhost:3000/workouts/plans/${planId}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete workout plan');
+      }
+      setScheduledPlans(prev => prev.filter(p => p.id !== planId));
+    } catch (err: any) {
+      alert(err.message || 'Error deleting plan');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+        <p className="text-on-surface-variant/60 font-bold uppercase tracking-widest text-xs">Loading Portfolio Intelligence...</p>
+      </div>
+    );
+  }
+
+  const canEdit = user?.id === targetId || user?.role === 'ADMIN';
 
   return (
     <div className="w-full space-y-[var(--spacing-section-gap)]">
@@ -34,107 +210,259 @@ const TrainerProfile: React.FC = () => {
         {/* Profile Identity Card */}
         <div className="lg:col-span-4 glass-card flex flex-col items-center text-center">
           <div className="relative mb-4">
-            <img
-              alt={trainerUser.fullName}
-              className="w-24 h-24 rounded-full border-2 border-primary object-cover"
-              src={trainerUser.avatar}
-            />
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-3 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
-              <span className="material-symbols-outlined text-[14px] fill">workspace_premium</span>
-              <span className="text-[10px] font-black uppercase tracking-widest">Elite Trainer</span>
-            </div>
+             <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary object-cover text-3xl font-black text-primary shadow-xl">
+               {activeUser?.fullName?.charAt(0) || 'T'}
+             </div>
+             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-3 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
+               <span className="material-symbols-outlined text-[14px] fill">workspace_premium</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">Elite Trainer</span>
+             </div>
           </div>
-          <h2 className="text-xl font-black text-on-surface mb-1 uppercase tracking-tight">
-            {trainerUser.fullName}
+          <h2 className="font-black text-on-surface mb-1 uppercase tracking-tight">
+            {activeUser?.fullName}
           </h2>
           <p className="text-xs font-medium text-on-surface-variant mb-6 uppercase tracking-widest opacity-60">
-            Senior Performance Architect
+            {activeUser?.username} • {activeUser?.role}
           </p>
           <div className="w-full grid grid-cols-2 gap-3 pt-6 border-t border-secondary-container/10">
             <div className="text-center">
               <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1 opacity-40">Rating</p>
               <div className="flex items-center justify-center gap-1">
-                <span className="text-lg font-black text-primary">{trainerProfile.rating}</span>
+                <span className="text-lg font-black text-primary">{rating}</span>
                 <span className="material-symbols-outlined text-tertiary text-[18px] fill">star</span>
               </div>
             </div>
             <div className="text-center">
               <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1 opacity-40">Clients</p>
-              <p className="text-lg font-black text-on-surface">150+</p>
+              <p className="text-lg font-black text-on-surface">{clients.length}</p>
             </div>
           </div>
+
+          {canEdit && !isEditing && (
+            <button
+              onClick={handleStartEditing}
+              className="mt-6 w-full py-2 bg-primary text-on-primary font-bold rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition-all flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-sm">edit</span>
+              Edit Profile Info
+            </button>
+          )}
         </div>
 
-        {/* Bio & Credentials Bento */}
-        <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-section-gap)]">
-          {/* Education */}
-          <div className="glass-card">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
-                <span className="material-symbols-outlined text-primary text-[18px]">school</span>
-              </div>
-              <h3 className="text-sm font-black text-on-surface uppercase tracking-tight">Education</h3>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-black text-on-surface uppercase tracking-tight">
-                {trainerProfile.education.split(' – ')[0] || "B.S. Sports Science"}
-              </p>
-              <p className="text-[11px] font-medium text-on-surface-variant opacity-60">
-                {trainerProfile.education.split(' – ')[1] || "University of Performance Athletics"}
-              </p>
-            </div>
-          </div>
+        {/* Bio & Credentials Bento / Edit Form */}
+        <div className="lg:col-span-8">
+          {isEditing ? (
+            <form onSubmit={handleSaveProfile} className="glass-card p-8 space-y-6">
+              <h3 className="text-lg font-bold text-on-surface uppercase tracking-tight border-b border-outline-variant/10 pb-3">Edit Profile Settings</h3>
+              
+              {errorMsg && (
+                <div className="p-4 bg-error/10 border border-error/20 rounded-xl text-xs text-error flex items-center gap-2">
+                  <span className="material-symbols-outlined">error</span> {errorMsg}
+                </div>
+              )}
 
-          {/* Certifications */}
-          <div className="glass-card">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-tertiary/10 flex items-center justify-center border border-tertiary/20">
-                <span className="material-symbols-outlined text-tertiary text-[18px]">military_tech</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.fullName}
+                    onChange={e => setEditForm({ ...editForm, fullName: e.target.value })}
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Username</label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.username}
+                    onChange={e => setEditForm({ ...editForm, username: e.target.value })}
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                  />
+                </div>
               </div>
-              <h3 className="text-sm font-black text-on-surface uppercase tracking-tight">Certifications</h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {trainerProfile.certifications.map(cert => (
-                <span
-                  key={cert}
-                  className="bg-surface-container-high px-3 py-1 rounded-lg text-[10px] font-black text-on-surface-variant border border-secondary-container/10 uppercase tracking-widest"
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={editForm.email}
+                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Password (Optional)</label>
+                  <input
+                    type="password"
+                    placeholder="Leave blank to keep same"
+                    value={editForm.password}
+                    onChange={e => setEditForm({ ...editForm, password: e.target.value })}
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                  />
+                </div>
+              </div>
+
+              {user?.role === 'ADMIN' && (
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Role override</label>
+                  <select
+                    value={editForm.role}
+                    onChange={e => setEditForm({ ...editForm, role: e.target.value })}
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm cursor-pointer"
+                  >
+                    <option value="USER">USER</option>
+                    <option value="TRAINER">TRAINER</option>
+                    <option value="ADMIN">ADMIN</option>
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Bio / Vision</label>
+                <textarea
+                  rows={3}
+                  value={editForm.bio}
+                  onChange={e => setEditForm({ ...editForm, bio: e.target.value })}
+                  className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Education / Degree</label>
+                  <input
+                    type="text"
+                    value={editForm.education}
+                    onChange={e => setEditForm({ ...editForm, education: e.target.value })}
+                    placeholder="e.g. B.S. Sports Science - University"
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Certifications (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={editForm.certifications}
+                    onChange={e => setEditForm({ ...editForm, certifications: e.target.value })}
+                    placeholder="FITSYNC, CSCS, NASM"
+                    className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Specialties (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.specialties}
+                  onChange={e => setEditForm({ ...editForm, specialties: e.target.value })}
+                  placeholder="Strength, Mobility, Powerlifting"
+                  className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-2.5 text-on-surface outline-none focus:border-primary/60 text-sm"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/10">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="px-5 py-2.5 border border-outline-variant/30 text-xs font-bold uppercase rounded-xl hover:bg-surface-container-highest transition-all text-on-surface"
                 >
-                  {cert}
-                </span>
-              ))}
-            </div>
-          </div>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-5 py-2.5 bg-primary text-on-primary font-bold uppercase text-xs rounded-xl hover:brightness-110 transition-all flex items-center gap-2"
+                >
+                  {isSaving ? 'Saving...' : 'Save Settings'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-section-gap)] h-full">
+              {/* Education */}
+              <div className="glass-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <span className="material-symbols-outlined text-primary text-[18px]">school</span>
+                  </div>
+                  <h3 className="text-sm font-black text-on-surface uppercase tracking-tight">Education</h3>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-black text-on-surface uppercase tracking-tight">
+                    {educationDegree}
+                  </p>
+                  {educationSchool && (
+                    <p className="text-[11px] font-medium text-on-surface-variant opacity-60">
+                      {educationSchool}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-          {/* Experience */}
-          <div className="md:col-span-2 glass-card hover:scale-[1.005]">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20">
-                <span className="material-symbols-outlined text-secondary text-[18px]">history_edu</span>
+              {/* Certifications */}
+              <div className="glass-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tertiary/10 flex items-center justify-center border border-tertiary/20">
+                    <span className="material-symbols-outlined text-tertiary text-[18px]">military_tech</span>
+                  </div>
+                  <h3 className="text-sm font-black text-on-surface uppercase tracking-tight">Certifications</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {certifications.map((cert: string) => (
+                    <span
+                      key={cert}
+                      className="bg-surface-container-high px-3 py-1 rounded-lg text-[10px] font-black text-on-surface-variant border border-secondary-container/10 uppercase tracking-widest"
+                    >
+                      {cert}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <h3 className="text-sm font-black text-on-surface uppercase tracking-tight">Experience</h3>
-            </div>
-            <div className="flex items-center gap-10">
-              <div className="shrink-0">
-                <span className="text-4xl font-black text-on-surface tracking-tighter">10</span>
-                <span className="text-xs font-black text-primary ml-2 uppercase tracking-widest">Years</span>
+
+              {/* Experience */}
+              <div className="md:col-span-2 glass-card hover:scale-[1.005]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20">
+                    <span className="material-symbols-outlined text-secondary text-[18px]">history_edu</span>
+                  </div>
+                  <h3 className="text-sm font-black text-on-surface uppercase tracking-tight">Experience & Bio</h3>
+                </div>
+                <div className="flex items-center gap-10">
+                  <div className="shrink-0">
+                    <span className="text-4xl font-black text-on-surface tracking-tighter">8+</span>
+                    <span className="text-xs font-black text-primary ml-2 uppercase tracking-widest">Years</span>
+                  </div>
+                  <blockquote className="font-medium text-on-surface-variant italic border-l-2 border-secondary-container/20 pl-10 leading-relaxed text-on-surface">
+                    "{bio}"
+                  </blockquote>
+                </div>
               </div>
-              <p className="text-sm font-medium text-on-surface-variant italic border-l-2 border-secondary-container/20 pl-10 leading-relaxed">
-                "{trainerProfile.bio}"
-              </p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {isTrainer && (
+      {successMsg && (
+        <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl text-sm text-primary flex items-center gap-2">
+          <span className="material-symbols-outlined">check_circle</span> {successMsg}
+        </div>
+      )}
+
+      {isTrainer && targetId === user?.id && (
         <section className="bg-primary/5 border border-primary/10 rounded-xl p-6 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-primary mb-1">Trainer Tools</h3>
-            <p className="text-sm text-on-surface-variant">Access your internal management dashboard and global templates.</p>
+            <p className="text-sm text-on-surface-variant">Access your public marketplace discoverability settings and custom portfolio builder.</p>
           </div>
           <button 
-            onClick={() => navigate('/portfolio-editor')}
-            className="px-6 py-2 bg-primary text-on-primary rounded-lg font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+            onClick={() => navigate('/portfolio')}
+            className="px-6 py-2 bg-primary text-on-primary rounded-lg font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/20 cursor-pointer"
           >
             Edit Portfolio
           </button>
@@ -153,7 +481,7 @@ const TrainerProfile: React.FC = () => {
           <div className="flex bg-surface-container-low rounded-lg p-1 border border-secondary-container/10">
             <button
               onClick={() => setClientFilter('active')}
-              className={`px-6 py-1 rounded-md text-[14px] leading-[20px] font-semibold transition-colors font-['Plus_Jakarta_Sans'] ${
+              className={`px-6 py-1 rounded-md text-[14px] leading-[20px] font-semibold transition-colors font-['Plus_Jakarta_Sans'] cursor-pointer ${
                 clientFilter === 'active' 
                   ? "bg-primary text-on-primary" 
                   : "text-on-surface-variant hover:text-on-surface"
@@ -163,7 +491,7 @@ const TrainerProfile: React.FC = () => {
             </button>
             <button
               onClick={() => setClientFilter('past')}
-              className={`px-6 py-1 rounded-md text-[14px] leading-[20px] font-semibold transition-colors font-['Plus_Jakarta_Sans'] ${
+              className={`px-6 py-1 rounded-md text-[14px] leading-[20px] font-semibold transition-colors font-['Plus_Jakarta_Sans'] cursor-pointer ${
                 clientFilter === 'past' 
                   ? "bg-primary text-on-primary" 
                   : "text-on-surface-variant hover:text-on-surface"
@@ -182,13 +510,10 @@ const TrainerProfile: React.FC = () => {
                   Client Name
                 </th>
                 <th className="p-6 text-[14px] leading-[20px] font-semibold text-outline font-['Plus_Jakarta_Sans']">
-                  Program Type
+                  Work Email
                 </th>
                 <th className="p-6 text-[14px] leading-[20px] font-semibold text-outline font-['Plus_Jakarta_Sans']">
-                  Current Status
-                </th>
-                <th className="p-6 text-[14px] leading-[20px] font-semibold text-outline font-['Plus_Jakarta_Sans']">
-                  Progress
+                  Registration Date
                 </th>
                 <th className="p-6 text-[14px] leading-[20px] font-semibold text-outline text-right font-['Plus_Jakarta_Sans']">
                   Actions
@@ -198,7 +523,7 @@ const TrainerProfile: React.FC = () => {
             <tbody className="divide-y divide-secondary-container/10">
               {displayedClients.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-on-surface-variant">
+                  <td colSpan={4} className="p-6 text-center text-on-surface-variant">
                     No clients found in this category.
                   </td>
                 </tr>
@@ -206,36 +531,24 @@ const TrainerProfile: React.FC = () => {
                 <tr key={client.id} className="hover:bg-surface-container transition-colors">
                   <td className="p-6">
                     <div className="flex items-center gap-3">
-                      {client.avatar ? (
-                        <img src={client.avatar} alt={client.fullName} className="w-8 h-8 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                          {client.fullName.substring(0,2).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="text-[16px] leading-[24px] text-on-surface font-['Plus_Jakarta_Sans']">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-xs">
+                        {client.fullName?.substring(0,2).toUpperCase()}
+                      </div>
+                      <span className="text-[16px] leading-[24px] text-on-surface font-['Plus_Jakarta_Sans'] font-semibold">
                         {client.fullName}
                       </span>
                     </div>
                   </td>
                   <td className="p-6 text-on-surface-variant text-[16px] leading-[24px] font-['Plus_Jakarta_Sans']">
-                    {client.goal || 'General Fitness'}
+                    {client.email}
                   </td>
-                  <td className="p-6">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[12px] leading-[16px] font-medium font-['Plus_Jakarta_Sans']">
-                      {client.status?.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="p-6">
-                    <div className="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                      {/* Random progress for mock visual */}
-                      <div className="h-full bg-primary" style={{ width: `${Math.random() * 50 + 20}%` }}></div>
-                    </div>
+                  <td className="p-6 text-on-surface-variant text-[16px] leading-[24px] font-['Plus_Jakarta_Sans']">
+                    {new Date(client.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-6 text-right">
                     <button
-                      onClick={() => navigate('/clients')}
-                      className="bg-surface-container-high px-6 py-1 rounded-md border border-secondary-container/10 text-primary text-[14px] leading-[20px] font-semibold hover:bg-primary hover:text-on-primary transition-all font-['Plus_Jakarta_Sans']"
+                      onClick={() => navigate(`/trainee/${client.id}`)}
+                      className="bg-surface-container-high px-6 py-1 rounded-md border border-secondary-container/10 text-primary text-[14px] leading-[20px] font-semibold hover:bg-primary hover:text-on-primary transition-all font-['Plus_Jakarta_Sans'] cursor-pointer"
                     >
                       View Details
                     </button>
@@ -247,7 +560,7 @@ const TrainerProfile: React.FC = () => {
         </div>
       </section>
 
-      {/* Personal & Performance Data Section - Hidden if viewing as guest/client for privacy */}
+      {/* Personal & Performance Data Section */}
       {isTrainer && (
         <section className="space-y-6">
           <div className="flex items-center gap-3">
@@ -258,7 +571,6 @@ const TrainerProfile: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Contact & Expanded Performance Stats */}
             <div className="space-y-6">
               <div className="bg-surface-container-low rounded-xl border border-secondary-container/10 overflow-hidden shadow-lg shadow-black/20">
                 <div className="bg-surface-container-high px-6 py-3 border-b border-secondary-container/10">
@@ -271,7 +583,7 @@ const TrainerProfile: React.FC = () => {
                     <span className="material-symbols-outlined text-outline">mail</span>
                     <div>
                       <p className="text-[12px] leading-[16px] font-medium text-outline font-['Plus_Jakarta_Sans']">Work Email</p>
-                      <p className="text-[16px] leading-[24px] text-on-surface font-['Plus_Jakarta_Sans']">{trainerUser.email}</p>
+                      <p className="text-[16px] leading-[24px] text-on-surface font-['Plus_Jakarta_Sans']">{activeUser?.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
@@ -283,37 +595,14 @@ const TrainerProfile: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="bg-surface-container-low rounded-xl border border-secondary-container/10 p-6 shadow-lg shadow-black/20">
-                <h3 className="text-[14px] leading-[20px] font-semibold text-on-surface mb-6 font-['Plus_Jakarta_Sans']">
-                  Personal Metrics Variance
-                </h3>
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="flex justify-between items-center p-3 bg-surface-container rounded-lg border border-error/10">
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-error text-sm">block</span>
-                      <span className="text-[14px] leading-[20px] font-semibold text-on-surface-variant font-['Plus_Jakarta_Sans']">Missed Workouts</span>
-                    </div>
-                    <span className="text-[24px] leading-[32px] font-semibold text-error font-['Plus_Jakarta_Sans']">02</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-surface-container rounded-lg border border-error/10">
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-error text-sm">error</span>
-                      <span className="text-[14px] leading-[20px] font-semibold text-on-surface-variant font-['Plus_Jakarta_Sans']">Missed Exercises</span>
-                    </div>
-                    <span className="text-[24px] leading-[32px] font-semibold text-error font-['Plus_Jakarta_Sans']">05</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Simulated Chart */}
+            {/* Volume load graph */}
             <div className="lg:col-span-2 bg-surface-container-low rounded-xl border border-secondary-container/10 flex flex-col shadow-lg shadow-black/20">
               <div className="bg-surface-container-high px-6 py-3 border-b border-secondary-container/10 flex justify-between items-center">
-                <h3 className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">Weight &amp; Body Fat Variance</h3>
+                <h3 className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">Active Client Volume Flow</h3>
                 <div className="flex gap-3">
-                  <span className="flex items-center gap-1 text-[12px] leading-[16px] font-medium text-on-surface-variant"><span className="w-2 h-2 rounded-full bg-primary"></span> Weight</span>
-                  <span className="flex items-center gap-1 text-[12px] leading-[16px] font-medium text-on-surface-variant"><span className="w-2 h-2 rounded-full bg-tertiary"></span> Body Fat %</span>
+                  <span className="flex items-center gap-1 text-[12px] leading-[16px] font-medium text-on-surface-variant"><span className="w-2 h-2 rounded-full bg-primary"></span> Volume Load</span>
                 </div>
               </div>
               <div className="p-6 flex-1 flex flex-col justify-end relative overflow-hidden">
@@ -331,7 +620,6 @@ const TrainerProfile: React.FC = () => {
                     <circle cx="30" cy="60" fill="#d0bcff" r="1.5"></circle>
                     <circle cx="60" cy="35" fill="#d0bcff" r="1.5"></circle>
                     <circle cx="100" cy="20" fill="#d0bcff" r="1.5"></circle>
-                    <path d="M0,85 C15,80 30,88 45,78 C60,68 80,72 100,65" fill="none" stroke="#ffb869" strokeDasharray="4" strokeWidth="2"></path>
                   </svg>
                 </div>
                 <div className="flex justify-between mt-3 px-3 border-t border-secondary-container/10 pt-1">
@@ -347,54 +635,83 @@ const TrainerProfile: React.FC = () => {
 
       {/* Completed & Scheduled Sections */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
+        {/* Completed Workouts */}
         <div className="bg-surface-container-low rounded-md border border-secondary-container/10 flex flex-col shadow-lg shadow-black/20 overflow-hidden">
           <div className="bg-surface-container-high px-6 py-3 border-b border-secondary-container/10 flex justify-between items-center">
             <h3 className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">Completed Workouts</h3>
           </div>
-          <div className="p-6 space-y-3">
-            {[
-              { title: "High Intensity Lower Body", time: "45 mins • Yesterday" },
-              { title: "Cardio & Mobility", time: "30 mins • 2 days ago" },
-            ].map((workout, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-secondary-container/10 hover:border-primary/50 cursor-pointer transition-colors" onClick={() => handleActionClick("View Workout", workout.title)}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined">task_alt</span>
+          <div className="p-6 space-y-3 max-h-96 overflow-y-auto">
+            {completedSessions.length === 0 ? (
+              <div className="text-center py-6 text-xs text-on-surface-variant/40">No completed workout logs found.</div>
+            ) : (
+              completedSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-secondary-container/10 hover:border-primary/50 cursor-pointer transition-colors"
+                  onClick={() => navigate(`/session-review?sessionId=${session.id}`)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                      <span className="material-symbols-outlined">task_alt</span>
+                    </div>
+                    <div>
+                      <p className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">
+                        {session.workoutPlan?.title}
+                      </p>
+                      <p className="text-[12px] leading-[16px] font-medium text-on-surface-variant font-['Plus_Jakarta_Sans']">
+                        Client: {session.workoutPlan?.client?.fullName} • {new Date(session.completedAt).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">{workout.title}</p>
-                    <p className="text-[12px] leading-[16px] font-medium text-on-surface-variant font-['Plus_Jakarta_Sans']">{workout.time}</p>
-                  </div>
+                  <span className="material-symbols-outlined text-outline">chevron_right</span>
                 </div>
-                <span className="material-symbols-outlined text-outline">chevron_right</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
+        {/* Scheduled Sessions (Upcoming Plans) */}
         <div className="bg-surface-container-low rounded-md border border-secondary-container/10 flex flex-col shadow-lg shadow-black/20 overflow-hidden">
           <div className="bg-surface-container-high px-6 py-3 border-b border-secondary-container/10 flex justify-between items-center">
-            <h3 className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">Scheduled Sessions</h3>
-            <button className="flex items-center gap-1 text-primary text-[14px] leading-[20px] font-semibold hover:underline" onClick={() => handleActionClick("Schedule New", "Session")}>
+            <h3 className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">Workout Blueprints</h3>
+            <button
+              className="flex items-center gap-1 text-primary text-[14px] leading-[20px] font-semibold hover:underline cursor-pointer"
+              onClick={() => navigate('/workout-builder')}
+            >
               <span className="material-symbols-outlined text-[18px]">add</span> Schedule New
             </button>
           </div>
-          <div className="p-6 space-y-3">
-            {[
-              { title: "Functional Core Workshop", time: "Tomorrow, 9:00 AM" },
-              { title: "Full Body Metabolic Blast", time: "Fri, 8:00 AM" },
-            ].map((session, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-secondary-container/10">
-                <div className="flex flex-col">
-                  <p className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">{session.title}</p>
-                  <p className="text-[12px] leading-[16px] font-medium text-primary font-['Plus_Jakarta_Sans']">{session.time}</p>
+          <div className="p-6 space-y-3 max-h-96 overflow-y-auto">
+            {scheduledPlans.length === 0 ? (
+              <div className="text-center py-6 text-xs text-on-surface-variant/40">No workout plans scheduled yet.</div>
+            ) : (
+              scheduledPlans.map((plan) => (
+                <div key={plan.id} className="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-secondary-container/10">
+                  <div className="flex flex-col">
+                    <p className="text-[14px] leading-[20px] font-semibold text-on-surface font-['Plus_Jakarta_Sans']">{plan.title}</p>
+                    <p className="text-[12px] leading-[16px] font-medium text-primary font-['Plus_Jakarta_Sans']">
+                      For: {plan.client?.fullName || 'Template'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => navigate(`/workout-builder?planId=${plan.id}`)}
+                      className="p-1 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                      title="View Details"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">visibility</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeletePlan(plan.id)}
+                      className="p-1 text-on-surface-variant hover:text-error transition-colors cursor-pointer"
+                      title="Delete blueprint"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => handleActionClick("Edit Session", session.title)} className="p-1 text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[20px]">edit</span></button>
-                  <button onClick={() => handleActionClick("Delete Session", session.title)} className="p-1 text-on-surface-variant hover:text-error transition-colors"><span className="material-symbols-outlined text-[20px]">delete</span></button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>

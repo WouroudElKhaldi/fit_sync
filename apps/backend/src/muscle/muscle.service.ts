@@ -31,11 +31,15 @@ export class MuscleService {
 
   async create(name: string, category: string) {
     const existing = await prisma.muscle.findUnique({ where: { name } });
-    if (existing) throw new ConflictException('Muscle with this name already exists');
+    if (existing)
+      throw new ConflictException('Muscle with this name already exists');
     return prisma.muscle.create({ data: { name, category } });
   }
 
-  async update(muscleId: string, payload: { name?: string; category?: string }) {
+  async update(
+    muscleId: string,
+    payload: { name?: string; category?: string },
+  ) {
     const muscle = await prisma.muscle.findUnique({ where: { id: muscleId } });
     if (!muscle) throw new NotFoundException('Muscle group not found');
     return prisma.muscle.update({

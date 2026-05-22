@@ -6,12 +6,52 @@ import {
 import { prisma, Role as PrismaRole } from '@fitsync/database';
 import { RegisterUserSchema, Role } from '@fitsync/shared-types';
 import * as crypto from 'crypto';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
   private hashPassword(password: string): string {
     const salt = 'fitsync-secure-salt-2026';
     return crypto.scryptSync(password, salt, 64).toString('hex');
+  }
+
+  private async sendEmail(
+    to: string,
+    subject: string,
+    body: string,
+  ): Promise<boolean> {
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+
+    if (!user || !pass) {
+      console.warn(
+        'SMTP_USER and SMTP_PASS are not configured in environment variables. Email mock-logged only.',
+      );
+      return false;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user,
+          pass,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"FitSync Pro" <${user}>`,
+        to,
+        subject,
+        text: body,
+      });
+
+      console.log(`Real email successfully sent to ${to} via Gmail SMTP`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send email via Nodemailer Gmail SMTP:', error);
+      return false;
+    }
   }
 
   async register(payload: unknown) {
@@ -48,7 +88,7 @@ export class AuthService {
         username,
         passwordHash,
         fullName,
-        role: role as PrismaRole,
+        role: role,
         isVerified: false,
         verificationCode,
         trainerProfile:
@@ -74,13 +114,17 @@ export class AuthService {
       },
     });
 
+    const subject = 'FitSync Account Verification Code';
+    const body = `Welcome ${fullName}! Your 6-digit verification code is: ${verificationCode}`;
+    await this.sendEmail(email, subject, body);
+
     return {
       message:
         'User registered successfully. Please verify your account using the provided code.',
       mockEmailDelivered: {
         to: email,
-        subject: 'FitSync Account Verification Code',
-        body: `Welcome ${fullName}! Your 6-digit verification code is: ${verificationCode}`,
+        subject,
+        body,
         code: verificationCode,
       },
       user,
@@ -105,12 +149,16 @@ export class AuthService {
       data: { verificationCode },
     });
 
+    const subject = 'FitSync Account Verification Code';
+    const body = `Your requested 6-digit verification code is: ${verificationCode}`;
+    await this.sendEmail(email, subject, body);
+
     return {
       message: 'Verification code generated and sent successfully',
       mockEmailDelivered: {
         to: email,
-        subject: 'FitSync Account Verification Code',
-        body: `Your requested 6-digit verification code is: ${verificationCode}`,
+        subject,
+        body,
         code: verificationCode,
       },
     };
@@ -210,12 +258,16 @@ export class AuthService {
       data: { resetPasswordCode },
     });
 
+    const subject = 'FitSync Password Reset Request';
+    const body = `Use this 6-digit code to reset your password: ${resetPasswordCode}`;
+    await this.sendEmail(payload.email, subject, body);
+
     return {
       message: 'Password reset code generated successfully',
       mockEmailDelivered: {
         to: payload.email,
-        subject: 'FitSync Password Reset Request',
-        body: `Use this 6-digit code to reset your password: ${resetPasswordCode}`,
+        subject,
+        body,
         code: resetPasswordCode,
       },
     };

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   NotFoundException,
@@ -78,7 +78,9 @@ export class ExerciseAdminService {
       where: { exerciseId_muscleId: { exerciseId, muscleId } },
     });
     if (existing) {
-      throw new ConflictException('This muscle mapping already exists for this exercise');
+      throw new ConflictException(
+        'This muscle mapping already exists for this exercise',
+      );
     }
 
     return prisma.exerciseMuscle.create({

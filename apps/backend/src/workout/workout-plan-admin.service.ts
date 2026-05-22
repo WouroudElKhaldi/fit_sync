@@ -13,6 +13,34 @@ export class WorkoutPlanAdminService {
     const plan = await prisma.workoutPlan.findUnique({ where: { id: planId } });
     if (!plan) throw new NotFoundException('Workout plan not found');
 
+    if (payload.exercises && Array.isArray(payload.exercises)) {
+      // Cascade delete previous exercises and sets
+      await prisma.workoutExercise.deleteMany({
+        where: { workoutPlanId: planId },
+      });
+
+      // Insert new exercises & sets
+      const exercisesPayload = payload.exercises as any[];
+      for (const ex of exercisesPayload) {
+        await prisma.workoutExercise.create({
+          data: {
+            workoutPlanId: planId,
+            exerciseId: ex.exerciseId,
+            orderIndex: ex.orderIndex,
+            restTimeSec: ex.restTimeSec,
+            notes: ex.notes,
+            sets: {
+              create: ex.sets.map((s: any) => ({
+                setIndex: s.setIndex,
+                expectedReps: s.expectedReps,
+                expectedWeight: s.expectedWeight,
+              })),
+            },
+          },
+        });
+      }
+    }
+
     return prisma.workoutPlan.update({
       where: { id: planId },
       data: {
@@ -23,6 +51,7 @@ export class WorkoutPlanAdminService {
           : undefined,
         isRecurring: payload.isRecurring as boolean | undefined,
         recurrenceRule: payload.recurrenceRule as string | undefined,
+        clientId: payload.clientId as string | undefined,
       },
       include: { exercises: { include: { sets: true, exercise: true } } },
     });

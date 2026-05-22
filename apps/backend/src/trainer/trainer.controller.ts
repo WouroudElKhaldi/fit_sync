@@ -29,4 +29,14 @@ export class TrainerController {
     }
     return this.trainerService.getClientProgress(trainerId, clientId);
   }
+
+  @Get(':trainerId/dashboard-stats')
+  async getDashboardStats(@Param('trainerId') trainerId: string) {
+    return this.trainerService.getDashboardStats(trainerId);
+  }
+
+  @Get(':trainerId/analytics')
+  async getTrainerAnalytics(@Param('trainerId') trainerId: string) {
+    return this.trainerService.getTrainerAnalytics(trainerId);
+  }
 }

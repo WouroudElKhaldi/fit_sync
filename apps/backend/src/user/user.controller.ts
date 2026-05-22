@@ -20,25 +20,60 @@ export class UserController {
     return this.userService.listAllUsers(role);
   }
 
+  // Any user: search clients/workout plans
+  @Get('search')
+  async search(
+    @Query('q') query: string,
+    @Query('callerId') callerId: string,
+  ) {
+    return this.userService.search(query, callerId);
+  }
+
+  // Any user: get real dynamic notifications list
+  @Get(':userId/notifications')
+  async getNotifications(@Param('userId') userId: string) {
+    return this.userService.getNotifications(userId);
+  }
+
   // Any user: get their own profile (or admin lookup)
   @Get(':userId')
   async getUserProfile(@Param('userId') userId: string) {
     return this.userService.getUserProfile(userId);
   }
 
-  // Any user: update their own profile fields
+  // Admin: create a new user/client
+  @Post('admin-create')
+  async adminCreateUser(
+    @Query('adminId') adminId: string,
+    @Body()
+    payload: {
+      email: string;
+      username: string;
+      fullName: string;
+      role: string;
+      password?: string;
+    },
+  ) {
+    return this.userService.adminCreateUser(adminId, payload as any);
+  }
+
+  // Any user: update their own profile fields (or admin updates another user)
   @Patch(':userId')
   async updateUserProfile(
     @Param('userId') userId: string,
     @Body() payload: Record<string, unknown>,
+    @Query('callerId') callerId?: string,
   ) {
-    return this.userService.updateUserProfile(userId, payload);
+    return this.userService.updateUserProfile(userId, payload, callerId);
   }
 
-  // Any user: permanently delete their own account
+  // Any user: permanently delete their own account (or admin deletes another user)
   @Delete(':userId')
-  async deleteAccount(@Param('userId') userId: string) {
-    return this.userService.deleteAccount(userId);
+  async deleteAccount(
+    @Param('userId') userId: string,
+    @Query('callerId') callerId?: string,
+  ) {
+    return this.userService.deleteAccount(userId, callerId);
   }
 
   // User: assign themselves to a trainer

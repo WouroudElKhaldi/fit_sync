@@ -122,7 +122,7 @@ export class SessionService {
     let totalVolume = 0;
     for (const s of session.loggedSets) {
       if (s.status === 'SKIPPED') continue;
-      
+
       const weight = s.actualWeight ?? s.expectedWeight;
       const reps = s.actualReps ?? s.expectedReps;
       totalVolume += weight * reps;
@@ -201,5 +201,33 @@ export class SessionService {
       },
     });
   }
-}
 
+  async getTrainerClientsSessions(trainerId: string, isAdmin?: boolean) {
+    return prisma.workoutSession.findMany({
+      where: isAdmin ? {} : {
+        workoutPlan: {
+          client: { trainerId },
+        },
+      },
+      include: {
+        workoutPlan: {
+          select: {
+            id: true,
+            title: true,
+            client: { select: { id: true, fullName: true, email: true } },
+            createdBy: { select: { id: true, fullName: true, email: true } },
+          },
+        },
+        loggedSets: {
+          include: {
+            workoutExercise: {
+              include: { exercise: true },
+            },
+          },
+          orderBy: { setIndex: 'asc' },
+        },
+      },
+      orderBy: { completedAt: 'desc' },
+    });
+  }
+}
