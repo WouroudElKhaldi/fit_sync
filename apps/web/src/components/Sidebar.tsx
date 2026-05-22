@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 
 const NewClientModal: React.FC<{ onClose: () => void; onSave: (data: { fullName: string; email: string; username: string; role: string }) => void }> = ({ onClose, onSave }) => {
   const [name, setName] = useState('');
@@ -44,6 +45,7 @@ const LogoutModal: React.FC<{ onConfirm: () => void; onClose: () => void }> = ({
 
 const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { isOpen } = useSidebar();
   const [isLight, setIsLight] = useState(false);
   const [showNewClient, setShowNewClient] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -84,7 +86,9 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-surface-container border-r border-outline-variant/20 p-8 flex flex-col z-50">
+      <aside className={`fixed left-0 top-0 h-screen w-64 bg-surface-container border-r border-outline-variant/20 p-8 flex flex-col z-50 transition-transform duration-300 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
         {user && (
           <div className="flex items-center gap-3 mb-12 cursor-pointer hover:opacity-80" onClick={() => navigate('/profile')}>
             <div 

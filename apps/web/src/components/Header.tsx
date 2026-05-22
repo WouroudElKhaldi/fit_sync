@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 import mockData from '../data/mockData.json';
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
@@ -18,6 +19,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () =
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isOpen, toggle } = useSidebar();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -108,7 +110,17 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-64 right-0 h-[72px] bg-surface-container/80 backdrop-blur-md border-b border-outline-variant/20 flex items-center justify-between px-10 z-40">
+      <header className={`fixed top-0 right-0 h-[72px] bg-surface-container/80 backdrop-blur-md border-b border-outline-variant/20 flex items-center gap-4 justify-between px-6 z-40 transition-all duration-300 ${
+        isOpen ? 'left-64' : 'left-0'
+      }`}>
+        {/* Sidebar Toggle Button */}
+        <button
+          onClick={toggle}
+          className="p-2 rounded-xl text-on-surface-variant/60 hover:bg-surface-container-highest hover:text-on-surface transition-all shrink-0"
+          title={isOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
+        >
+          <span className="material-symbols-outlined">{isOpen ? 'menu_open' : 'menu'}</span>
+        </button>
         {/* Search */}
         <div className="relative w-80" ref={searchRef}>
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 z-10">search</span>

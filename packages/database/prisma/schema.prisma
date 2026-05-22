@@ -79,6 +79,21 @@ model User {
   // Chat Groups
   createdGroups           ChatGroup[]     @relation("CreatedGroups")
   groupMemberships        ChatGroupMember[]
+
+  // Connections
+  requestedConnections    Connection[]    @relation("RequestedConnections")
+  receivedConnections     Connection[]    @relation("ReceivedConnections")
+
+  // Chat History Management (Soft Delete)
+  clearedChats            ChatClear[]
+
+  // Blocks
+  blockingUsers           Block[]         @relation("BlockingUsers")
+  blockedUsers            Block[]         @relation("BlockedUsers")
+
+  // Presence Status
+  isOnline                Boolean         @default(false)
+  lastActiveAt            DateTime        @default(now())
 }
 
 model TrainerProfile {
@@ -258,4 +273,50 @@ model Message {
   workoutPlanId String?
   workoutPlan   WorkoutPlan? @relation("LinkedMessages", fields: [workoutPlanId], references: [id], onDelete: SetNull)
   createdAt     DateTime     @default(now())
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Connection {
+  id           String           @id @default(uuid())
+  requesterId  String
+  requester    User             @relation("RequestedConnections", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId  String
+  addressee    User             @relation("ReceivedConnections", fields: [addresseeId], references: [id], onDelete: Cascade)
+  status       ConnectionStatus @default(PENDING)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([requesterId, addresseeId])
+}
+
+// ================= CHAT CLEAR & BLOCKING =================
+
+model ChatClear {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otherUserId String?  // For direct chats
+  groupId     String?  // For group chats
+  clearedAt   DateTime @default(now())
+
+  // A user can clear a specific direct chat or a specific group chat
+  // Note: Only one entry per combination is needed, we just update clearedAt.
+  @@unique([userId, otherUserId])
+  @@unique([userId, groupId])
+}
+
+model Block {
+  id        String   @id @default(uuid())
+  blockerId String
+  blocker   User     @relation("BlockingUsers", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("BlockedUsers", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
 }

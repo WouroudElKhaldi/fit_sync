@@ -111,6 +111,8 @@ const Dashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<any>(null);
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
   const [trainerProfile, setTrainerProfile] = useState<any>(null);
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
+  const [pendingConnections, setPendingConnections] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -127,6 +129,48 @@ const Dashboard: React.FC = () => {
     setFeedPage(1);
   }, [feedFilter]);
 
+  const handleInvitationResponse = async (membershipId: string, status: 'ACCEPTED' | 'REJECTED') => {
+    if (!user) return;
+    const token = localStorage.getItem('fitsync_token');
+    try {
+      const res = await fetch(`http://localhost:3000/messages/invitations/${membershipId}/respond`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: user.id, status }),
+      });
+
+      if (res.ok) {
+        setPendingInvitations(prev => prev.filter(inv => inv.id !== membershipId));
+      }
+    } catch (err) {
+      console.error('Error responding to invitation:', err);
+    }
+  };
+
+  const handleConnectionResponse = async (connectionId: string, status: 'ACCEPTED' | 'REJECTED') => {
+    if (!user) return;
+    const token = localStorage.getItem('fitsync_token');
+    try {
+      const res = await fetch(`http://localhost:3000/messages/connections/${connectionId}/respond`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: user.id, status }),
+      });
+
+      if (res.ok) {
+        setPendingConnections(prev => prev.filter(conn => conn.id !== connectionId));
+      }
+    } catch (err) {
+      console.error('Error responding to connection:', err);
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -140,11 +184,13 @@ const Dashboard: React.FC = () => {
       };
 
       try {
-        const [statsRes, analyticsRes, sessionsRes, profileRes] = await Promise.all([
+        const [statsRes, analyticsRes, sessionsRes, profileRes, invitationsRes, connectionsRes] = await Promise.all([
           fetch(`http://localhost:3000/trainers/${user.id}/dashboard-stats`, { headers }),
           fetch(`http://localhost:3000/trainers/${user.id}/analytics`, { headers }),
           fetch(`http://localhost:3000/workouts/sessions/trainer/${user.id}`, { headers }),
           fetch(`http://localhost:3000/trainer-profiles/${user.id}`, { headers }),
+          fetch(`http://localhost:3000/messages/invitations/${user.id}`, { headers }),
+          fetch(`http://localhost:3000/messages/connections/pending/${user.id}`, { headers }),
         ]);
 
         if (!statsRes.ok || !analyticsRes.ok || !sessionsRes.ok || !profileRes.ok) {
@@ -155,11 +201,15 @@ const Dashboard: React.FC = () => {
         const analyticsData = await analyticsRes.json();
         const sessionsData = await sessionsRes.json();
         const profileData = await profileRes.json();
+        const invitationsData = invitationsRes.ok ? await invitationsRes.json() : [];
+        const connectionsData = connectionsRes.ok ? await connectionsRes.json() : [];
 
         setStats(statsData);
         setAnalytics(analyticsData);
         setRecentSessions(sessionsData);
         setTrainerProfile(profileData);
+        setPendingInvitations(invitationsData);
+        setPendingConnections(connectionsData);
       } catch (err: any) {
         console.error('Error fetching dashboard details:', err);
         setError(err.message || 'An error occurred while loading dashboard telemetry');
@@ -318,19 +368,79 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-6 pb-4 border-b border-outline-variant/20">
             <span className="material-symbols-outlined text-error">error</span>
             <h2 className="font-bold">Needs Attention</h2>
-            {alerts.length - dismissedAlertIds.length > 0 && (
+            {(alerts.length - dismissedAlertIds.length + pendingInvitations.length + pendingConnections.length) > 0 && (
               <span className="ml-auto text-xs font-bold bg-error/10 text-error px-2 py-0.5 rounded-full">
-                {alerts.length - dismissedAlertIds.length}
+                {alerts.length - dismissedAlertIds.length + pendingInvitations.length + pendingConnections.length}
               </span>
             )}
           </div>
           <div className="flex flex-col gap-3 flex-1">
-            {visibleAlerts.length === 0 && (
+            {visibleAlerts.length === 0 && pendingInvitations.length === 0 && pendingConnections.length === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center text-on-surface-variant/40 gap-2">
                 <span className="material-symbols-outlined text-4xl">check_circle</span>
                 <span className="text-sm font-semibold">All clear!</span>
               </div>
             )}
+
+            {/* Pending Connections */}
+            {pendingConnections.map(conn => (
+              <div key={conn.id} className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 group animate-in fade-in slide-in-from-bottom-2">
+                <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+                  <span className="material-symbols-outlined">person_add</span>
+                </div>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="font-bold text-sm truncate">{conn.requester?.fullName}</span>
+                  <span className="text-[10px] text-primary font-semibold truncate">Connection Request ({conn.requester?.role})</span>
+                </div>
+                <div className="flex gap-1.5 shrink-0">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleConnectionResponse(conn.id, 'ACCEPTED'); }}
+                    className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center shadow-lg cursor-pointer"
+                    title="Accept Request"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">check</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleConnectionResponse(conn.id, 'REJECTED'); }}
+                    className="w-8 h-8 rounded-lg bg-error/20 text-error hover:bg-error hover:text-white transition-all flex items-center justify-center shadow-lg cursor-pointer"
+                    title="Decline Request"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Pending Group Invitations */}
+            {pendingInvitations.map(invite => (
+              <div key={invite.id} className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 group">
+                <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+                  <span className="material-symbols-outlined">groups</span>
+                </div>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="font-bold text-sm truncate">{invite.group?.name}</span>
+                  <span className="text-[10px] text-primary font-semibold truncate">Group Invite from {invite.group?.createdBy?.fullName}</span>
+                </div>
+                <div className="flex gap-1.5 shrink-0">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleInvitationResponse(invite.id, 'ACCEPTED'); }}
+                    className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center shadow-lg cursor-pointer"
+                    title="Accept"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">check</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleInvitationResponse(invite.id, 'REJECTED'); }}
+                    className="w-8 h-8 rounded-lg bg-error/20 text-error hover:bg-error hover:text-white transition-all flex items-center justify-center shadow-lg cursor-pointer"
+                    title="Decline"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Completed Workout Session Alerts */}
             {visibleAlerts.map(alert => (
               <div key={alert.id} onClick={() => setSelectedAlert(alert)} className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 cursor-pointer group">
                 <img src={alert.avatar} alt={alert.clientName} className="w-11 h-11 rounded-full object-cover border-2 border-transparent group-hover:border-primary/40" />

@@ -52,6 +52,9 @@ const WorkoutBuilder: React.FC = () => {
 
   const [isSaving, setIsSaving] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>([]);
+  // True when the loaded plan belongs to another trainer — treat it as a read-only template
+  const [isTemplatePlan, setIsTemplatePlan] = useState(false);
+  const [templateOwnerName, setTemplateOwnerName] = useState("");
 
   // Modal State
   const [modalConfig, setModalConfig] = useState<{
@@ -103,8 +106,20 @@ const WorkoutBuilder: React.FC = () => {
             const planData = await planRes.json();
             setTemplateName(planData.title || "");
             setDescription(planData.description || "");
-            setSelectedClient(planData.clientId || "");
-            if (planData.scheduledDate) {
+
+            // Detect if this plan belongs to a different trainer
+            const isOwnPlan = !planData.createdById || planData.createdById === user?.id;
+            if (!isOwnPlan) {
+              // It's a shared template — do NOT pre-select client, do NOT allow patching the original
+              setIsTemplatePlan(true);
+              setTemplateOwnerName(planData.createdBy?.fullName || "Another Trainer");
+              setSelectedClient(""); // Force user to pick their own client
+            } else {
+              setIsTemplatePlan(false);
+              setSelectedClient(planData.clientId || "");
+            }
+
+            if (isOwnPlan && planData.scheduledDate) {
               const d = new Date(planData.scheduledDate);
               const pad = (n: number) => String(n).padStart(2, '0');
               setScheduledDateTime(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
@@ -273,10 +288,13 @@ const WorkoutBuilder: React.FC = () => {
     };
 
     try {
-      const url = planId 
+      // If it's a foreign plan (template mode), always create a new plan (POST)
+      // If it's our own plan and we have a planId, update it (PATCH)
+      const isEditing = planId && !isTemplatePlan;
+      const url = isEditing
         ? `http://localhost:3000/workouts/plans/${planId}`
         : `http://localhost:3000/workouts/plans?trainerId=${user?.id}`;
-      const method = planId ? 'PATCH' : 'POST';
+      const method = isEditing ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
         method: method,
@@ -293,10 +311,12 @@ const WorkoutBuilder: React.FC = () => {
 
       setModalConfig({
         isOpen: true,
-        title: planId ? 'Workout Updated' : 'Workout Published',
-        message: planId 
+        title: isEditing ? 'Workout Updated' : 'Workout Published',
+        message: isEditing
           ? 'The training workout has been successfully updated.'
-          : 'The training workout has been successfully published and scheduled.',
+          : isTemplatePlan
+            ? 'A new workout plan has been created from this template and scheduled for your client.'
+            : 'The training workout has been successfully published and scheduled.',
         type: 'success',
         onConfirm: () => {
           closeModal();
@@ -318,9 +338,9 @@ const WorkoutBuilder: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col lg:flex-row h-[calc(100vh-140px)] overflow-hidden rounded-[var(--radius-xl)] border border-secondary-container/10 bg-background shadow-2xl relative">
+    <div className="w-full flex flex-col lg:flex-row lg:h-[calc(100vh-140px)] rounded-[var(--radius-xl)] border border-secondary-container/10 bg-background shadow-2xl relative overflow-x-hidden">
       {/* Left Sidebar: Exercise Library */}
-      <aside className="w-full lg:w-60 bg-surface-container-low/40 border-r border-secondary-container/10 flex flex-col shrink-0 overflow-hidden z-20 backdrop-blur-xl">
+      <aside className="w-full lg:w-60 max-h-[40vh] lg:max-h-none lg:h-full bg-surface-container-low/40 border-b lg:border-b-0 lg:border-r border-secondary-container/10 flex flex-col shrink-0 overflow-hidden z-20 backdrop-blur-xl">
         <div className="p-4 border-b border-secondary-container/10 bg-surface-container-high/20">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-black text-on-surface uppercase tracking-tight leading-none">Library</h2>
@@ -377,8 +397,20 @@ const WorkoutBuilder: React.FC = () => {
       </aside>
 
       {/* Center: Workout Canvas */}
-      <section className="flex-1 bg-surface-container-low/40 overflow-y-auto p-6 no-scrollbar relative z-10">
+      <section className="flex-1 min-h-[60vh] lg:h-full bg-surface-container-low/40 overflow-y-auto p-6 no-scrollbar relative z-10">
         <div className="max-w-[800px] mx-auto space-y-8 pb-10">
+          {/* Template Mode Banner */}
+          {isTemplatePlan && (
+            <div className="flex items-center gap-4 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-md mb-2 animate-in fade-in slide-in-from-top-2">
+              <span className="material-symbols-outlined text-amber-400 text-[22px]">content_copy</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 block">Shared Template Mode</span>
+                <span className="text-[10px] font-bold text-on-surface/70">
+                  Viewing a plan shared by <strong>{templateOwnerName}</strong>. Select your own client and save to create a new plan from this template.
+                </span>
+              </div>
+            </div>
+          )}
           {/* Canvas Header */}
           <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6 border-b border-secondary-container/10 pb-6 relative">
             <div className="flex-1 relative z-10 space-y-4">
@@ -432,7 +464,7 @@ const WorkoutBuilder: React.FC = () => {
                 <span className={`material-symbols-outlined text-[16px] ${isSaving ? 'animate-spin' : 'group-hover:-translate-y-0.5'} transition-transform`}>
                   {isSaving ? 'sync' : 'rocket_launch'}
                 </span>
-                {isSaving ? 'Publishing...' : planId ? 'Update Workout' : 'Publish Workout'}
+                {isSaving ? 'Publishing...' : isTemplatePlan ? 'Use Template' : planId ? 'Update Workout' : 'Publish Workout'}
               </button>
             </div>
           </div>

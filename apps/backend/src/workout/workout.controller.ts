@@ -25,6 +25,7 @@ export class WorkoutController {
   private async validateAccess(
     authHeader: string | undefined,
     planId: string,
+    isWrite = false,
   ): Promise<void> {
     if (!authHeader) return;
     const parts = authHeader.split(' ');
@@ -42,9 +43,11 @@ export class WorkoutController {
     if (!plan) return;
 
     if (caller.role === 'TRAINER') {
-      if (plan.createdById !== caller.id) {
+      // Any trainer can read a plan (e.g. to view a shared workout template)
+      // Only the owning trainer can write/modify it
+      if (isWrite && plan.createdById !== caller.id) {
         throw new ForbiddenException(
-          'You do not have permission to access or modify this workout plan',
+          'You do not have permission to modify this workout plan',
         );
       }
     } else {
@@ -94,7 +97,7 @@ export class WorkoutController {
     @Body() payload: Record<string, unknown>,
     @Headers('authorization') authHeader?: string,
   ) {
-    await this.validateAccess(authHeader, planId);
+    await this.validateAccess(authHeader, planId, true);
     return this.workoutPlanAdminService.updatePlan(planId, payload);
   }
 
@@ -103,7 +106,7 @@ export class WorkoutController {
     @Param('planId') planId: string,
     @Headers('authorization') authHeader?: string,
   ) {
-    await this.validateAccess(authHeader, planId);
+    await this.validateAccess(authHeader, planId, false);
     return this.workoutService.getPlanById(planId);
   }
 
@@ -120,7 +123,7 @@ export class WorkoutController {
     @Body() payload: Record<string, unknown>,
     @Headers('authorization') authHeader?: string,
   ) {
-    await this.validateAccess(authHeader, planId);
+    await this.validateAccess(authHeader, planId, true);
     return this.workoutPlanAdminService.addExerciseToPlan(planId, payload);
   }
 
@@ -135,7 +138,7 @@ export class WorkoutController {
       where: { id: workoutExerciseId },
     });
     if (entry) {
-      await this.validateAccess(authHeader, entry.workoutPlanId);
+      await this.validateAccess(authHeader, entry.workoutPlanId, true);
     }
     return this.workoutPlanAdminService.updateWorkoutExercise(
       workoutExerciseId,
@@ -152,7 +155,7 @@ export class WorkoutController {
       where: { id: workoutExerciseId },
     });
     if (entry) {
-      await this.validateAccess(authHeader, entry.workoutPlanId);
+      await this.validateAccess(authHeader, entry.workoutPlanId, true);
     }
     return this.workoutPlanAdminService.removeExerciseFromPlan(
       workoutExerciseId,
@@ -176,7 +179,7 @@ export class WorkoutController {
       where: { id: workoutExerciseId },
     });
     if (entry) {
-      await this.validateAccess(authHeader, entry.workoutPlanId);
+      await this.validateAccess(authHeader, entry.workoutPlanId, true);
     }
     return this.workoutPlanAdminService.addSetToExercise(
       workoutExerciseId,
@@ -200,7 +203,7 @@ export class WorkoutController {
       include: { workoutExercise: true },
     });
     if (set?.workoutExercise) {
-      await this.validateAccess(authHeader, set.workoutExercise.workoutPlanId);
+      await this.validateAccess(authHeader, set.workoutExercise.workoutPlanId, true);
     }
     return this.workoutPlanAdminService.updateSet(setId, payload);
   }
@@ -215,7 +218,7 @@ export class WorkoutController {
       include: { workoutExercise: true },
     });
     if (set?.workoutExercise) {
-      await this.validateAccess(authHeader, set.workoutExercise.workoutPlanId);
+      await this.validateAccess(authHeader, set.workoutExercise.workoutPlanId, true);
     }
     return this.workoutPlanAdminService.deleteSet(setId);
   }
@@ -230,7 +233,7 @@ export class WorkoutController {
     @Param('planId') planId: string,
     @Headers('authorization') authHeader?: string,
   ) {
-    await this.validateAccess(authHeader, planId);
+    await this.validateAccess(authHeader, planId, true);
     return this.workoutPlanAdminService.deletePlan(planId);
   }
 }
