@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider, useAppTheme } from './src/context/ThemeContext';
+import { AuthProvider } from './src/context/AuthContext';
 
 interface Props {
   children?: ReactNode;
@@ -75,7 +76,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <MainAppContent />
+        <AuthProvider>
+          <MainAppContent />
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

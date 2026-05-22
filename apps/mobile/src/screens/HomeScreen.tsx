@@ -50,6 +50,12 @@ export default function HomeScreen({ navigation }: Props) {
   const thisWeekDays = getThisWeekDays();
   const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
+  const isWorkoutDone = (plan: any) => {
+    return plan.exercises?.some((ex: any) => 
+      ex.sets?.some((s: any) => s.status === 'COMPLETED' || s.actualReps !== null)
+    );
+  };
+
   // Find all workouts for the selected date
   const dayPlans = schedules.filter((s: any) => {
     const sDate = new Date(s.scheduledDate);
@@ -188,15 +194,22 @@ export default function HomeScreen({ navigation }: Props) {
                   </View>
                 </View>
 
-                <TouchableOpacity 
-                  className="w-full h-14 bg-primary rounded-xl flex-row items-center justify-center gap-2 border-t border-white/20"
-                  onPress={() => {
-                    navigation.navigate('WorkoutLogger', { planId: plan.id });
-                  }}
-                >
-                  <MaterialIcons name="play-arrow" size={24} color="#3c0091" />
-                  <Text className="text-on-primary font-headline-md text-[18px] font-bold">Start Workout</Text>
-                </TouchableOpacity>
+                {(() => {
+                  const isDone = isWorkoutDone(plan);
+                  return (
+                    <TouchableOpacity 
+                      className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 border-t border-white/20 ${isDone ? 'bg-secondary' : 'bg-primary'}`}
+                      onPress={() => {
+                        navigation.navigate('WorkoutLogger', { planId: plan.id });
+                      }}
+                    >
+                      <MaterialIcons name={isDone ? "edit" : "play-arrow"} size={24} color={isDone ? "#30312e" : "#3c0091"} />
+                      <Text className={`font-headline-md text-[18px] font-bold ${isDone ? 'text-on-secondary' : 'text-on-primary'}`}>
+                        {isDone ? "Edit Workout" : "Start Workout"}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })()}
               </View>
             ))
           ) : (

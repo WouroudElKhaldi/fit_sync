@@ -6,6 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'ResetPassword'>;
@@ -14,6 +15,7 @@ type Props = {
 
 export default function ResetPasswordScreen({ navigation, route }: Props) {
   const { isDark, toggleTheme, colors } = useAppTheme();
+  const { resetPassword } = useAuth();
   const { email, code } = route.params;
 
   const [password, setPassword] = useState('');
@@ -34,8 +36,8 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
       return;
     }
 
-    if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long');
+    if (password.length < 8) {
+      setErrorMessage('Password must be at least 8 characters long');
       return;
     }
 
@@ -46,12 +48,15 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
 
     setIsLoading(true);
     try {
-      // Simulate API call for saving the new password
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await resetPassword({
+        email,
+        code,
+        newPassword: password,
+      });
       // Show success popup modal
       setShowSuccessModal(true);
-    } catch (e) {
-      setErrorMessage('Failed to save new password. Please try again.');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Failed to save new password. Please try again.');
     } finally {
       setIsLoading(false);
     }

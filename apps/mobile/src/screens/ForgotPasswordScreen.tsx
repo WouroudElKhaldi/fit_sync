@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
@@ -12,6 +13,7 @@ type Props = {
 
 export default function ForgotPasswordScreen({ navigation }: Props) {
   const { isDark, toggleTheme, colors } = useAppTheme();
+  const { forgotPassword } = useAuth();
   
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +29,10 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
     setIsLoading(true);
     try {
-      // Simulate API call for sending reset code
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      // For testing/mock purposes, navigate to the verify step passing the email parameter
+      await forgotPassword(email.toLowerCase().trim());
       navigation.navigate('VerifyResetCode', { email: email.toLowerCase().trim() });
-    } catch (e) {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

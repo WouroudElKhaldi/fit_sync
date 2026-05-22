@@ -6,6 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'EmailVerification'>;
@@ -14,6 +15,7 @@ type Props = {
 
 export default function EmailVerificationScreen({ navigation, route }: Props) {
   const { isDark, toggleTheme, colors } = useAppTheme();
+  const { verifyEmail, sendVerificationCode } = useAuth();
   const { email } = route.params;
 
   const [code, setCode] = useState('');
@@ -46,12 +48,11 @@ export default function EmailVerificationScreen({ navigation, route }: Props) {
 
     setIsLoading(true);
     try {
-      // Simulate verification API delay
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      await verifyEmail(email, code);
       // Show verified modal
       setShowSuccessModal(true);
-    } catch (e) {
-      setErrorMessage('Invalid verification code. Please try again.');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Invalid verification code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -65,12 +66,11 @@ export default function EmailVerificationScreen({ navigation, route }: Props) {
     setIsLoading(true);
 
     try {
-      // Simulate API resend email code
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await sendVerificationCode(email);
       setSuccessMessage('A new verification code has been dispatched.');
       setCountdown(30);
-    } catch (e) {
-      setErrorMessage('Failed to send code. Please try again later.');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Failed to send code. Please try again later.');
     } finally {
       setIsLoading(false);
     }

@@ -225,11 +225,9 @@ export default function ExerciseSelectorScreen({ navigation }: Props) {
             <TouchableOpacity 
               className="h-14 px-8 rounded-2xl bg-[#8B5CF6] items-center justify-center shadow-lg"
               onPress={() => {
-                navigation.navigate({
-                  name: 'WorkoutBuilder' as any,
-                  params: { addedExerciseNames: selectedExercises },
-                  merge: true
-                } as any);
+                navigation.navigate('WorkoutBuilder', {
+                  addedExerciseNames: selectedExercises
+                });
               }}
             >
               <Text className="text-white font-bold text-lg">Add to Workout</Text>

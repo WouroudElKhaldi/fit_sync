@@ -6,6 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'VerifyResetCode'>;
@@ -14,6 +15,7 @@ type Props = {
 
 export default function VerifyResetCodeScreen({ navigation, route }: Props) {
   const { isDark, toggleTheme, colors } = useAppTheme();
+  const { forgotPassword } = useAuth();
   const { email } = route.params;
 
   const [code, setCode] = useState('');
@@ -62,14 +64,12 @@ export default function VerifyResetCodeScreen({ navigation, route }: Props) {
     setErrorMessage('');
     setSuccessMessage('');
     setIsLoading(true);
-
     try {
-      // Simulate resending reset code API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await forgotPassword(email);
       setSuccessMessage('A new reset code has been sent to your email.');
       setCountdown(30);
-    } catch (e) {
-      setErrorMessage('Failed to resend code. Please try again later.');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Failed to resend code. Please try again later.');
     } finally {
       setIsLoading(false);
     }

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { api } from '../../mocks/api';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -13,19 +13,38 @@ type Props = {
 
 export default function LoginScreen({ navigation }: Props) {
   const { isDark, toggleTheme, colors } = useAppTheme();
+  const { login } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async () => {
+    setErrorMessage('');
+    
+    if (!email.trim() || !password.trim()) {
+      setErrorMessage('Please fill in both email and password fields');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const userProfile = await api.getUserProfile();
+      await login(email.toLowerCase().trim(), password);
+      // Route verified session to the main dashboards
       navigation.replace('MainTabs');
-    } catch (e) {
-      console.error(e);
+    } catch (error: any) {
+      console.log('Login failed with error:', error);
+      
+      // Auto routing unverified user to EmailVerification screen
+      if (error.code === 'ACCOUNT_NOT_VERIFIED') {
+        navigation.replace('EmailVerification', { 
+          email: error.email || email.toLowerCase().trim() 
+        });
+      } else {
+        setErrorMessage(error.message || 'Invalid email or password. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +92,7 @@ export default function LoginScreen({ navigation }: Props) {
 
       <View className="w-full max-w-[400px] z-10 flex flex-col gap-stack-lg">
         {/* Logo Header */}
-        <View className="items-center mb-stack-lg flex flex-col gap-stack-sm">
+        <View className="items-center mb-2 flex flex-col gap-stack-sm">
           <MaterialIcons name="fitness-center" size={48} color={colors.primary} />
           <Text className="font-display-lg text-display-lg tracking-tighter font-black" style={{ color: colors.primary }}>
             FITSYNC PRO
@@ -82,6 +101,22 @@ export default function LoginScreen({ navigation }: Props) {
             Elite Performance Tracking
           </Text>
         </View>
+
+        {/* Error Message Alert */}
+        {errorMessage ? (
+          <View 
+            className="border rounded-xl p-4 flex-row items-center gap-3"
+            style={{ 
+              backgroundColor: isDark ? 'rgba(147, 0, 10, 0.2)' : 'rgba(255, 180, 171, 0.2)', 
+              borderColor: isDark ? 'rgba(147, 0, 10, 0.4)' : 'rgba(255, 180, 171, 0.4)' 
+            }}
+          >
+            <MaterialIcons name="error-outline" size={20} color="#ffb4ab" />
+            <Text className="font-body-base flex-1 font-bold" style={{ color: isDark ? '#ffb4ab' : '#93000a' }}>
+              {errorMessage}
+            </Text>
+          </View>
+        ) : null}
 
         {/* Login Form Container (Glass surface in dark mode, clean white card in light mode) */}
         <BlurView 
@@ -153,7 +188,11 @@ export default function LoginScreen({ navigation }: Props) {
             <Text className="text-[16px] font-bold" style={{ color: colors.onPrimary }}>
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Text>
-            {!isLoading && <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />}
+            {isLoading ? (
+              <ActivityIndicator size="small" color={colors.onPrimary} />
+            ) : (
+              <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />
+            )}
           </TouchableOpacity>
         </BlurView>
 

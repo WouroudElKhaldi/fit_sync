@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { BlurView } from 'expo-blur';
 import { useAppTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
@@ -21,6 +22,7 @@ type Props = {
 
 export default function SignUpScreen({ navigation }: Props) {
   const { isDark, toggleTheme, colors } = useAppTheme();
+  const { register } = useAuth();
   
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
@@ -93,18 +95,24 @@ export default function SignUpScreen({ navigation }: Props) {
       setErrorMessage('Please enter a valid email address');
       return;
     }
-    if (!password.trim() || password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters');
+    if (!password.trim() || password.length < 8) {
+      setErrorMessage('Password must be at least 8 characters');
       return;
     }
 
-    // 2. Perform mock Sign Up
+    // 2. Perform real Sign Up
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      await register({
+        email: email.toLowerCase().trim(),
+        username: username.toLowerCase().trim(),
+        password,
+        fullName: fullName.trim(),
+        role: 'USER',
+      });
       navigation.replace('EmailVerification', { email: email.toLowerCase().trim() });
-    } catch (error) {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

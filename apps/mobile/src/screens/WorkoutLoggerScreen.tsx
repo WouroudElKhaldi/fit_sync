@@ -35,10 +35,15 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
         const initialData: any = {};
         selected.exercises.forEach((ex: any) => {
           ex.sets.forEach((set: any) => {
+            const isCompleted = set.status === 'COMPLETED';
             initialData[set.id] = {
-              reps: set.expectedReps?.toString() || '',
-              weight: set.expectedWeight?.toString() || '',
-              completed: set.status === 'COMPLETED',
+              reps: isCompleted && set.actualReps !== null && set.actualReps !== undefined
+                ? set.actualReps.toString()
+                : (set.expectedReps?.toString() || ''),
+              weight: isCompleted && set.actualWeight !== null && set.actualWeight !== undefined
+                ? set.actualWeight.toString()
+                : (set.expectedWeight?.toString() || ''),
+              completed: isCompleted,
             };
           });
         });
@@ -137,7 +142,7 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
                         }}
                         placeholder="0"
                         placeholderTextColor="#958ea0"
-                        editable={!isCompleted}
+                        editable={true}
                       />
                     </View>
                     <View className="flex-1 px-2">
@@ -153,7 +158,7 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
                         }}
                         placeholder="0"
                         placeholderTextColor="#958ea0"
-                        editable={!isCompleted}
+                        editable={true}
                       />
                     </View>
                     <View className="flex-[0.5] items-end">
@@ -233,8 +238,17 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
         visible={showFinishModal}
         title="Finish Workout?"
         message="Are you sure you want to finish and save this workout? Uncompleted sets will be marked as skipped."
-        onConfirm={() => {
+        onConfirm={async () => {
           setShowFinishModal(false);
+          // Persist all completed sets' values to database/API
+          for (const setId of Object.keys(setsData)) {
+            const data = setsData[setId];
+            if (data.completed) {
+              const repsNum = parseInt(data.reps) || 0;
+              const weightNum = parseFloat(data.weight) || 0;
+              await api.logSetCompletion(setId, repsNum, weightNum);
+            }
+          }
           navigation.navigate('PostWorkoutSummary' as any);
         }}
         onCancel={() => setShowFinishModal(false)}
