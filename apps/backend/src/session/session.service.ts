@@ -128,11 +128,19 @@ export class SessionService {
       totalVolume += weight * reps;
     }
 
+    const completedAt = new Date();
+    // Calculate duration in hours
+    const durationMs = completedAt.getTime() - session.startedAt.getTime();
+    const durationHours = durationMs / (1000 * 60 * 60);
+    // Rough estimate: 500 kcal per hour of lifting
+    const caloriesBurned = durationHours * 500;
+
     return prisma.workoutSession.update({
       where: { id: sessionId },
       data: {
-        completedAt: new Date(),
+        completedAt,
         totalVolume,
+        caloriesBurned,
         clientNotes: payload.clientNotes,
       },
       include: {

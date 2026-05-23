@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { RouteProp } from '@react-navigation/native';
-import { api } from '../../mocks/api';
+import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'WorkoutBuilder'>;
@@ -23,44 +25,84 @@ interface ExerciseState {
 }
 
 export default function WorkoutBuilderScreen({ navigation, route }: Props) {
-  const { defaultDate } = route.params || {};
-  const selectedDate = defaultDate ? new Date(defaultDate) : new Date('2026-05-19'); // stable mock fallback
+  const { user } = useAuth();
+  const { defaultDate, planId } = route.params || {};
+  const [selectedDate, setSelectedDate] = useState(defaultDate ? new Date(defaultDate) : new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const formattedDateString = `${DAYS_OF_WEEK[selectedDate.getDay()]}, ${MONTHS[selectedDate.getMonth()]} ${selectedDate.getDate()} | 9:00 AM`;
+  
+  const formatTime = (date: Date) => {
+    let h = date.getHours();
+    const m = date.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12;
+    return `${h}:${m} ${ampm}`;
+  };
 
-  const [workoutName, setWorkoutName] = useState('My Custom Leg Day');
-  const [exercises, setExercises] = useState<ExerciseState[]>([
-    {
-      id: 'ex-sq-1',
-      name: 'Back Squat',
-      sets: [
-        { id: 's-sq-1', reps: '10', weight: '225', rest: '2:00' },
-        { id: 's-sq-2', reps: '10', weight: '225', rest: '2:00' }
-      ]
+  const formattedDateString = `${DAYS_OF_WEEK[selectedDate.getDay()]}, ${MONTHS[selectedDate.getMonth()]} ${selectedDate.getDate()} | ${formatTime(selectedDate)}`;
+
+  const [workoutName, setWorkoutName] = useState('New Workout');
+  const [exercises, setExercises] = useState<ExerciseState[]>([]);
+
+  // Load existing plan if editing
+  useEffect(() => {
+    async function loadPlanForEdit() {
+      if (!planId) return;
+      try {
+        setLoading(true);
+        const plan = await apiService.get(`/workouts/plans/${planId}`);
+        setWorkoutName(plan.title || '');
+        if (plan.scheduledDate) {
+          setSelectedDate(new Date(plan.scheduledDate));
+        }
+        if (plan.exercises) {
+          const loadedExs = plan.exercises.map((ex: any, exIdx: number) => ({
+            id: ex.exercise?.id || ex.exerciseId,
+            name: ex.exercise?.name || 'Exercise',
+            sets: (ex.sets || []).map((s: any, sIdx: number) => ({
+              id: s.id || `s-${Date.now()}-${exIdx}-${sIdx}`,
+              reps: (s.expectedReps ?? 10).toString(),
+              weight: (s.expectedWeight ?? 0).toString(),
+              rest: '2:00',
+            }))
+          }));
+          setExercises(loadedExs);
+        }
+      } catch (err) {
+        console.error('Failed to load plan for editing:', err);
+      } finally {
+        setLoading(false);
+      }
     }
-  ]);
+    loadPlanForEdit();
+  }, [planId]);
 
   // Reactive Navigation Param Listener to process selected exercises
   useEffect(() => {
-    if (route.params?.addedExerciseNames && route.params.addedExerciseNames.length > 0) {
-      const newNames = route.params.addedExerciseNames;
+    if ((route.params as any)?.addedExercises && (route.params as any).addedExercises.length > 0) {
+      const newExercises = (route.params as any).addedExercises;
       setExercises(prev => {
-        const newlyAdded = newNames.map((name, idx) => ({
-          id: `ex-${Date.now()}-${idx}`,
-          name: name,
+        const newlyAdded = newExercises.map((ex: any, idx: number) => ({
+          id: ex.id,
+          name: ex.name,
           sets: [
             { id: `s-${Date.now()}-${idx}-1`, reps: '10', weight: '135', rest: '2:00' }
           ]
         }));
-        return [...prev, ...newlyAdded];
+        // filter out any exercises already in the list
+        const filteredNew = newlyAdded.filter((n: any) => !prev.some(p => p.id === n.id));
+        return [...prev, ...filteredNew];
       });
 
       // Clear params to avoid double adding
-      navigation.setParams({ addedExerciseNames: undefined });
+      navigation.setParams({ addedExercises: undefined } as any);
     }
-  }, [route.params?.addedExerciseNames]);
+  }, [(route.params as any)?.addedExercises]);
 
   const handleAddSet = (exerciseId: string) => {
     setExercises(prev => prev.map(ex => {
@@ -99,41 +141,56 @@ export default function WorkoutBuilderScreen({ navigation, route }: Props) {
   };
 
   const handleSaveWorkout = async () => {
+    if (!user) return;
     const newPlan = {
-      id: `wp-custom-${Date.now()}`,
       title: workoutName || 'Custom Workout',
       description: 'Dynamically created custom workout session.',
       scheduledDate: selectedDate.toISOString(),
       isRecurring: false,
-      createdById: 't-2001',
-      clientId: 'u-1001',
-      createdAt: new Date().toISOString(),
+      clientId: user.role === 'USER' ? user.id : undefined,
+      trainerId: user.role === 'TRAINER' ? user.id : undefined,
       exercises: exercises.map((ex, exIdx) => ({
-        id: `we-custom-${exIdx}-${Date.now()}`,
-        workoutPlanId: `wp-custom-${Date.now()}`,
-        exerciseId: `e-custom-${exIdx}`,
+        exerciseId: ex.id,
         orderIndex: exIdx + 1,
         restTimeSec: 90,
         notes: '',
-        exercise: {
-          id: `e-custom-${exIdx}`,
-          name: ex.name
-        },
         sets: ex.sets.map((set, setIdx) => ({
-          id: `ws-custom-${exIdx}-${setIdx}-${Date.now()}`,
           setIndex: setIdx + 1,
           expectedReps: parseInt(set.reps) || 10,
           expectedWeight: parseFloat(set.weight) || 0,
-          actualReps: null,
-          actualWeight: null,
-          status: 'PENDING'
         }))
       }))
     };
 
-    await api.addWorkoutPlan(newPlan);
-    navigation.goBack();
+    try {
+      let saved;
+      if (planId) {
+        saved = await apiService.patch(`/workouts/plans/${planId}`, newPlan);
+      } else {
+        saved = await apiService.post('/workouts/plans', newPlan);
+      }
+
+      const targetPlanId = planId || saved.id;
+      navigation.reset({
+        index: 1,
+        routes: [
+          { name: 'MainTabs' },
+          { name: 'WorkoutDetails', params: { planId: targetPlanId } }
+        ]
+      });
+    } catch (err) {
+      console.error('Failed to save workout', err);
+    }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center">
+        <ActivityIndicator size="large" color="#d0bcff" />
+        <Text className="text-on-surface-variant mt-3 font-body-base">Loading workout details…</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 
@@ -165,10 +222,48 @@ export default function WorkoutBuilderScreen({ navigation, route }: Props) {
             value={workoutName}
             onChangeText={setWorkoutName}
           />
-          <TouchableOpacity className="flex-row items-center gap-2 self-start px-3 py-1.5 rounded-lg bg-surface-container-high/50 border border-white/5">
+          <TouchableOpacity 
+            className="flex-row items-center gap-2 self-start px-3 py-1.5 rounded-lg bg-surface-container-high/50 border border-white/5"
+            onPress={() => setShowDatePicker(true)}
+          >
             <MaterialIcons name="calendar-today" size={18} color="#d0bcff" />
             <Text className="text-primary font-body-base font-bold">{formattedDateString}</Text>
           </TouchableOpacity>
+          
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={(event, date) => {
+                setShowDatePicker(Platform.OS === 'ios');
+                if (date) {
+                  const updatedDate = new Date(selectedDate);
+                  updatedDate.setFullYear(date.getFullYear());
+                  updatedDate.setMonth(date.getMonth());
+                  updatedDate.setDate(date.getDate());
+                  setSelectedDate(updatedDate);
+                  if (Platform.OS !== 'ios') setShowTimePicker(true);
+                }
+              }}
+            />
+          )}
+          {showTimePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="time"
+              display="default"
+              onChange={(event, date) => {
+                setShowTimePicker(Platform.OS === 'ios');
+                if (date) {
+                  const updatedDate = new Date(selectedDate);
+                  updatedDate.setHours(date.getHours());
+                  updatedDate.setMinutes(date.getMinutes());
+                  setSelectedDate(updatedDate);
+                }
+              }}
+            />
+          )}
         </View>
       </View>
 

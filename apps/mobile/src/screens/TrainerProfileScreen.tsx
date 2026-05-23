@@ -1,14 +1,46 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { RouteProp } from '@react-navigation/native';
+import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'TrainerProfile'>;
+  route: RouteProp<RootStackParamList, 'TrainerProfile'>;
 };
 
-export default function TrainerProfileScreen({ navigation }: Props) {
+export default function TrainerProfileScreen({ navigation, route }: Props) {
+  const { trainerId } = (route.params as any) || {};
+  const [profile, setProfile] = useState<any>(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function loadProfile() {
+      if (!trainerId) return;
+      try {
+        const data = await apiService.get(`/trainer-profiles/${trainerId}`);
+        setProfile(data);
+      } catch (err) {
+        console.error('Failed to load trainer profile', err);
+      }
+    }
+    loadProfile();
+  }, [trainerId]);
+
+  const handleHire = async () => {
+    if (!user) return;
+    try {
+      await apiService.post(`/users/${user.id}/assign-trainer`, { trainerId });
+      Alert.alert('Success', 'You are now assigned to this trainer!');
+      navigation.navigate('MainTabs' as any);
+    } catch (err) {
+      console.error('Failed to hire trainer', err);
+      Alert.alert('Error', 'Failed to assign trainer.');
+    }
+  };
   return (
     <View className="flex-1 bg-background pt-12">
       {/* Top App Bar */}
@@ -33,10 +65,12 @@ export default function TrainerProfileScreen({ navigation }: Props) {
               <MaterialIcons name="person" size={64} color="#cbc3d7" />
             </View>
             <View className="items-center mb-4">
-              <Text className="text-display-lg font-display-lg text-white font-bold text-center">Marcus Thorne</Text>
+              <Text className="text-display-lg font-display-lg text-white font-bold text-center">
+                {profile?.user?.fullName || 'Trainer'}
+              </Text>
               <View className="flex-row items-center gap-2 mt-2">
                 <MaterialIcons name="star" size={20} color="#d0bcff" />
-                <Text className="text-primary font-body-lg text-body-lg">4.9 (128 Reviews)</Text>
+                <Text className="text-primary font-body-lg text-body-lg">{profile?.rating || '0'} ({profile?.reviewCount || 0} Reviews)</Text>
               </View>
             </View>
             <View className="flex-row gap-4">
@@ -59,7 +93,7 @@ export default function TrainerProfileScreen({ navigation }: Props) {
             <Text className="text-headline-md font-headline-md text-white font-bold">Bio</Text>
           </View>
           <Text className="text-secondary font-body-base text-body-base leading-relaxed">
-            Specializing in high-intensity functional training and elite conditioning. My philosophy centers on combining raw athletic power with precise biomechanical execution.
+            {profile?.bio || 'Elite Coach.'}
           </Text>
         </View>
 
@@ -75,17 +109,34 @@ export default function TrainerProfileScreen({ navigation }: Props) {
                 <View className="w-2 h-2 bg-primary rounded-full" />
               </View>
               <View>
-                <Text className="text-white font-body-base font-bold">M.S. Kinesiology</Text>
-                <Text className="text-secondary text-sm">University of Sports Science, 2018</Text>
+                <Text className="text-white font-body-base font-bold">{profile?.education || 'Degree in Kinesiology'}</Text>
+                <Text className="text-secondary text-sm">University of Sports Science</Text>
               </View>
             </View>
           </View>
         </View>
+
+        {profile?.certifications && profile.certifications.length > 0 && (
+          <View className="bg-white/10 p-6 rounded-xl border border-white/15">
+            <View className="flex-row items-center gap-2 mb-4">
+              <MaterialIcons name="workspace-premium" size={24} color="#d0bcff" />
+              <Text className="text-headline-md font-headline-md text-white font-bold">Certifications</Text>
+            </View>
+            <View className="flex-col gap-2">
+              {profile.certifications.map((cert: string, idx: number) => (
+                <Text key={idx} className="text-secondary text-body-base">- {cert}</Text>
+              ))}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Action Button */}
       <View className="absolute bottom-0 left-0 w-full p-4 bg-surface/90 border-t border-white/10">
-        <TouchableOpacity className="w-full h-14 bg-primary text-on-primary rounded-xl flex-row items-center justify-center gap-2">
+        <TouchableOpacity 
+          onPress={handleHire}
+          className="w-full h-14 bg-primary text-on-primary rounded-xl flex-row items-center justify-center gap-2"
+        >
           <MaterialIcons name="handshake" size={24} color="#3c0091" />
           <Text className="text-headline-md font-headline-md font-bold text-on-primary">Request to Hire</Text>
         </TouchableOpacity>

@@ -12,6 +12,12 @@ export interface UserProfile {
   createdAt?: string;
   updatedAt?: string;
   bio?: string;
+  weightUnit?: 'LBS' | 'KG';
+  lengthUnit?: 'IN' | 'CM';
+  notificationLeadMinutes?: number;
+  weeklyGoalDays?: number;
+  weeklyGoalHours?: number;
+  weeklyGoalCalories?: number;
   trainer?: {
     id: string;
     fullName: string;
@@ -38,6 +44,7 @@ interface AuthContextType {
   resetPassword: (payload: any) => Promise<any>;
   logout: () => Promise<void>;
   updateUserLocal: (updatedUser: UserProfile) => Promise<void>;
+  updateProfile: (payload: any) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -120,6 +127,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updatedUser);
   };
 
+  const updateProfile = async (payload: any) => {
+    if (!user) throw new Error('Not authenticated');
+    const updatedUser = await apiService.patch(`/users/${user.id}`, payload);
+    await updateUserLocal({ ...user, ...updatedUser });
+    return updatedUser;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -134,6 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetPassword,
         logout,
         updateUserLocal,
+        updateProfile,
       }}
     >
       {children}

@@ -390,8 +390,8 @@ export default function SignUpScreen({ navigation }: Props) {
                       className="py-3 items-center"
                       style={{ 
                         backgroundColor: selDay === d ? (isDark ? 'rgba(208, 188, 255, 0.25)' : 'rgba(109, 59, 215, 0.15)') : 'transparent',
-                        borderVerticalColor: selDay === d ? colors.primary : 'transparent',
-                        borderVerticalWidth: selDay === d ? 1 : 0
+                        borderTopWidth: selDay === d ? 1 : 0,
+                        borderBottomWidth: selDay === d ? 1 : 0
                       }}
                       onPress={() => setSelDay(d)}
                     >
@@ -419,8 +419,8 @@ export default function SignUpScreen({ navigation }: Props) {
                       className="py-3 items-center"
                       style={{ 
                         backgroundColor: selMonth === idx ? (isDark ? 'rgba(208, 188, 255, 0.25)' : 'rgba(109, 59, 215, 0.15)') : 'transparent',
-                        borderVerticalColor: selMonth === idx ? colors.primary : 'transparent',
-                        borderVerticalWidth: selMonth === idx ? 1 : 0
+                        borderTopWidth: selMonth === idx ? 1 : 0,
+                        borderBottomWidth: selMonth === idx ? 1 : 0
                       }}
                       onPress={() => {
                         setSelMonth(idx);
@@ -454,8 +454,8 @@ export default function SignUpScreen({ navigation }: Props) {
                       className="py-3 items-center"
                       style={{ 
                         backgroundColor: selYear === y ? (isDark ? 'rgba(208, 188, 255, 0.25)' : 'rgba(109, 59, 215, 0.15)') : 'transparent',
-                        borderVerticalColor: selYear === y ? colors.primary : 'transparent',
-                        borderVerticalWidth: selYear === y ? 1 : 0
+                        borderTopWidth: selYear === y ? 1 : 0,
+                        borderBottomWidth: selYear === y ? 1 : 0
                       }}
                       onPress={() => {
                         setSelYear(y);

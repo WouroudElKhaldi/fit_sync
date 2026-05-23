@@ -10,6 +10,7 @@ const TraineeProfile: React.FC = () => {
   
   const [traineeData, setTraineeData] = useState<any>(null);
   const [plans, setPlans] = useState<any[]>([]);
+  const [prs, setPrs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [triggerReload, setTriggerReload] = useState(0);
 
@@ -55,9 +56,10 @@ const TraineeProfile: React.FC = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       try {
-        const [progressRes, plansRes] = await Promise.all([
+        const [progressRes, plansRes, prsRes] = await Promise.all([
           fetch(`http://localhost:3000/trainers/clients/${id}/progress?trainerId=${user.id}`, { headers }),
-          fetch(`http://localhost:3000/workouts/plans/client/${id}`, { headers })
+          fetch(`http://localhost:3000/workouts/plans/client/${id}`, { headers }),
+          fetch(`http://localhost:3000/biometrics/${id}/prs`, { headers })
         ]);
 
         if (progressRes.ok) {
@@ -65,6 +67,9 @@ const TraineeProfile: React.FC = () => {
         }
         if (plansRes.ok) {
           setPlans(await plansRes.json());
+        }
+        if (prsRes.ok) {
+          setPrs(await prsRes.json());
         }
       } catch (err) {
         console.error('Failed to load client telemetry:', err);
@@ -220,6 +225,10 @@ const TraineeProfile: React.FC = () => {
 
   const { client, biometricsTimeline, trainingSessions } = traineeData;
   const latestWeight = biometricsTimeline?.length ? biometricsTimeline[biometricsTimeline.length - 1].weight : 'N/A';
+  
+  const latestBodyFat = biometricsTimeline?.length ? [...biometricsTimeline].reverse().find((b: any) => b.bodyFat)?.bodyFat || '--' : '--';
+  const latestLeanMass = biometricsTimeline?.length ? [...biometricsTimeline].reverse().find((b: any) => b.leanMass)?.leanMass || '--' : '--';
+
   const weightUnit = client.weightUnit || 'KG';
   const lengthModeLabel = client.lengthUnit === 'METRIC' ? 'CM' : 'IN';
   const canEdit = user?.id === id || user?.role === 'ADMIN';
@@ -425,7 +434,8 @@ const TraineeProfile: React.FC = () => {
               <div className="space-y-2 relative z-10">
                 {[
                   { label: 'Mass', value: latestWeight, unit: weightUnit, color: 'on-surface' },
-                  { label: 'Distance Mode', value: lengthModeLabel, unit: '', color: 'on-surface' },
+                  { label: 'Body Fat %', value: latestBodyFat, unit: '%', color: 'tertiary' },
+                  { label: 'Lean Mass', value: latestLeanMass, unit: weightUnit, color: 'primary' },
                   { label: 'Biometrics Logged', value: biometricsTimeline?.length || 0, unit: 'logs', color: 'primary' }
                 ].map((stat, i) => (
                   <div key={i} className="flex items-center justify-between p-3.5 bg-surface-container-high/40 rounded-xl border border-secondary-container/5 group/row hover:bg-surface-container-high transition-all shadow-inner">
@@ -486,9 +496,44 @@ const TraineeProfile: React.FC = () => {
           </div>
 
           {/* 3. Operational Timeline */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-section-gap)]">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-section-gap)]">
+            {/* Performance Records */}
+            <div className="bg-surface-container-low rounded-[32px] border border-secondary-container/10 p-8 hover-card-motion shadow-2xl lg:col-span-1">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="w-10 h-10 rounded-xl bg-[#ffb869]/10 text-[#ffb869] flex items-center justify-center border border-[#ffb869]/20">
+                   <span className="material-symbols-outlined text-[24px] fill">emoji_events</span>
+                </div>
+                <div>
+                   <h3 className="text-lg font-black text-on-surface uppercase tracking-tight leading-none mb-1">Performance Records</h3>
+                   <span className="text-[8px] font-black text-on-surface-variant/40 uppercase tracking-widest">Verified Maxes</span>
+                </div>
+              </div>
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-2 no-scrollbar">
+                {prs.length === 0 ? (
+                  <p className="text-[10px] text-on-surface-variant/40 italic text-center py-8">No PRs found.</p>
+                ) : prs.map((pr: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-surface-container-high/40 hover:bg-[#ffb869]/5 transition-all group border border-transparent shadow-inner">
+                    <div className="flex items-center gap-4">
+                       <div className="w-1.5 h-8 bg-[#ffb869]/10 rounded-full group-hover:bg-[#ffb869] transition-all"></div>
+                       <div>
+                        <h4 className="text-xs font-black text-[#ffb869] uppercase tracking-tight transition-colors">
+                          {pr.exercise.name}
+                        </h4>
+                        <p className="text-[8px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-0.5">
+                          {new Date(pr.achievedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-black text-on-surface">
+                       {pr.weight} <span className="text-[8px] font-black opacity-30">{weightUnit}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Completed Protocols */}
-            <div className="bg-surface-container-low rounded-[32px] border border-secondary-container/10 p-8 hover-card-motion shadow-2xl">
+            <div className="bg-surface-container-low rounded-[32px] border border-secondary-container/10 p-8 hover-card-motion shadow-2xl lg:col-span-1">
               <div className="flex items-center gap-4 mb-10">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
                    <span className="material-symbols-outlined text-[24px] fill">verified</span>

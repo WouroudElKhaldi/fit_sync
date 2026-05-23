@@ -4,11 +4,30 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
+import { apiService } from '../services/api';
+import { RouteProp } from '@react-navigation/native';
+
 type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'WorkoutLogger'>; // Adjust depending on flow
+  navigation: NativeStackNavigationProp<RootStackParamList, 'PostWorkoutSummary'>;
+  route: RouteProp<RootStackParamList, 'PostWorkoutSummary'>;
 };
 
-export default function PostWorkoutSummaryScreen({ navigation }: Props) {
+export default function PostWorkoutSummaryScreen({ navigation, route }: Props) {
+  const { sessionId } = (route.params as any) || {};
+  const [session, setSession] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    async function loadSession() {
+      if (!sessionId) return;
+      try {
+        const data = await apiService.get(`/workouts/sessions/${sessionId}`);
+        setSession(data);
+      } catch (err) {
+        console.error('Failed to load session summary', err);
+      }
+    }
+    loadSession();
+  }, [sessionId]);
   return (
     <View className="flex-1 bg-background pt-12">
       {/* Top App Bar */}
@@ -28,7 +47,7 @@ export default function PostWorkoutSummaryScreen({ navigation }: Props) {
         {/* Header Section */}
         <View className="items-center py-8">
           <Text className="text-label-caps font-label-caps text-primary mb-2 uppercase">Workout Complete</Text>
-          <Text className="text-display-lg font-display-lg text-on-surface">Leg Day Crusher</Text>
+          <Text className="text-display-lg font-display-lg text-on-surface">{session?.workoutPlan?.title || 'Custom Session'}</Text>
         </View>
 
         <View className="flex-col gap-6">
@@ -37,7 +56,9 @@ export default function PostWorkoutSummaryScreen({ navigation }: Props) {
             <View className="absolute inset-0 bg-primary/5 rounded-full" />
             <Text className="text-label-caps font-label-caps text-on-surface-variant mb-4 uppercase">Total Volume Lifted</Text>
             <View className="flex-row items-baseline gap-2">
-              <Text className="text-[48px] font-black text-primary font-display-xl">12,450</Text>
+              <Text className="text-[48px] font-black text-primary font-display-xl">
+                {session?.totalVolume || 0}
+              </Text>
               <Text className="text-headline-md font-headline-md text-on-surface-variant">kg</Text>
             </View>
           </View>
@@ -81,7 +102,10 @@ export default function PostWorkoutSummaryScreen({ navigation }: Props) {
           {/* Done Button */}
           <TouchableOpacity 
             className="w-full h-14 bg-primary rounded-2xl items-center justify-center flex-row gap-2"
-            onPress={() => navigation.navigate('MainTabs' as any)}
+            onPress={async () => {
+              // Optionally submit the notes to the backend here if needed
+              navigation.navigate('MainTabs' as any);
+            }}
           >
             <Text className="text-headline-md font-headline-md font-bold text-on-primary">Done</Text>
             <MaterialIcons name="check-circle" size={24} color="#3c0091" />

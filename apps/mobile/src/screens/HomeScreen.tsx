@@ -1,43 +1,98 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { api } from '../../mocks/api';
+import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { useIsFocused } from '@react-navigation/native';
+import { useAppTheme } from '../context/ThemeContext';
+import { AppHeader } from '../components/ui/AppHeader';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'MainTabs'>;
 };
 
 export default function HomeScreen({ navigation }: Props) {
-  const [profile, setProfile] = useState<any>(null);
+  const { user } = useAuth();
+  const { colors } = useAppTheme();
   const [schedules, setSchedules] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 19)); // May 19, 2026
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today
   const isFocused = useIsFocused();
-
-  async function loadData() {
-    const userProfile = await api.getUserProfile();
-    setProfile(userProfile);
-    
-    const allSchedules = await api.getWorkoutSchedule();
-    setSchedules(allSchedules);
-  }
+  const [prs, setPrs] = useState<any[]>([]);
+  const [weeklyGoal, setWeeklyGoal] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    async function loadData() {
+      try {
+        if (!user) return;
+
+        // Load upcoming plans
+        const res = await apiService.get(`/workouts/plans/client/${user.id}`);
+        setSchedules(res || []);
+
+        // Load recent PRs
+        const prsRes = await apiService.get(`/biometrics/${user.id}/prs`);
+        setPrs(prsRes || []);
+
+        // Load analytics for weekly goal calculation
+        const analyticsRes = await apiService.get(`/workouts/plans/analytics/${user.id}`);
+        if (analyticsRes && analyticsRes.summary) {
+          const { totalSessionsThisWeek, weeklyGoalDays } = analyticsRes.summary;
+          const target = weeklyGoalDays || 4;
+          const progress = Math.min(100, Math.round((totalSessionsThisWeek / target) * 100));
+          setWeeklyGoal(progress);
+        }
+
+        if (analyticsRes && analyticsRes.summary) {
+          const { totalSessionsThisWeek, weeklyGoalDays } = analyticsRes.summary;
+          const target = weeklyGoalDays || 4;
+          const progress = Math.min(100, Math.round((totalSessionsThisWeek / target) * 100));
+          setWeeklyGoal(progress);
+        }
+      } catch (error) {
+        console.error('Failed to load home data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     if (isFocused) {
       loadData();
     }
-  }, [isFocused]);
+  }, [isFocused, user]);
 
-  // Helper to get this week's days (Monday to Sunday) containing May 19, 2026
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      await apiService.delete(`/workouts/plans/${planId}`);
+      if (user) {
+        const res = await apiService.get(`/workouts/plans/client/${user.id}`);
+        setSchedules(res || []);
+      }
+    } catch (err) {
+      console.error('Failed to delete workout plan:', err);
+    }
+  };
+
+  const confirmDelete = (planId: string) => {
+    Alert.alert(
+      'Delete Workout?',
+      'Are you sure you want to permanently delete this workout session?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => handleDeletePlan(planId) },
+      ]
+    );
+  };
+
+  // Helper to get this week's days (Mon–Sun) for the current real date
   const getThisWeekDays = () => {
-    const today = new Date(2026, 4, 19); // Baseline Today
-    const dayOfWeek = today.getDay(); // 0 is Sun, 1 is Mon...
+    const today = new Date(); // always real today
+    const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon...
     const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(today);
     monday.setDate(today.getDate() + distanceToMonday);
-    
+
     const days = [];
     for (let i = 0; i < 7; i++) {
       const day = new Date(monday);
@@ -51,7 +106,7 @@ export default function HomeScreen({ navigation }: Props) {
   const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   const isWorkoutDone = (plan: any) => {
-    return plan.exercises?.some((ex: any) => 
+    return plan.exercises?.some((ex: any) =>
       ex.sets?.some((s: any) => s.status === 'COMPLETED' || s.actualReps !== null)
     );
   };
@@ -60,217 +115,227 @@ export default function HomeScreen({ navigation }: Props) {
   const dayPlans = schedules.filter((s: any) => {
     const sDate = new Date(s.scheduledDate);
     return sDate.getFullYear() === selectedDate.getFullYear() &&
-           sDate.getMonth() === selectedDate.getMonth() &&
-           sDate.getDate() === selectedDate.getDate();
+      sDate.getMonth() === selectedDate.getMonth() &&
+      sDate.getDate() === selectedDate.getDate();
   });
 
   return (
-    <View className="flex-1 bg-background pt-12">
-      {/* Mobile Top Header */}
-      <View className="px-margin-mobile pt-4 pb-2 flex-row justify-between items-center">
-        <View>
-          <Text className="text-on-surface-variant text-label-caps font-label-caps uppercase tracking-wider mb-1">
-            Good Morning
-          </Text>
-          <Text className="text-headline-md font-headline-md text-on-surface font-bold">
-            Welcome back, {profile?.name?.split(' ')[0] || 'Athlete'}
-          </Text>
-        </View>
-        <View className="flex-row gap-2">
-          <TouchableOpacity 
-            className="w-12 h-12 rounded-full bg-surface-container-high items-center justify-center border border-white/10"
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <MaterialIcons name="settings" size={24} color="#d9e3f6" />
-          </TouchableOpacity>
-          <TouchableOpacity className="w-12 h-12 rounded-full bg-surface-container-high items-center justify-center border border-white/10">
-            <MaterialIcons name="notifications" size={24} color="#d9e3f6" />
-            <View className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full shadow-lg" />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
+      <AppHeader />
 
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 96 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 96 }}>
         
-        {/* Week Selector Ribbon */}
-        <View className="flex-row justify-between items-center px-1 mt-2">
-          <Text className="text-on-surface font-bold text-[18px] tracking-tight">
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4, marginTop: 16 }}>
+          <View>
+            <Text style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4, color: colors.textMuted }}>
+              Good Morning
+            </Text>
+            <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text }}>
+              Welcome back, {user?.fullName?.split(' ')[0] || 'Athlete'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4, marginTop: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>
             This Week
           </Text>
-          <Text className="text-primary text-[14px] font-bold">
-            May 2026
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.primary }}>
+            {weeklyGoal}% Goal
           </Text>
         </View>
 
-        {/* Horizontal Week Ribbon */}
-        <View className="flex-row justify-between gap-1 mt-1">
-          {thisWeekDays.map((day) => {
-            const isSelected = selectedDate.getFullYear() === day.getFullYear() &&
-                               selectedDate.getMonth() === day.getMonth() &&
-                               selectedDate.getDate() === day.getDate();
-            
-            const hasWorkout = schedules.some((s: any) => {
-              const sDate = new Date(s.scheduledDate);
-              return sDate.getFullYear() === day.getFullYear() &&
-                     sDate.getMonth() === day.getMonth() &&
-                     sDate.getDate() === day.getDate();
-            });
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 10, paddingVertical: 4 }}
+        >
+            {thisWeekDays.map((d, idx) => {
+              const isToday = d.toDateString() === new Date().toDateString();
+              const isSelected = d.toDateString() === selectedDate.toDateString();
+              const dayName = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][d.getDay()];
 
-            return (
-              <TouchableOpacity 
-                key={day.toISOString()} 
-                onPress={() => setSelectedDate(day)}
-                className={`flex-1 items-center justify-center h-[76px] rounded-xl border ${isSelected ? 'bg-primary/20 border-primary/50' : 'bg-surface-container/40 border-white/5'} backdrop-blur-md`}
-              >
-                <Text className={`text-[10px] font-bold tracking-wider mb-1 ${isSelected ? 'text-primary font-black' : 'text-on-surface-variant'}`}>
-                  {DAY_NAMES[day.getDay()]}
-                </Text>
-                <Text className={`text-[18px] font-bold ${isSelected ? 'text-primary font-black' : 'text-on-surface'}`}>
-                  {day.getDate()}
-                </Text>
-                {hasWorkout && (
-                  <View className={`absolute bottom-2 w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-primary' : 'bg-tertiary'}`} />
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => setSelectedDate(d)}
+                  style={{
+                    width: 52, height: 72, borderRadius: 12,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderWidth: isToday && !isSelected ? 2 : 1,
+                    backgroundColor: isSelected ? colors.primary : colors.surfaceContainer,
+                    borderColor: isSelected ? 'transparent' : isToday ? colors.primary : colors.border
+                  }}
+                >
+                  <Text style={{ fontSize: 10, fontWeight: '700', marginBottom: 4, color: isSelected ? colors.onPrimary : isToday ? colors.primary : colors.textMuted }}>
+                    {dayName}
+                  </Text>
+                  <Text style={{ fontSize: 18, fontWeight: '700', color: isSelected ? colors.onPrimary : isToday ? colors.primary : colors.text }}>
+                    {d.getDate()}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
 
-        {/* Today's Plans List */}
-        <View className="flex flex-col gap-4">
-          <View className="flex-row items-center justify-between mb-1">
-            <Text className="text-on-surface-variant text-label-caps uppercase tracking-wider font-bold">
-              Scheduled Workouts
-            </Text>
-            {dayPlans.length > 0 && (
-              <Text className="text-primary text-[12px] font-bold">
-                {dayPlans.length} Session{dayPlans.length > 1 ? 's' : ''}
+          <View style={{ flex: 1, gap: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <Text style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, fontWeight: '700', color: colors.textMuted }}>
+                SCHEDULED SESSIONS
               </Text>
-            )}
-          </View>
+            </View>
 
-          {dayPlans.length > 0 ? (
+            {dayPlans.length > 0 ? (
             dayPlans.map((plan: any) => (
-              <View key={plan.id} className="bg-surface-container/30 border border-white/10 rounded-xl p-6 relative overflow-hidden">
-                <View className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-20 -mt-20" />
-                <View className="flex-row justify-between items-start mb-6">
-                  <View className="flex-1 pr-4">
-                    <View className="flex-row items-center gap-2 mb-2">
+              <View key={plan.id} style={{ backgroundColor: colors.surfaceContainer, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, padding: 24, marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                  <View style={{ flex: 1, paddingRight: 16 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <MaterialIcons name="local-fire-department" size={16} color="#ffb869" />
-                      <Text className="text-label-caps font-label-caps text-tertiary uppercase tracking-wider">
+                      <Text style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, color: colors.textMuted }}>
                         Workout Plan
                       </Text>
                     </View>
-                    <Text className="text-display-lg font-display-lg text-on-surface leading-tight font-black">
+                    <Text style={{ fontSize: 24, fontWeight: '900', color: colors.text, marginBottom: 4 }}>
                       {plan.title || plan.name}
                     </Text>
-                    <Text className="text-on-surface-variant text-body-base font-body-base mt-1">
+                    <Text style={{ fontSize: 14, color: colors.textMuted }}>
                       {plan.description || 'Custom session'}
                     </Text>
                   </View>
-                  <View className="w-12 h-12 rounded-full bg-surface-container-high items-center justify-center border border-white/5">
-                    <MaterialIcons name="fitness-center" size={24} color="#d0bcff" />
+                  <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}>
+                    <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
                   </View>
                 </View>
 
-                <View className="flex-row gap-4 mb-8">
-                  <View className="flex-1 bg-surface-container/50 rounded-lg p-3 border border-white/5 items-center">
-                    <Text className="text-numeric-data font-numeric-data text-on-surface font-bold">
+                <View style={{ flexDirection: 'row', gap: 16, marginBottom: 32 }}>
+                  <View style={{ flex: 1, backgroundColor: colors.surfaceContainerHigh, borderRadius: 8, padding: 12, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>
                       {plan.exercises?.length || 0}
                     </Text>
-                    <Text className="text-[10px] uppercase text-on-surface-variant tracking-wider font-bold">Exercises</Text>
+                    <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, fontWeight: '700', color: colors.textMuted }}>Exercises</Text>
                   </View>
-                  <View className="flex-1 bg-surface-container/50 rounded-lg p-3 border border-white/5 items-center">
-                    <Text className="text-numeric-data font-numeric-data text-on-surface font-bold">
+                  <View style={{ flex: 1, backgroundColor: colors.surfaceContainerHigh, borderRadius: 8, padding: 12, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>
                       {plan.estimatedDuration || 45}
                     </Text>
-                    <Text className="text-[10px] uppercase text-on-surface-variant tracking-wider font-bold">Minutes</Text>
+                    <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, fontWeight: '700', color: colors.textMuted }}>Minutes</Text>
                   </View>
-                  <View className="flex-1 bg-surface-container/50 rounded-lg p-3 border border-white/5 items-center">
-                    <Text className="text-numeric-data font-numeric-data text-on-surface font-bold">
+                  <View style={{ flex: 1, backgroundColor: colors.surfaceContainerHigh, borderRadius: 8, padding: 12, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>
                       {plan.difficulty || 'Med'}
                     </Text>
-                    <Text className="text-[10px] uppercase text-on-surface-variant tracking-wider font-bold">Intensity</Text>
+                    <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, fontWeight: '700', color: colors.textMuted }}>Intensity</Text>
                   </View>
                 </View>
 
-                {(() => {
-                  const isDone = isWorkoutDone(plan);
-                  return (
-                    <TouchableOpacity 
-                      className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 border-t border-white/20 ${isDone ? 'bg-secondary' : 'bg-primary'}`}
-                      onPress={() => {
-                        navigation.navigate('WorkoutLogger', { planId: plan.id });
-                      }}
-                    >
-                      <MaterialIcons name={isDone ? "edit" : "play-arrow"} size={24} color={isDone ? "#30312e" : "#3c0091"} />
-                      <Text className={`font-headline-md text-[18px] font-bold ${isDone ? 'text-on-secondary' : 'text-on-primary'}`}>
-                        {isDone ? "Edit Workout" : "Start Workout"}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })()}
+                <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                  {/* Start Workout */}
+                  <TouchableOpacity 
+                    style={{ flex: 1.6, height: 46, borderRadius: 10, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                    onPress={() => {
+                      navigation.navigate('WorkoutLogger', { planId: plan.id });
+                    }}
+                  >
+                    <MaterialIcons name="play-arrow" size={20} color={colors.onPrimary} />
+                    <Text style={{ fontSize: 14, fontWeight: '700', color: colors.onPrimary }}>
+                      Start
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* View Details */}
+                  <TouchableOpacity 
+                    style={{ width: 46, height: 46, borderRadius: 10, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
+                    onPress={() => {
+                      (navigation as any).navigate('WorkoutDetails', { planId: plan.id });
+                    }}
+                  >
+                    <MaterialIcons name="info" size={20} color={colors.text} />
+                  </TouchableOpacity>
+
+                  {/* Edit Plan */}
+                  <TouchableOpacity 
+                    style={{ width: 46, height: 46, borderRadius: 10, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
+                    onPress={() => {
+                      (navigation as any).navigate('WorkoutBuilder', { planId: plan.id });
+                    }}
+                  >
+                    <MaterialIcons name="edit" size={20} color={colors.text} />
+                  </TouchableOpacity>
+
+                  {/* Delete Plan */}
+                  <TouchableOpacity 
+                    style={{ width: 46, height: 46, borderRadius: 10, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
+                    onPress={() => confirmDelete(plan.id)}
+                  >
+                    <MaterialIcons name="delete" size={20} color="#ffb4ab" />
+                  </TouchableOpacity>
+                </View>
               </View>
             ))
           ) : (
-            <View className="bg-surface-container/20 border border-white/5 rounded-xl p-6 flex-col items-center justify-center min-h-[220px] relative overflow-hidden">
-              <View className="absolute top-0 right-0 w-48 h-48 bg-tertiary/10 rounded-full blur-2xl -mr-16 -mt-16" />
-              <View className="w-12 h-12 rounded-full bg-surface-container-high border border-white/10 items-center justify-center mb-4">
-                <MaterialIcons name="spa" size={24} color="#cbc3d7" />
+            <View style={{ backgroundColor: colors.surfaceContainer, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, padding: 24, alignItems: 'center', justifyContent: 'center', minHeight: 220 }}>
+              <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                <MaterialIcons name="spa" size={24} color={colors.textMuted} />
               </View>
-              <Text className="text-[18px] font-bold text-on-surface text-center mb-1">Rest Day</Text>
-              <Text className="text-on-surface-variant text-sm text-center mb-6 max-w-[280px]">
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>Rest Day</Text>
+              <Text style={{ fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 24, maxWidth: 280 }}>
                 No workouts scheduled for today. Rest and recover to let your muscles grow!
               </Text>
               <TouchableOpacity 
-                className="px-6 h-10 bg-white/10 border border-white/15 rounded-full items-center justify-center"
+                style={{ paddingHorizontal: 24, height: 40, backgroundColor: colors.primary, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
                 onPress={() => {
                   navigation.navigate('WorkoutBuilder', { defaultDate: selectedDate.toISOString() });
                 }}
               >
-                <Text className="text-white font-bold text-sm">Plan a Session</Text>
+                <Text style={{ fontWeight: '700', fontSize: 14, color: colors.onPrimary }}>Add Workout</Text>
               </TouchableOpacity>
             </View>
           )}
-        </View>
+          </View>
 
         {/* Bento Grid: Stats & Prompts */}
-        <View className="flex-row gap-4">
-          <View className="flex-1 bg-surface-container/30 border border-white/10 rounded-xl p-5 aspect-square justify-between overflow-hidden relative">
-            <View className="absolute -bottom-10 -right-10 w-32 h-32 bg-tertiary/20 rounded-full blur-2xl" />
-            <View className="w-10 h-10 rounded-full items-center justify-center mb-4" style={{ backgroundColor: '#B06B00' }}>
+        <View style={{ flexDirection: 'row', gap: 16 }}>
+          <View style={{ flex: 1, backgroundColor: colors.surfaceContainer, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: colors.border }}>
+            <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 16, backgroundColor: '#B06B00' }}>
               <MaterialIcons name="emoji-events" size={20} color="white" />
             </View>
             <View>
-              <Text className="text-numeric-data font-numeric-data text-on-surface font-bold">New PR!</Text>
-              <Text className="text-label-caps font-label-caps text-on-surface-variant mt-1">Deadlift 315lbs</Text>
+              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text }}>
+                {prs.length > 0 ? 'New PR!' : 'No PRs Yet'}
+              </Text>
+              <Text style={{ fontSize: 12, textTransform: 'uppercase', color: colors.textMuted, marginTop: 4 }}>
+                {prs.length > 0 ? `${prs[0].exercise.name} ${prs[0].weight}${user?.weightUnit || 'KG'}` : 'Keep pushing!'}
+              </Text>
             </View>
           </View>
 
-          <View className="flex-1 bg-surface-container/30 border border-white/10 rounded-xl p-5 aspect-square items-center justify-center">
-            <View className="relative w-24 h-24 mb-2 items-center justify-center">
-              {/* Fake progress ring */}
-              <View className="w-20 h-20 rounded-full border-[8px] border-white/10 absolute" />
-              <View className="w-20 h-20 rounded-full border-[8px] border-primary absolute" style={{ borderRightColor: 'transparent', borderBottomColor: 'transparent', transform: [{ rotate: '45deg' }] }} />
-              <Text className="text-numeric-data font-numeric-data text-on-surface font-bold">75%</Text>
+          <View style={{ flex: 1, backgroundColor: colors.surfaceContainer, borderRadius: 16, padding: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}>
+            <View style={{ width: 96, height: 96, marginBottom: 8, alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ position: 'absolute', width: 80, height: 80, borderRadius: 40, borderWidth: 8, borderColor: colors.surfaceContainerHigh }} />
+              <View style={{ position: 'absolute', width: 80, height: 80, borderRadius: 40, borderWidth: 8, borderColor: colors.primary, borderRightColor: 'transparent', borderBottomColor: 'transparent', transform: [{ rotate: `${(weeklyGoal / 100) * 360}deg` }] }} />
+              <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>{weeklyGoal}%</Text>
             </View>
-            <Text className="text-label-caps font-label-caps text-on-surface-variant text-center">Weekly Goal</Text>
+            <Text style={{ fontSize: 12, textTransform: 'uppercase', color: colors.textMuted }}>Weekly Goal</Text>
           </View>
         </View>
 
         {/* Find a Coach Prompt */}
-        <TouchableOpacity className="bg-surface-container-high/50 border border-white/5 rounded-xl p-6 flex-row items-center gap-4">
-          <View className="w-16 h-16 rounded-lg bg-surface items-center justify-center border border-white/10">
+        <TouchableOpacity 
+          style={{ backgroundColor: colors.surfaceContainer, borderRadius: 16, padding: 24, flexDirection: 'row', alignItems: 'center', gap: 16, borderWidth: 1, borderColor: colors.border }}
+          onPress={() => (navigation as any).navigate('Market')}
+        >
+          <View style={{ width: 64, height: 64, borderRadius: 12, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}>
             <MaterialIcons name="sports" size={32} color="#ffb869" />
           </View>
-          <View className="flex-1">
-            <Text className="text-body-lg font-body-lg text-on-surface font-bold mb-1">Stalled Progress?</Text>
-            <Text className="text-body-base font-body-base text-on-surface-variant text-sm">
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 4 }}>Stalled Progress?</Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted }}>
               Find an elite coach in the market to push your limits.
             </Text>
           </View>
-          <View className="w-10 h-10 rounded-full bg-surface border border-white/10 items-center justify-center">
-            <MaterialIcons name="arrow-forward" size={20} color="#d9e3f6" />
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}>
+            <MaterialIcons name="arrow-forward" size={20} color={colors.text} />
           </View>
         </TouchableOpacity>
 
@@ -285,7 +350,7 @@ export default function HomeScreen({ navigation }: Props) {
           width: 56,
           height: 56,
           borderRadius: 28,
-          backgroundColor: '#d0bcff',
+          backgroundColor: colors.primary,
           alignItems: 'center',
           justifyContent: 'center',
           elevation: 5,
@@ -299,7 +364,7 @@ export default function HomeScreen({ navigation }: Props) {
           navigation.navigate('WorkoutBuilder', { defaultDate: selectedDate.toISOString() });
         }}
       >
-        <MaterialIcons name="add" size={32} color="#3c0091" />
+        <MaterialIcons name="add" size={32} color={colors.onPrimary} />
       </TouchableOpacity>
     </View>
   );

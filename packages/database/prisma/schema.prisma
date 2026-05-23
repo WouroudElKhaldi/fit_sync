@@ -55,6 +55,11 @@ model User {
   // Notifications
   notificationLeadMinutes Int             @default(60)
 
+  // Custom Weekly Goals
+  weeklyGoalDays          Int             @default(4)
+  weeklyGoalHours         Float           @default(6.0)
+  weeklyGoalCalories      Float           @default(2000.0)
+
   // Authentication Lifecycle & Verification
   isVerified              Boolean         @default(false)
   verificationCode        String?
@@ -71,6 +76,7 @@ model User {
   // App Modules
   trainerProfile          TrainerProfile?
   biometrics              BiometricLog[]
+  personalRecords         PersonalRecord[]
   workoutPlans            WorkoutPlan[]   @relation("ClientWorkouts")
   createdPlans            WorkoutPlan[]   @relation("CreatedWorkouts")
   sentMessages            Message[]       @relation("SentMessages")
@@ -94,6 +100,9 @@ model User {
   // Presence Status
   isOnline                Boolean         @default(false)
   lastActiveAt            DateTime        @default(now())
+
+  // System Notifications
+  notifications           Notification[]  @relation("UserNotifications")
 }
 
 model TrainerProfile {
@@ -131,8 +140,9 @@ model Exercise {
   steps       String[]          // Sequential instructions
   equipmentId String?
   equipment   Equipment?        @relation(fields: [equipmentId], references: [id])
-  muscles     ExerciseMuscle[]
-  workouts    WorkoutExercise[]
+  muscles         ExerciseMuscle[]
+  workouts        WorkoutExercise[]
+  personalRecords PersonalRecord[]
 }
 
 model ExerciseMuscle {
@@ -212,6 +222,7 @@ model WorkoutSession {
   completedAt     DateTime?
   
   totalVolume     Float        @default(0.0)
+  caloriesBurned  Float        @default(0.0)
   clientNotes     String?      // Struggles / Comments
   trainerFeedback String?
   trainerRating   Int?         // 1-5 Scale
@@ -226,8 +237,23 @@ model BiometricLog {
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   weight   Float    
-  height   Float?   
+  height   Float?
+  bodyFat  Float?
+  leanMass Float?
   loggedAt DateTime @default(now())
+}
+
+model PersonalRecord {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  weight     Float    // PR weight
+  reps       Int?     // PR reps at that weight
+  achievedAt DateTime @default(now())
+
+  @@unique([userId, exerciseId]) // Keep track of current PR per exercise
 }
 
 enum GroupInvitationStatus {
@@ -319,4 +345,17 @@ model Block {
   createdAt DateTime @default(now())
 
   @@unique([blockerId, blockedId])
+}
+
+// ================= NOTIFICATIONS =================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // e.g., "CONNECTION_REQUEST", "GROUP_INVITATION", "NEW_MESSAGE", "TRAINER_REQUEST", "REMINDER"
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

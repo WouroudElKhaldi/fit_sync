@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Switch, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,12 +16,46 @@ export default function SettingsScreen({ navigation }: Props) {
   const { user, logout } = useAuth();
   
   // Settings Controls
-  const [isMetric, setIsMetric] = useState(true);
+  const [isMetric, setIsMetric] = useState(user?.weightUnit === 'KG');
   const [height, setHeight] = useState('180');
   const [weight, setWeight] = useState('75.5');
   const [hapticEnabled, setHapticEnabled] = useState(true);
+  const [reminderMinutes, setReminderMinutes] = useState(user?.notificationLeadMinutes?.toString() || '60');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: user?.fullName || '',
+    username: user?.username || '',
+    bio: user?.bio || '',
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingBiometrics, setSavingBiometrics] = useState(false);
+  const [isEditingGoals, setIsEditingGoals] = useState(false);
+  const [savingGoals, setSavingGoals] = useState(false);
+  const [goalsForm, setGoalsForm] = useState({
+    weeklyGoalDays: user?.weeklyGoalDays?.toString() || '4',
+    weeklyGoalHours: user?.weeklyGoalHours?.toString() || '6',
+    weeklyGoalCalories: user?.weeklyGoalCalories?.toString() || '2000',
+  });
+  const { updateProfile } = useAuth();
+  const { apiService } = require('../services/api');
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchBio = async () => {
+      try {
+        const bio = await apiService.get(`/biometrics/${user.id}/latest`);
+        if (bio) {
+          if (bio.height) setHeight(bio.height.toString());
+          if (bio.weight) setWeight(bio.weight.toString());
+        }
+      } catch (err) {
+        // No biometrics exist yet or network error
+      }
+    };
+    fetchBio();
+  }, [user]);
 
   // Format date helper
   const formatDate = (dateStr?: string) => {
@@ -34,7 +68,6 @@ export default function SettingsScreen({ navigation }: Props) {
     try {
       setLoggingOut(true);
       await logout();
-      // Reset navigation stack to Login screen cleanly
       navigation.reset({
         index: 0,
         routes: [{ name: 'Login' }],
@@ -43,6 +76,49 @@ export default function SettingsScreen({ navigation }: Props) {
       console.error('Logout error:', error);
     } finally {
       setLoggingOut(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSavingProfile(true);
+      await updateProfile(editForm);
+      setIsEditingProfile(false);
+    } catch (err) {
+      console.error('Failed to update profile', err);
+      alert('Failed to update profile.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleSaveBiometrics = async () => {
+    setSavingBiometrics(true);
+    try {
+      await apiService.post(`/biometrics/${user?.id}`, {
+        height: parseFloat(height),
+        weight: parseFloat(weight),
+      });
+    } catch (err) {
+      console.error('Failed to save biometrics', err);
+    } finally {
+      setSavingBiometrics(false);
+    }
+  };
+
+  const handleSaveGoals = async () => {
+    setSavingGoals(true);
+    try {
+      await updateProfile({
+        weeklyGoalDays: parseInt(goalsForm.weeklyGoalDays, 10),
+        weeklyGoalHours: parseFloat(goalsForm.weeklyGoalHours),
+        weeklyGoalCalories: parseFloat(goalsForm.weeklyGoalCalories),
+      });
+      setIsEditingGoals(false);
+    } catch (err) {
+      console.error('Failed to save goals', err);
+    } finally {
+      setSavingGoals(false);
     }
   };
 
@@ -75,9 +151,27 @@ export default function SettingsScreen({ navigation }: Props) {
         {/* 👤 PERSONAL PROFILE CARD */}
         {user ? (
           <View className="flex-col gap-3">
-            <Text className="text-label-caps font-label-caps uppercase tracking-wider pl-2" style={{ color: colors.textMuted }}>
-              Personal Profile
-            </Text>
+            <View className="flex-row items-center justify-between pl-2">
+              <Text className="text-label-caps font-label-caps uppercase tracking-wider" style={{ color: colors.textMuted }}>
+                Personal Profile
+              </Text>
+              <TouchableOpacity onPress={() => {
+                if (isEditingProfile) {
+                  handleSaveProfile();
+                } else {
+                  setIsEditingProfile(true);
+                  setEditForm({
+                    fullName: user?.fullName || '',
+                    username: user?.username || '',
+                    bio: user?.bio || '',
+                  });
+                }
+              }}>
+                <Text className="text-[12px] font-bold uppercase tracking-wider" style={{ color: colors.primary }}>
+                  {isEditingProfile ? (savingProfile ? 'Saving...' : 'Save') : 'Edit'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             
             <View 
               className="border rounded-2xl p-5 gap-5"
@@ -113,12 +207,34 @@ export default function SettingsScreen({ navigation }: Props) {
                 
                 {/* Name Info */}
                 <View className="flex-1 justify-center">
-                  <Text className="text-[20px] font-bold tracking-tight" style={{ color: colors.text }}>
-                    {user.fullName}
-                  </Text>
-                  <Text className="text-[14px] mt-0.5" style={{ color: colors.primary, fontWeight: 'bold' }}>
-                    @{user.username}
-                  </Text>
+                  {isEditingProfile ? (
+                    <View className="gap-2">
+                      <TextInput 
+                        className="border rounded-lg px-3 py-1 font-bold text-[16px]"
+                        style={{ borderColor: colors.border, color: colors.text }}
+                        value={editForm.fullName}
+                        onChangeText={v => setEditForm({...editForm, fullName: v})}
+                        placeholder="Full Name"
+                      />
+                      <TextInput 
+                        className="border rounded-lg px-3 py-1 text-[14px]"
+                        style={{ borderColor: colors.border, color: colors.primary }}
+                        value={editForm.username}
+                        onChangeText={v => setEditForm({...editForm, username: v})}
+                        placeholder="Username"
+                        autoCapitalize="none"
+                      />
+                    </View>
+                  ) : (
+                    <>
+                      <Text className="text-[20px] font-bold tracking-tight" style={{ color: colors.text }}>
+                        {user.fullName}
+                      </Text>
+                      <Text className="text-[14px] mt-0.5" style={{ color: colors.primary, fontWeight: 'bold' }}>
+                        @{user.username}
+                      </Text>
+                    </>
+                  )}
                   <View className="flex-row items-center mt-1 gap-1">
                     <MaterialIcons name="verified" size={14} color="#00e676" />
                     <Text className="text-[11px] uppercase tracking-wider font-bold text-[#00e676]">
@@ -167,31 +283,26 @@ export default function SettingsScreen({ navigation }: Props) {
               </View>
 
               {/* Bio text box */}
-              {user.bio ? (
-                <>
-                  <View className="h-px w-full" style={{ backgroundColor: colors.border }} />
-                  <View className="gap-1.5">
-                    <Text className="text-[11px] uppercase tracking-wider font-bold" style={{ color: colors.textMuted }}>
-                      Bio / Goals
-                    </Text>
-                    <Text className="text-[13px] leading-5" style={{ color: colors.text }}>
-                      "{user.bio}"
-                    </Text>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <View className="h-px w-full" style={{ backgroundColor: colors.border }} />
-                  <View className="gap-1.5">
-                    <Text className="text-[11px] uppercase tracking-wider font-bold" style={{ color: colors.textMuted }}>
-                      Bio / Goals
-                    </Text>
-                    <Text className="text-[13px] leading-5 italic" style={{ color: colors.textMuted }}>
-                      "Pushing boundaries, smashing PRs, and getting fit."
-                    </Text>
-                  </View>
-                </>
-              )}
+              <View className="h-px w-full" style={{ backgroundColor: colors.border }} />
+              <View className="gap-1.5">
+                <Text className="text-[11px] uppercase tracking-wider font-bold" style={{ color: colors.textMuted }}>
+                  Bio / Goals
+                </Text>
+                {isEditingProfile ? (
+                  <TextInput 
+                    className="border rounded-lg px-3 py-2 text-[13px]"
+                    style={{ borderColor: colors.border, color: colors.text, minHeight: 60 }}
+                    value={editForm.bio}
+                    onChangeText={v => setEditForm({...editForm, bio: v})}
+                    placeholder="Tell us about your fitness goals..."
+                    multiline
+                  />
+                ) : (
+                  <Text className="text-[13px] leading-5" style={{ color: colors.text }}>
+                    {user.bio ? `"${user.bio}"` : <Text className="italic" style={{ color: colors.textMuted }}>"Pushing boundaries, smashing PRs, and getting fit."</Text>}
+                  </Text>
+                )}
+              </View>
             </View>
           </View>
         ) : null}
@@ -269,75 +380,52 @@ export default function SettingsScreen({ navigation }: Props) {
             </View>
           </View>
         ) : (
-          /* Custom Coach Fallback display for rich aesthetics */
+          /* Empty State for unassigned coach */
           <View className="flex-col gap-3">
             <Text className="text-label-caps font-label-caps uppercase tracking-wider pl-2" style={{ color: colors.textMuted }}>
               Assigned Coach
             </Text>
             
             <View 
-              className="border rounded-2xl p-5 gap-4"
+              className="border rounded-2xl p-5 gap-4 items-center justify-center"
               style={{ 
                 backgroundColor: isDark ? 'rgba(22, 32, 46, 0.4)' : '#FFFFFF', 
                 borderColor: colors.border 
               }}
             >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                    <MaterialIcons name="sports" size={22} color={colors.primary} />
-                  </View>
-                  <View>
-                    <Text className="text-[16px] font-bold" style={{ color: colors.text }}>
-                      Coach Alex Johnson
-                    </Text>
-                    <Text className="text-[12px]" style={{ color: colors.textMuted }}>
-                      M.S. Kinesiology
-                    </Text>
-                  </View>
-                </View>
-                
-                <View className="flex-row items-center gap-1 bg-amber-500/10 px-2.5 py-1 rounded-full">
-                  <MaterialIcons name="star" size={14} color="#ffb020" />
-                  <Text className="text-[12px] font-bold text-[#ffb020]">4.9</Text>
-                </View>
+              <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center mb-2">
+                <MaterialIcons name="person-add-alt-1" size={24} color={colors.primary} />
               </View>
-
-              <Text className="text-[13px] leading-5 italic" style={{ color: colors.textMuted }}>
-                "Dedicated to helping athletes unlock their ultimate potential through science-based athletic coaching."
+              <Text className="text-[16px] font-bold text-center" style={{ color: colors.text }}>
+                No Coach Assigned
               </Text>
-
-              <View className="h-px w-full" style={{ backgroundColor: colors.border }} />
-
-              <View className="flex flex-col gap-2">
-                <View className="flex-row flex-wrap gap-1.5 items-center">
-                  <Text className="text-[11px] uppercase tracking-wider font-bold mr-1" style={{ color: colors.textMuted }}>
-                    Certs:
-                  </Text>
-                  {['NSCA-CSCS', 'NASM-CPT'].map((c: string) => (
-                    <View key={c} className="bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                      <Text className="text-[10px] font-bold" style={{ color: colors.primary }}>{c}</Text>
-                    </View>
-                  ))}
-                </View>
-                <View className="flex-row flex-wrap gap-1.5 items-center">
-                  <Text className="text-[11px] uppercase tracking-wider font-bold mr-1" style={{ color: colors.textMuted }}>
-                    Focus:
-                  </Text>
-                  {['Powerlifting', 'Strength Training'].map((s: string) => (
-                    <View key={s} className="bg-tertiary/10 px-2 py-0.5 rounded border border-tertiary/20">
-                      <Text className="text-[10px] font-bold text-tertiary">{s}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              <Text className="text-[13px] text-center" style={{ color: colors.textMuted }}>
+                Browse the marketplace to find the perfect coach to help you reach your goals.
+              </Text>
+              
+              <TouchableOpacity 
+                className="mt-2 px-6 py-3 rounded-xl flex-row items-center justify-center gap-2"
+                style={{ backgroundColor: colors.primary }}
+                onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Market' })}
+              >
+                <Text className="text-[14px] font-bold" style={{ color: colors.onPrimary }}>
+                  Browse Trainers
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
         
         {/* Biometrics */}
         <View className="flex-col gap-4">
-          <Text className="text-label-caps font-label-caps uppercase tracking-wider pl-2" style={{ color: colors.textMuted }}>Biometrics</Text>
+          <View className="flex-row items-center justify-between pl-2">
+            <Text className="text-label-caps font-label-caps uppercase tracking-wider" style={{ color: colors.textMuted }}>Biometrics</Text>
+            <TouchableOpacity onPress={handleSaveBiometrics}>
+              <Text className="text-[12px] font-bold uppercase tracking-wider" style={{ color: colors.primary }}>
+                {savingBiometrics ? 'Saving...' : 'Save'}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <View 
             className="border rounded-xl p-5 gap-6"
             style={{ backgroundColor: isDark ? 'rgba(22,32,46,0.3)' : '#FFFFFF', borderColor: colors.border }}
@@ -349,7 +437,18 @@ export default function SettingsScreen({ navigation }: Props) {
               </View>
               <Switch 
                 value={isMetric}
-                onValueChange={setIsMetric}
+                onValueChange={async (val) => {
+                  setIsMetric(val);
+                  try {
+                    await updateProfile({
+                      weightUnit: val ? 'KG' : 'LBS',
+                      lengthUnit: val ? 'CM' : 'IN'
+                    });
+                  } catch (err) {
+                    console.error('Failed to update metric preference', err);
+                    setIsMetric(!val);
+                  }
+                }}
                 trackColor={{ false: isDark ? '#494454' : '#C8C6C3', true: isDark ? '#a078ff' : '#6D3BD7' }}
                 thumbColor={isMetric ? colors.primary : '#ffffff'}
               />
@@ -380,6 +479,62 @@ export default function SettingsScreen({ navigation }: Props) {
                 />
                 <Text className="absolute right-4 text-body-base font-body-base" style={{ color: colors.textMuted }}>kg</Text>
               </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Weekly Goals */}
+        <View className="flex-col gap-4">
+          <View className="flex-row justify-between items-center pl-2">
+            <Text className="text-label-caps font-label-caps uppercase tracking-wider" style={{ color: colors.textMuted }}>Weekly Goals</Text>
+            {isEditingGoals ? (
+              <TouchableOpacity onPress={handleSaveGoals} disabled={savingGoals}>
+                <Text className="text-[12px] font-bold uppercase tracking-wider" style={{ color: colors.primary }}>
+                  {savingGoals ? 'Saving...' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => setIsEditingGoals(true)}>
+                <Text className="text-[12px] font-bold uppercase tracking-wider" style={{ color: colors.primary }}>Edit</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <View 
+            className="border rounded-xl p-5 gap-6"
+            style={{ backgroundColor: isDark ? 'rgba(22,32,46,0.3)' : '#FFFFFF', borderColor: colors.border }}
+          >
+            <View className="gap-2">
+              <Text className="text-body-base font-body-base font-bold" style={{ color: colors.text }}>Training Days (per week)</Text>
+              <TextInput 
+                className="w-full h-12 bg-transparent border rounded-lg px-4"
+                style={{ borderColor: colors.border, color: colors.text }}
+                keyboardType="numeric"
+                value={goalsForm.weeklyGoalDays}
+                onChangeText={(text) => setGoalsForm({...goalsForm, weeklyGoalDays: text})}
+                editable={isEditingGoals}
+              />
+            </View>
+            <View className="gap-2">
+              <Text className="text-body-base font-body-base font-bold" style={{ color: colors.text }}>Total Hours (per week)</Text>
+              <TextInput 
+                className="w-full h-12 bg-transparent border rounded-lg px-4"
+                style={{ borderColor: colors.border, color: colors.text }}
+                keyboardType="numeric"
+                value={goalsForm.weeklyGoalHours}
+                onChangeText={(text) => setGoalsForm({...goalsForm, weeklyGoalHours: text})}
+                editable={isEditingGoals}
+              />
+            </View>
+            <View className="gap-2">
+              <Text className="text-body-base font-body-base font-bold" style={{ color: colors.text }}>Calories to Burn (per week)</Text>
+              <TextInput 
+                className="w-full h-12 bg-transparent border rounded-lg px-4"
+                style={{ borderColor: colors.border, color: colors.text }}
+                keyboardType="numeric"
+                value={goalsForm.weeklyGoalCalories}
+                onChangeText={(text) => setGoalsForm({...goalsForm, weeklyGoalCalories: text})}
+                editable={isEditingGoals}
+              />
             </View>
           </View>
         </View>
@@ -415,6 +570,29 @@ export default function SettingsScreen({ navigation }: Props) {
                 onValueChange={setHapticEnabled}
                 trackColor={{ false: isDark ? '#494454' : '#C8C6C3', true: isDark ? '#a078ff' : '#6D3BD7' }}
                 thumbColor={hapticEnabled ? colors.primary : '#ffffff'}
+              />
+            </View>
+            <View className="h-px w-full" style={{ backgroundColor: colors.border }} />
+            <View className="flex-row justify-between items-center">
+              <View className="flex-1 pr-4">
+                <Text className="text-body-lg font-body-lg font-bold" style={{ color: colors.text }}>Workout Reminder</Text>
+                <Text className="text-body-base font-body-base mt-1" style={{ color: colors.textMuted }}>Minutes before workout to notify</Text>
+              </View>
+              <TextInput 
+                className="w-16 h-10 bg-transparent border rounded-lg px-2 text-center"
+                style={{ borderColor: colors.border, color: colors.text }}
+                keyboardType="numeric"
+                value={reminderMinutes}
+                onChangeText={setReminderMinutes}
+                onEndEditing={async () => {
+                  try {
+                    await updateProfile({
+                      notificationLeadMinutes: parseInt(reminderMinutes, 10) || 60,
+                    });
+                  } catch (err) {
+                    console.error('Failed to update reminder setting', err);
+                  }
+                }}
               />
             </View>
           </View>

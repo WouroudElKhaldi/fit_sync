@@ -1,187 +1,299 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, TextInput,
+  ActivityIndicator, FlatList
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { apiService } from '../services/api';
+import { useAppTheme } from '../context/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'ExerciseSelector'>;
 };
 
-interface PredefinedExercise {
+interface Exercise {
+  id: string;
   name: string;
   category: string;
-  type: string;
+  equipment: string;
+  display: string;
 }
 
-const PREDEFINED_EXERCISES: PredefinedExercise[] = [
-  // Chest
-  { name: 'Bench Press', category: 'Chest', type: 'Barbell • Flat Chest' },
-  { name: 'Incline DB Press', category: 'Chest', type: 'Dumbbell • Incline Chest' },
-  { name: 'Dumbbell Bench', category: 'Chest', type: 'Dumbbell • Flat Chest' },
-  { name: 'DB Flyes', category: 'Chest', type: 'Dumbbell • Chest Isolation' },
-  
-  // Shoulders
-  { name: 'Overhead Press', category: 'Shoulders', type: 'Barbell • Shoulder Strength' },
-  { name: 'Lateral Raises', category: 'Shoulders', type: 'Dumbbell • Side Delts' },
-  { name: 'Face Pulls', category: 'Shoulders', type: 'Cable • Rear Delts' },
-  { name: 'Seated OHP', category: 'Shoulders', type: 'Dumbbell • Shoulders' },
-
-  // Back
-  { name: 'Barbell Rows', category: 'Back', type: 'Barbell • Mid Back' },
-  { name: 'Lat Pulldown', category: 'Back', type: 'Cable • Lats Width' },
-  { name: 'Cable Rows', category: 'Back', type: 'Cable • Upper Back' },
-  { name: 'Weighted Pull-ups', category: 'Back', type: 'Bodyweight • Lats/Upper Back' },
-
-  // Arms
-  { name: 'Tricep Pushdown', category: 'Arms', type: 'Cable • Triceps' },
-  { name: 'Overhead Tricep Ext', category: 'Arms', type: 'Dumbbell/Cable • Triceps' },
-  { name: 'Barbell Curl', category: 'Arms', type: 'Barbell • Biceps' },
-  { name: 'Hammer Curls', category: 'Arms', type: 'Dumbbell • Biceps/Brachialis' },
-  { name: 'Reverse Curls', category: 'Arms', type: 'Barbell • Forearms' },
-  { name: 'EZ Bar Curl', category: 'Arms', type: 'EZ Bar • Biceps' },
-
-  // Legs
-  { name: 'Back Squat', category: 'Legs', type: 'Barbell • Quads/Glutes' },
-  { name: 'Deadlift', category: 'Legs', type: 'Barbell • Posterior Chain' },
-  { name: 'Romanian Deadlift', category: 'Legs', type: 'Barbell • Hamstrings/Glutes' },
-  { name: 'Leg Press', category: 'Legs', type: 'Machine • Quads/Legs' },
-  { name: 'Leg Curl', category: 'Legs', type: 'Machine • Hamstrings' },
-  { name: 'Calf Raises', category: 'Legs', type: 'Calves • Calf Strength' },
-  { name: 'Front Squat', category: 'Legs', type: 'Barbell • Quads Focus' },
-  { name: 'Walking Lunges', category: 'Legs', type: 'Dumbbell • Glutes/Quads' },
-  { name: 'Leg Extension', category: 'Legs', type: 'Machine • Quads' },
-  { name: 'Hip Thrust', category: 'Legs', type: 'Barbell • Glutes' },
-];
-
-interface ExerciseItemProps {
-  name: string;
-  type: string;
-  isSelected: boolean;
-  onPress: () => void;
-}
-
-const ExerciseItem = React.memo(({ name, type, isSelected, onPress }: ExerciseItemProps) => {
-  return (
-    <TouchableOpacity 
-      className="w-full flex-row items-center px-margin-mobile py-3 min-h-[64px] border-b border-white/5"
-      style={{ backgroundColor: isSelected ? 'rgba(208, 188, 255, 0.1)' : 'transparent' }}
-      onPress={onPress}
-    >
-      <View className="w-12 h-12 rounded-lg bg-surface-container-high shrink-0 overflow-hidden border border-white/10 mr-4 items-center justify-center">
-        <MaterialIcons name="fitness-center" size={24} color="#cbc3d7" />
-      </View>
-      <View className="flex-1 justify-center">
-        <Text className="text-body-base font-body-base font-bold text-on-background">{name}</Text>
-        <Text className="text-label-caps font-label-caps text-on-surface-variant mt-1">{type}</Text>
-      </View>
-      <View 
-        className="w-6 h-6 rounded-full flex items-center justify-center ml-4"
-        style={{ 
-          backgroundColor: isSelected ? '#d0bcff' : 'transparent',
-          borderWidth: isSelected ? 0 : 1,
-          borderColor: isSelected ? 'transparent' : 'rgba(255, 255, 255, 0.3)'
-        }}
-      >
-        {isSelected && <MaterialIcons name="check" size={16} color="#3c0091" />}
-      </View>
-    </TouchableOpacity>
-  );
-});
+const PAGE_SIZE = 20;
 
 export default function ExerciseSelectorScreen({ navigation }: Props) {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']);
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const { colors } = useAppTheme();
+
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [muscleCategories, setMuscleCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const toggleFilter = (filter: string) => {
-    if (filter === 'All') {
-      setSelectedFilters(['All']);
-    } else {
-      const newFilters = selectedFilters.filter(f => f !== 'All');
-      if (newFilters.includes(filter)) {
-        if (newFilters.length === 1) {
-          setSelectedFilters(['All']);
-        } else {
-          setSelectedFilters(newFilters.filter(f => f !== filter));
-        }
-      } else {
-        setSelectedFilters([...newFilters, filter]);
+  // Loading states — separate initial vs paginating
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  // Track the "active" request sequence to discard stale responses
+  const requestSeqRef = useRef(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
+
+  // ─── Load muscle categories once ─────────────────────────────────────────
+  useEffect(() => {
+    async function loadMuscles() {
+      try {
+        const data = await apiService.get('/exercises/muscles');
+        if (!isMountedRef.current) return;
+        const cats = Array.from(
+          new Set((data as any[]).map((m: any) => m.category).filter(Boolean))
+        ).sort() as string[];
+        setMuscleCategories(cats);
+      } catch (err) {
+        console.error('Failed to load muscles:', err);
       }
     }
-  };
+    loadMuscles();
+  }, []);
 
-  const toggleExercise = (ex: string) => {
-    if (selectedExercises.includes(ex)) {
-      setSelectedExercises(selectedExercises.filter(e => e !== ex));
-    } else {
-      setSelectedExercises([...selectedExercises, ex]);
+  // ─── Core fetch ───────────────────────────────────────────────────────────
+  const fetchExercises = useCallback(
+    async (query: string, category: string, pageNum: number, append: boolean, seq: number) => {
+      if (append) setLoadingMore(true);
+      else setInitialLoading(true);
+
+      try {
+        const params = new URLSearchParams();
+        if (query) params.append('search', query);
+        if (category !== 'All') params.append('muscleCategory', category);
+        params.append('page', String(pageNum));
+        params.append('limit', String(PAGE_SIZE));
+
+        const res = await apiService.get(`/exercises?${params.toString()}`);
+
+        // Discard if a newer request has been issued
+        if (!isMountedRef.current || seq !== requestSeqRef.current) return;
+
+        const formatted: Exercise[] = (res.data || []).map((ex: any) => {
+          const primaryMuscle =
+            ex.muscles?.find((m: any) => m.targetType === 'PRIMARY')?.muscle?.name || 'Full Body';
+          const equipment = ex.equipment?.name || 'Bodyweight';
+          return {
+            id: ex.id,
+            name: ex.name,
+            category: primaryMuscle,
+            equipment,
+            display: `${equipment} • ${primaryMuscle}`,
+          };
+        });
+
+        setTotalPages(res.totalPages ?? 1);
+        setTotal(res.total ?? 0);
+        setExercises(prev => (append ? [...prev, ...formatted] : formatted));
+      } catch (err) {
+        if (!isMountedRef.current || seq !== requestSeqRef.current) return;
+        console.error('Failed to load exercises:', err);
+      } finally {
+        if (isMountedRef.current && seq === requestSeqRef.current) {
+          setInitialLoading(false);
+          setLoadingMore(false);
+        }
+      }
+    },
+    []
+  );
+
+  // ─── React to search / category changes (debounced) ───────────────────────
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    // Reset pagination states immediately to prevent stale loadMore calls during debounce
+    setPage(1);
+    setTotalPages(1);
+
+    debounceRef.current = setTimeout(() => {
+      // Bump seq so any in-flight request for a previous query is discarded
+      const seq = requestSeqRef.current + 1;
+      requestSeqRef.current = seq;
+      setExercises([]);           // clear immediately — avoids stale list flash
+      fetchExercises(searchQuery, selectedCategory, 1, false, seq);
+    }, 350);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, selectedCategory, fetchExercises]);
+
+  // ─── Load more (pagination) ───────────────────────────────────────────────
+  const loadMore = useCallback(() => {
+    if (loadingMore || initialLoading || page >= totalPages) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    const seq = requestSeqRef.current; // same request "era" — just next page
+    fetchExercises(searchQuery, selectedCategory, nextPage, true, seq);
+  }, [loadingMore, initialLoading, page, totalPages, searchQuery, selectedCategory, fetchExercises]);
+
+  // ─── Toggle exercise selection ─────────────────────────────────────────────
+  const toggleExercise = useCallback((ex: Exercise) => {
+    setSelectedExercises(prev =>
+      prev.find(e => e.id === ex.id) ? prev.filter(e => e.id !== ex.id) : [...prev, ex]
+    );
+  }, []);
+
+  const isSelected = (id: string) => !!selectedExercises.find(e => e.id === id);
+
+  // ─── Render item (stable reference) ──────────────────────────────────────
+  const renderItem = useCallback(({ item }: { item: Exercise }) => {
+    const selected = isSelected(item.id);
+    return (
+      <TouchableOpacity
+        onPress={() => toggleExercise(item)}
+        style={{
+          flexDirection: 'row', alignItems: 'center',
+          paddingHorizontal: 20, paddingVertical: 14,
+          borderBottomWidth: 1, borderColor: colors.border,
+          backgroundColor: selected ? colors.primary + '18' : 'transparent',
+        }}
+      >
+        <View style={{
+          width: 46, height: 46, borderRadius: 10,
+          backgroundColor: colors.surfaceContainerHigh,
+          alignItems: 'center', justifyContent: 'center',
+          marginRight: 14, borderWidth: 1, borderColor: colors.border,
+        }}>
+          <MaterialIcons name="fitness-center" size={22} color={colors.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{item.name}</Text>
+          <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>{item.display}</Text>
+        </View>
+        <View style={{
+          width: 24, height: 24, borderRadius: 12,
+          backgroundColor: selected ? colors.primary : 'transparent',
+          borderWidth: selected ? 0 : 1.5, borderColor: colors.border,
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          {selected && <MaterialIcons name="check" size={15} color={colors.onPrimary} />}
+        </View>
+      </TouchableOpacity>
+    );
+  }, [selectedExercises, colors, toggleExercise]);
+
+  // ─── Empty / loading states ───────────────────────────────────────────────
+  const ListEmptyComponent = () => {
+    if (initialLoading) {
+      return (
+        <View style={{ alignItems: 'center', paddingTop: 80 }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ color: colors.textMuted, marginTop: 12 }}>Loading exercises…</Text>
+        </View>
+      );
     }
+    return (
+      <View style={{ alignItems: 'center', paddingTop: 80 }}>
+        <MaterialIcons name="search-off" size={48} color={colors.textMuted} />
+        <Text style={{ color: colors.textMuted, fontWeight: '700', marginTop: 12 }}>
+          No exercises found
+        </Text>
+        {selectedCategory !== 'All' && (
+          <TouchableOpacity
+            onPress={() => setSelectedCategory('All')}
+            style={{ marginTop: 12, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.primary + '20' }}
+          >
+            <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 13 }}>
+              Clear filter
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
   };
 
-  // Filtering Logic
-  const filteredExercises = PREDEFINED_EXERCISES.filter(ex => {
-    const matchesSearch = ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          ex.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          ex.type.toLowerCase().includes(searchQuery.toLowerCase());
-                          
-    const matchesCategory = selectedFilters.includes('All') || 
-                            selectedFilters.includes(ex.category);
-                            
-    return matchesSearch && matchesCategory;
-  });
+  const ListFooterComponent = loadingMore ? (
+    <View style={{ padding: 20, alignItems: 'center' }}>
+      <ActivityIndicator size="small" color={colors.primary} />
+    </View>
+  ) : null;
 
-  // Group by Categories
-  const categoriesPresent = Array.from(new Set(filteredExercises.map(ex => ex.category)));
-
+  // ─── UI ───────────────────────────────────────────────────────────────────
   return (
-    <View className="flex-1 bg-background">
-      {/* Sticky Header */}
-      <View className="bg-background pt-12 pb-2 border-b border-white/10 z-40">
-        <View className="px-margin-mobile flex-row items-center justify-between h-12 mb-4">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialIcons name="close" size={28} color="#d9e3f6" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+
+      {/* ── Sticky Header ── */}
+      <View style={{ backgroundColor: colors.background, paddingTop: 52, borderBottomWidth: 1, borderColor: colors.border }}>
+
+        {/* Title row */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, height: 48, marginBottom: 12 }}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <MaterialIcons name="close" size={26} color={colors.text} />
           </TouchableOpacity>
-          <Text className="text-headline-md font-headline-md text-on-background absolute left-1/2 -translate-x-1/2 font-bold">
+          <Text style={{ flex: 1, textAlign: 'center', fontSize: 18, fontWeight: '700', color: colors.text }}>
             Add Exercises
           </Text>
-          <View className="w-12" />
+          <View style={{ width: 40 }} />
         </View>
 
-        <View className="px-margin-mobile mb-4">
-          <View className="relative flex-row items-center h-12">
-            <View className="absolute left-4 z-10">
-              <MaterialIcons name="search" size={24} color="#958ea0" />
-            </View>
-            <TextInput 
-              className="w-full h-full bg-surface-container rounded-lg pl-12 pr-4 text-body-base font-body-base text-on-background border border-white/20"
-              placeholder="Search exercises, muscles..."
-              placeholderTextColor="#958ea0"
+        {/* Search bar */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+          <View style={{
+            flexDirection: 'row', alignItems: 'center', height: 46,
+            backgroundColor: colors.surfaceContainer,
+            borderRadius: 12, borderWidth: 1, borderColor: colors.border,
+            paddingHorizontal: 12, gap: 8,
+          }}>
+            <MaterialIcons name="search" size={20} color={colors.textMuted} />
+            <TextInput
+              style={{ flex: 1, fontSize: 15, color: colors.text }}
+              placeholder="Search exercises, muscles…"
+              placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
+              autoCorrect={false}
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <MaterialIcons name="clear" size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-margin-mobile pb-2 gap-2 flex-row">
-          {['All', 'Chest', 'Legs', 'Back', 'Shoulders', 'Arms'].map(filter => {
-            const isChipSelected = selectedFilters.includes(filter);
+        {/* Category chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingBottom: 12 }}
+        >
+          {['All', ...muscleCategories].map(cat => {
+            const active = selectedCategory === cat;
             return (
-              <TouchableOpacity 
-                key={filter}
-                onPress={() => toggleFilter(filter)}
-                className="h-10 px-6 rounded-full flex items-center justify-center mr-2"
-                style={{ 
-                  backgroundColor: isChipSelected ? '#d0bcff' : '#16202e',
-                  borderWidth: isChipSelected ? 0 : 1,
-                  borderColor: isChipSelected ? 'transparent' : 'rgba(255, 255, 255, 0.1)'
+              <TouchableOpacity
+                key={cat}
+                onPress={() => setSelectedCategory(cat)}
+                style={{
+                  height: 34, paddingHorizontal: 14, borderRadius: 8,
+                  backgroundColor: active ? colors.primary : colors.surfaceContainer,
+                  borderWidth: active ? 0 : 1,
+                  borderColor: colors.border,
+                  alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <Text 
-                  className="font-bold"
-                  style={{ color: isChipSelected ? '#3c0091' : '#cbc3d7' }}
-                >
-                  {filter}
+                <Text style={{ fontSize: 13, fontWeight: '700', color: active ? colors.onPrimary : colors.textMuted }}>
+                  {cat}
                 </Text>
               </TouchableOpacity>
             );
@@ -189,50 +301,55 @@ export default function ExerciseSelectorScreen({ navigation }: Props) {
         </ScrollView>
       </View>
 
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 130 }}>
-        {categoriesPresent.length === 0 ? (
-          <View className="flex-1 items-center justify-center py-12">
-            <MaterialIcons name="search-off" size={48} color="#958ea0" />
-            <Text className="text-on-surface-variant font-bold mt-4">No exercises match search criteria</Text>
-          </View>
-        ) : (
-          categoriesPresent.map(category => (
-            <View key={category} className="mt-4">
-              <View className="px-margin-mobile py-2 bg-surface-container/20 border-b border-white/5">
-                <Text className="text-label-caps font-label-caps text-outline uppercase tracking-widest font-black text-primary">{category}</Text>
-              </View>
-                {filteredExercises
-                  .filter(ex => ex.category === category)
-                  .map(ex => (
-                    <ExerciseItem 
-                      key={ex.name} 
-                      name={ex.name} 
-                      type={ex.type} 
-                      isSelected={selectedExercises.includes(ex.name)}
-                      onPress={() => toggleExercise(ex.name)}
-                    />
-                  ))}
-            </View>
-          ))
-        )}
-      </ScrollView>
+      {/* Results count */}
+      {!initialLoading && (
+        <View style={{ paddingHorizontal: 20, paddingVertical: 8 }}>
+          <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: '600' }}>
+            {total} exercise{total !== 1 ? 's' : ''}
+            {selectedCategory !== 'All' ? ` · ${selectedCategory}` : ''}
+          </Text>
+        </View>
+      )}
 
-      {/* Floating Action Bar */}
+      {/* List */}
+      <FlatList
+        data={exercises}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        removeClippedSubviews
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: selectedExercises.length > 0 ? 110 : 40 }}
+        ListEmptyComponent={ListEmptyComponent}
+        ListFooterComponent={ListFooterComponent}
+      />
+
+      {/* Floating Add Bar */}
       {selectedExercises.length > 0 && (
-        <View className="absolute bottom-0 left-0 right-0 z-50 p-margin-mobile pb-8 bg-gradient-to-t from-background to-transparent">
-          <View className="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex-row items-center justify-between border border-white/15">
-            <Text className="text-body-base font-body-base font-bold text-on-background">{selectedExercises.length} Selected</Text>
-            <TouchableOpacity 
-              className="h-14 px-8 rounded-2xl bg-[#8B5CF6] items-center justify-center shadow-lg"
-              onPress={() => {
-                navigation.navigate('WorkoutBuilder', {
-                  addedExerciseNames: selectedExercises
-                });
-              }}
-            >
-              <Text className="text-white font-bold text-lg">Add to Workout</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          padding: 20, paddingBottom: 32,
+          backgroundColor: colors.background,
+          borderTopWidth: 1, borderColor: colors.border,
+        }}>
+          <TouchableOpacity
+            style={{
+              height: 54, borderRadius: 12,
+              backgroundColor: colors.primary,
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}
+            onPress={() => {
+              navigation.navigate('WorkoutBuilder', {
+                addedExercises: selectedExercises.map(e => ({ id: e.id, name: e.name }))
+              });
+            }}
+          >
+            <MaterialIcons name="add" size={22} color={colors.onPrimary} />
+            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>
+              Add {selectedExercises.length} Exercise{selectedExercises.length !== 1 ? 's' : ''} to Workout
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>

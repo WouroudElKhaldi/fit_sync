@@ -70,6 +70,9 @@ export class UserService {
       weightUnit?: WeightUnit;
       lengthUnit?: LengthUnit;
       notificationLeadMinutes?: number | string;
+      weeklyGoalDays?: number;
+      weeklyGoalHours?: number;
+      weeklyGoalCalories?: number;
       role?: Role;
       trainerProfile?: {
         education?: string;
@@ -117,6 +120,9 @@ export class UserService {
       notificationLeadMinutes: payload.notificationLeadMinutes
         ? parseInt(String(payload.notificationLeadMinutes), 10)
         : undefined,
+      weeklyGoalDays: payload.weeklyGoalDays !== undefined ? parseInt(String(payload.weeklyGoalDays), 10) : undefined,
+      weeklyGoalHours: payload.weeklyGoalHours !== undefined ? parseFloat(String(payload.weeklyGoalHours)) : undefined,
+      weeklyGoalCalories: payload.weeklyGoalCalories !== undefined ? parseFloat(String(payload.weeklyGoalCalories)) : undefined,
       trainerProfile: payload.trainerProfile
         ? {
             upsert: {
@@ -330,135 +336,50 @@ export class UserService {
       orderBy: { createdAt: 'desc' },
     });
 
-    unreadMessages.forEach((msg) => {
-      notificationsList.push({
-        id: `msg-${msg.id}`,
-        icon: 'chat',
-        title: 'New Message',
-        body: `From ${msg.sender.fullName}: "${msg.content.substring(0, 40)}${msg.content.length > 40 ? '...' : ''}"`,
-        time: msg.createdAt,
-        read: false,
-        type: 'message',
-      });
+    const leadMinutes = user.notificationLeadMinutes || 60;
+    const now = new Date();
+    const futureLimit = new Date(now.getTime() + leadMinutes * 60000);
+
+    // Fetch persistent notifications
+    const dbNotifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     });
 
-    if (user.role === Role.ADMIN) {
-      const pendingSessions = await prisma.workoutSession.findMany({
-        where: { completedAt: { not: null }, trainerFeedback: null },
-        include: { workoutPlan: { include: { client: true } } },
-        orderBy: { completedAt: 'desc' },
-      });
-      pendingSessions.forEach((s) => {
-        notificationsList.push({
-          id: `session-review-${s.id}`,
-          icon: 'feedback',
-          title: 'Workout Review Needed',
-          body: `${s.workoutPlan.client.fullName} completed "${s.workoutPlan.title}"`,
-          time: s.completedAt,
-          read: false,
-          type: 'session_review',
-        });
-      });
-
-      const recentUsers = await prisma.user.findMany({
-        where: { NOT: { id: userId } },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      });
-      recentUsers.forEach((u) => {
-        notificationsList.push({
-          id: `new-user-${u.id}`,
-          icon: 'person_add',
-          title: 'New User Registered',
-          body: `${u.fullName} joined as ${u.role}`,
-          time: u.createdAt,
-          read: false,
-          type: 'new_user',
-        });
-      });
-
-    } else if (user.role === Role.TRAINER) {
-      const pendingSessions = await prisma.workoutSession.findMany({
-        where: {
-          completedAt: { not: null },
-          trainerFeedback: null,
-          workoutPlan: { client: { trainerId: userId } },
+    // Generate dynamic upcoming workout reminders
+    const upcomingWorkouts = await prisma.workoutPlan.findMany({
+      where: {
+        clientId: userId,
+        scheduledDate: {
+          gt: now,
+          lte: futureLimit,
         },
-        include: { workoutPlan: { include: { client: true } } },
-        orderBy: { completedAt: 'desc' },
-      });
-      pendingSessions.forEach((s) => {
-        notificationsList.push({
-          id: `session-review-${s.id}`,
-          icon: 'feedback',
-          title: 'Workout Review Needed',
-          body: `${s.workoutPlan.client.fullName} completed "${s.workoutPlan.title}"`,
-          time: s.completedAt,
-          read: false,
-          type: 'session_review',
-        });
-      });
+        session: null, // Only workouts that haven't been completed
+      },
+    });
 
-      const clients = await prisma.user.findMany({
-        where: { trainerId: userId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      });
-      clients.forEach((c) => {
-        notificationsList.push({
-          id: `assigned-client-${c.id}`,
-          icon: 'person_add',
-          title: 'New Athlete Assigned',
-          body: `${c.fullName} is now assigned to you`,
-          time: c.createdAt,
-          read: false,
-          type: 'client_assigned',
-        });
-      });
+    const reminderNotifications = upcomingWorkouts.map((w) => ({
+      id: `reminder-${w.id}`,
+      title: 'Upcoming Workout Reminder',
+      message: `Your workout "${w.title}" is scheduled in less than ${leadMinutes} minutes!`,
+      type: 'REMINDER',
+      isRead: false,
+      createdAt: w.scheduledDate || now,
+    }));
 
-    } else {
-      const recentPlans = await prisma.workoutPlan.findMany({
-        where: { clientId: userId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      });
-      recentPlans.forEach((p) => {
-        notificationsList.push({
-          id: `new-plan-${p.id}`,
-          icon: 'calendar_today',
-          title: 'Workout Plan Assigned',
-          body: `New blueprint: "${p.title}"`,
-          time: p.createdAt,
-          read: false,
-          type: 'plan_assigned',
-        });
-      });
+    const allNotifications = [...reminderNotifications, ...dbNotifications].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
-      const reviewedSessions = await prisma.workoutSession.findMany({
-        where: {
-          workoutPlan: { clientId: userId },
-          trainerFeedback: { not: null },
-        },
-        include: { workoutPlan: true },
-        orderBy: { completedAt: 'desc' },
-        take: 5,
-      });
-      reviewedSessions.forEach((s) => {
-        notificationsList.push({
-          id: `reviewed-session-${s.id}`,
-          icon: 'rate_review',
-          title: 'Workout Feedback Submitted',
-          body: `Feedback received on "${s.workoutPlan.title}"`,
-          time: s.completedAt,
-          read: false,
-          type: 'feedback_submitted',
-        });
-      });
-    }
-
-    notificationsList.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-
-    return notificationsList;
+    return allNotifications.map(n => ({
+      id: n.id,
+      title: n.title,
+      body: n.message,
+      time: n.createdAt,
+      read: n.isRead,
+      type: n.type,
+      icon: n.type === 'REMINDER' ? 'alarm' : n.type === 'NEW_MESSAGE' ? 'chat' : 'notifications'
+    }));
   }
 }
-

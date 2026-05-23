@@ -9,7 +9,7 @@ export class BiometricController {
   @Post(':userId')
   async logBiometric(
     @Param('userId') userId: string,
-    @Body() payload: { weight?: number; height?: number },
+    @Body() payload: { weight?: number; height?: number; bodyFat?: number; leanMass?: number },
   ) {
     return this.biometricService.logBiometric(userId, payload);
   }
@@ -30,5 +30,21 @@ export class BiometricController {
   @Delete('log/:logId')
   async deleteBiometricLog(@Param('logId') logId: string) {
     return this.biometricService.deleteBiometricLog(logId);
+  }
+
+  // User: log a personal record
+  @Post(':userId/prs/:exerciseId')
+  async logPersonalRecord(
+    @Param('userId') userId: string,
+    @Param('exerciseId') exerciseId: string,
+    @Body() payload: { weight: number; reps?: number },
+  ) {
+    return this.biometricService.logPersonalRecord(userId, exerciseId, payload);
+  }
+
+  // User: get all personal records
+  @Get(':userId/prs')
+  async getPersonalRecords(@Param('userId') userId: string) {
+    return this.biometricService.getPersonalRecords(userId);
   }
 }

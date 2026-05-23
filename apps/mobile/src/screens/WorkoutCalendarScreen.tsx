@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useIsFocused } from '@react-navigation/native';
-import { api } from '../../mocks/api';
+import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'MainTabs'>;
 };
 
 export default function WorkoutCalendarScreen({ navigation }: Props) {
+  const { user } = useAuth();
   const [schedules, setSchedules] = useState<any[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date(2026, 4, 1)); // May 2026
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 19)); // May 19, 2026
@@ -22,9 +24,34 @@ export default function WorkoutCalendarScreen({ navigation }: Props) {
   const [tempMonth, setTempMonth] = useState(4);
 
   async function loadData() {
-    const allSchedules = await api.getWorkoutSchedule();
-    setSchedules(allSchedules);
+    if (!user) return;
+    try {
+      const allSchedules = await apiService.get(`/workouts/plans/client/${user.id}`);
+      setSchedules(allSchedules || []);
+    } catch (err) {
+      console.error('Failed to load schedules', err);
+    }
   }
+
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      await apiService.delete(`/workouts/plans/${planId}`);
+      await loadData();
+    } catch (err) {
+      console.error('Failed to delete workout plan:', err);
+    }
+  };
+
+  const confirmDelete = (planId: string) => {
+    Alert.alert(
+      'Delete Workout?',
+      'Are you sure you want to permanently delete this workout session?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => handleDeletePlan(planId) },
+      ]
+    );
+  };
 
   useEffect(() => {
     if (isFocused) {
@@ -226,22 +253,48 @@ export default function WorkoutCalendarScreen({ navigation }: Props) {
                 </View>
               </View>
 
-              {(() => {
-                const isDone = isWorkoutDone(plan);
-                return (
-                  <TouchableOpacity 
-                    className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 border-t border-white/20 ${isDone ? 'bg-secondary' : 'bg-primary'}`}
-                    onPress={() => {
-                      navigation.navigate('WorkoutLogger', { planId: plan.id });
-                    }}
-                  >
-                    <MaterialIcons name={isDone ? "edit" : "play-arrow"} size={24} color={isDone ? "#30312e" : "#3c0091"} />
-                    <Text className={`font-headline-md text-[18px] font-bold ${isDone ? 'text-on-secondary' : 'text-on-primary'}`}>
-                      {isDone ? "Edit Workout" : "Start Workout"}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })()}
+              <View className="flex-row gap-2 mt-3 w-full">
+                {/* Start Workout */}
+                <TouchableOpacity 
+                  className="flex-[1.6] h-11 bg-primary rounded-xl flex-row items-center justify-center gap-1.5"
+                  onPress={() => {
+                    navigation.navigate('WorkoutLogger', { planId: plan.id });
+                  }}
+                >
+                  <MaterialIcons name="play-arrow" size={20} color="#3c0091" />
+                  <Text className="text-[14px] font-bold text-on-primary">
+                    Start
+                  </Text>
+                </TouchableOpacity>
+
+                {/* View Details */}
+                <TouchableOpacity 
+                  className="w-11 h-11 rounded-xl bg-surface-container-high items-center justify-center border border-white/10"
+                  onPress={() => {
+                    (navigation as any).navigate('WorkoutDetails', { planId: plan.id });
+                  }}
+                >
+                  <MaterialIcons name="info" size={20} color="#cbc3d7" />
+                </TouchableOpacity>
+
+                {/* Edit Plan */}
+                <TouchableOpacity 
+                  className="w-11 h-11 rounded-xl bg-surface-container-high items-center justify-center border border-white/10"
+                  onPress={() => {
+                    (navigation as any).navigate('WorkoutBuilder', { planId: plan.id });
+                  }}
+                >
+                  <MaterialIcons name="edit" size={20} color="#cbc3d7" />
+                </TouchableOpacity>
+
+                {/* Delete Plan */}
+                <TouchableOpacity 
+                  className="w-11 h-11 rounded-xl bg-surface-container-high items-center justify-center border border-white/10"
+                  onPress={() => confirmDelete(plan.id)}
+                >
+                  <MaterialIcons name="delete" size={20} color="#ffb4ab" />
+                </TouchableOpacity>
+              </View>
             </View>
           ))
         ) : (

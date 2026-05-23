@@ -22,8 +22,18 @@ export class ExerciseController {
   // ─── Public Read ──────────────────────────────────────────────────────────
 
   @Get()
-  async findAllExercises(@Query('search') search?: string) {
-    return this.exerciseService.findAllExercises(search);
+  async findAllExercises(
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('muscleCategory') muscleCategory?: string,
+  ) {
+    return this.exerciseService.findAllExercises(
+      search,
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 20,
+      muscleCategory,
+    );
   }
 
   @Get('muscles')

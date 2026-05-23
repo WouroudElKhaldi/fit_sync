@@ -24,6 +24,8 @@ import PostWorkoutSummaryScreen from '../screens/PostWorkoutSummaryScreen';
 import RoleSelectionScreen from '../screens/RoleSelectionScreen';
 import TrainerMarketplaceScreen from '../screens/TrainerMarketplaceScreen';
 import TrainerProfileScreen from '../screens/TrainerProfileScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
+import WorkoutDetailsScreen from '../screens/WorkoutDetailsScreen';
 
 import { RootStackParamList, MainTabParamList } from './types';
 
@@ -100,7 +102,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Log" component={WorkoutCalendarScreen} />
       <Tab.Screen name="Analytics" component={AnalyticsDashboardScreen} />
-      <Tab.Screen name="Market" component={TrainerMarketplaceScreen} />
+      <Tab.Screen name="Market" component={TrainerMarketplaceScreen} options={{ tabBarLabel: 'Trainers' }} />
       <Tab.Screen name="Chat" component={ChatInboxScreen} />
     </Tab.Navigator>
   );
@@ -128,10 +130,12 @@ export default function AppNavigator() {
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         <Stack.Screen name="WorkoutLogger" component={WorkoutLoggerScreen} />
         <Stack.Screen name="WorkoutBuilder" component={WorkoutBuilderScreen} />
+        <Stack.Screen name="WorkoutDetails" component={WorkoutDetailsScreen} />
         <Stack.Screen name="ExerciseSelector" component={ExerciseSelectorScreen} />
         <Stack.Screen name="PostWorkoutSummary" component={PostWorkoutSummaryScreen} />
         <Stack.Screen name="ActiveChat" component={ActiveChatScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="TrainerProfile" component={TrainerProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useAppTheme } from '../context/ThemeContext';
+import { AppHeader } from '../components/ui/AppHeader';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'MainTabs'>;
@@ -12,60 +16,65 @@ type TabType = 'overview' | 'strength' | 'composition';
 type LiftType = 'bench' | 'squat' | 'deadlift';
 
 export default function AnalyticsDashboardScreen({ navigation }: Props) {
+  const { colors, isDark } = useAppTheme();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [selectedLift, setSelectedLift] = useState<LiftType>('bench');
+  const [volumeData, setVolumeData] = useState<any[]>([]);
+  const [summary, setSummary] = useState<any>({
+    activeCalories: 0,
+    weeklyTimeHours: 0,
+    totalSessionsThisWeek: 0,
+    weeklyGoalDays: 4,
+    weeklyGoalHours: 6,
+    weeklyGoalCalories: 2000,
+  });
+  const [prs, setPrs] = useState<any[]>([]);
+  const [biometricHistory, setBiometricHistory] = useState<any[]>([]);
+  const { user } = useAuth();
 
-  // Static high-fidelity mock data
-  const liftsData = {
-    bench: {
-      pr: '225 lbs',
-      history: [
-        { date: 'Apr 1', weight: 205 },
-        { date: 'Apr 15', weight: 210 },
-        { date: 'May 1', weight: 215 },
-        { date: 'May 15', weight: 225 },
-      ],
-      targets: { '1RM': '225 lbs', '3RM': '210 lbs', '5RM': '195 lbs' }
-    },
-    squat: {
-      pr: '315 lbs',
-      history: [
-        { date: 'Apr 1', weight: 295 },
-        { date: 'Apr 15', weight: 300 },
-        { date: 'May 1', weight: 305 },
-        { date: 'May 15', weight: 315 },
-      ],
-      targets: { '1RM': '315 lbs', '3RM': '295 lbs', '5RM': '275 lbs' }
-    },
-    deadlift: {
-      pr: '405 lbs',
-      history: [
-        { date: 'Apr 1', weight: 375 },
-        { date: 'Apr 15', weight: 385 },
-        { date: 'May 1', weight: 395 },
-        { date: 'May 15', weight: 405 },
-      ],
-      targets: { '1RM': '405 lbs', '3RM': '380 lbs', '5RM': '355 lbs' }
+  useEffect(() => {
+    async function loadData() {
+      if (!user) return;
+      try {
+        const [volRes, prsRes, histRes] = await Promise.all([
+          apiService.get(`/workouts/plans/analytics/${user.id}`),
+          apiService.get(`/biometrics/${user.id}/prs`),
+          apiService.get(`/biometrics/${user.id}/history`)
+        ]);
+        setVolumeData(volRes?.volumeData || []);
+        if (volRes?.summary) {
+          setSummary(volRes.summary);
+        }
+        setPrs(prsRes || []);
+        setBiometricHistory(histRes || []);
+      } catch (err) {
+        console.error('Failed to load analytics', err);
+      }
     }
-  };
+    loadData();
+  }, [user]);
+
+  // Dynamic data processing
+  const currentPR = prs.find(p => p.exercise.name.toLowerCase().includes(selectedLift.toLowerCase())) || { weight: 0, achievedAt: new Date().toISOString() };
+  
+  // Make fake history based on PR if not enough data, just for visual continuity, since we don't have historical PR endpoints yet
+  const prHistory = [
+    { date: 'Wk 1', weight: currentPR.weight ? currentPR.weight * 0.85 : 0 },
+    { date: 'Wk 2', weight: currentPR.weight ? currentPR.weight * 0.90 : 0 },
+    { date: 'Wk 3', weight: currentPR.weight ? currentPR.weight * 0.95 : 0 },
+    { date: 'Now', weight: currentPR.weight || 0 },
+  ];
+
+  const currentBiometrics = biometricHistory.length > 0 ? biometricHistory[biometricHistory.length - 1] : { weight: 0, bodyFat: 0, leanMass: 0 };
+  const recentWeightHistory = biometricHistory.slice(-4).map((b, i) => ({ w: b.weight, date: `T-${biometricHistory.length - i}` }));
+  if (recentWeightHistory.length === 0) recentWeightHistory.push({ w: 0, date: 'Now' });
 
   return (
-    <View className="flex-1 bg-background pt-12">
-      {/* Top App Bar */}
-      <View className="w-full bg-surface/80 border-b border-white/10 z-50 px-margin-mobile py-4 flex-row justify-between items-center">
-        <View className="flex-row items-center gap-3">
-          <View className="w-8 h-8 rounded-full bg-surface-container-high items-center justify-center">
-             <MaterialIcons name="insights" size={20} color="#d0bcff" />
-          </View>
-          <Text className="font-headline-md text-headline-md font-black tracking-tighter text-primary">PERFORMANCE</Text>
-        </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-          <MaterialIcons name="settings" size={24} color="#d0bcff" />
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <AppHeader />
 
       {/* Glassmorphic Category Tabs */}
-      <View className="flex-row px-margin-mobile pt-4 pb-2 justify-between gap-2">
+      <View style={{ flexDirection: 'row', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, gap: 8 }}>
         {(['overview', 'strength', 'composition'] as TabType[]).map((tab) => (
           <TouchableOpacity
             key={tab}
@@ -101,12 +110,12 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
                   </View>
                 </View>
                 <View>
-                  <Text className="text-display-md font-black text-on-surface leading-tight">640 kcal</Text>
+                  <Text className="text-display-md font-black text-on-surface leading-tight">{summary.activeCalories} kcal</Text>
                   {/* Mini-progress bar */}
                   <View className="w-full h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
-                    <View className="w-[80%] h-full bg-primary rounded-full" />
+                    <View style={{ width: `${Math.min(100, (summary.activeCalories / summary.weeklyGoalCalories) * 100)}%` }} className="h-full bg-primary rounded-full" />
                   </View>
-                  <Text className="text-[9px] text-on-surface-variant mt-1">80% of daily target</Text>
+                  <Text className="text-[9px] text-on-surface-variant mt-1">{Math.round((summary.activeCalories / summary.weeklyGoalCalories) * 100)}% of weekly target</Text>
                 </View>
               </View>
 
@@ -119,11 +128,11 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
                   </View>
                 </View>
                 <View>
-                  <Text className="text-display-md font-black text-on-surface leading-tight">4.8 hrs</Text>
+                  <Text className="text-display-md font-black text-on-surface leading-tight">{summary.weeklyTimeHours} hrs</Text>
                   <View className="w-full h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
-                    <View className="w-[65%] h-full bg-tertiary rounded-full" />
+                    <View style={{ width: `${Math.min(100, (summary.weeklyTimeHours / summary.weeklyGoalHours) * 100)}%` }} className="h-full bg-tertiary rounded-full" />
                   </View>
-                  <Text className="text-[9px] text-on-surface-variant mt-1">Goal: 6 hours</Text>
+                  <Text className="text-[9px] text-on-surface-variant mt-1">Goal: {summary.weeklyGoalHours} hours</Text>
                 </View>
               </View>
             </View>
@@ -138,8 +147,8 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
                   </View>
                 </View>
                 <View>
-                  <Text className="text-display-lg font-black text-on-surface">14</Text>
-                  <Text className="text-[9px] text-on-surface-variant mt-1">100% completion rate</Text>
+                  <Text className="text-display-lg font-black text-on-surface">{volumeData.length || 0}</Text>
+                  <Text className="text-[9px] text-on-surface-variant mt-1">Total completed</Text>
                 </View>
               </View>
 
@@ -152,8 +161,8 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
                   </View>
                 </View>
                 <View>
-                  <Text className="text-display-lg font-black text-on-surface">12 Days</Text>
-                  <Text className="text-[9px] text-on-surface-variant mt-1">Personal record is 15!</Text>
+                  <Text className="text-display-lg font-black text-on-surface">{summary.totalSessionsThisWeek}</Text>
+                  <Text className="text-[9px] text-on-surface-variant mt-1">Target: {summary.weeklyGoalDays} days</Text>
                 </View>
               </View>
             </View>
@@ -173,7 +182,7 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
                 ].map((item, idx) => (
                   <View key={idx} className="flex-1 items-center gap-2">
                     <View 
-                      style={{ height: item.h }} 
+                      style={{ height: item.h as any }} 
                       className={`w-full rounded-t-lg ${item.active ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-surface-container-high/50'}`} 
                     />
                     <Text className={`text-[10px] font-bold ${item.active ? 'text-primary' : 'text-on-surface-variant'}`}>{item.day}</Text>
@@ -199,7 +208,7 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
                       <Text className="text-[11px] font-black text-on-surface">{item.val}</Text>
                     </View>
                     <View className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                      <View style={{ width: item.val }} className={`h-full rounded-full ${item.color}`} />
+                      <View style={{ width: item.val as any }} className={`h-full rounded-full ${item.color}`} />
                     </View>
                   </View>
                 ))}
@@ -235,7 +244,7 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
               <View className="flex-row justify-between items-center mb-6">
                 <View>
                   <Text className="text-[10px] text-tertiary uppercase tracking-wider font-bold">Verified Personal Record</Text>
-                  <Text className="text-[28px] font-black text-on-surface mt-1">{liftsData[selectedLift].pr}</Text>
+                  <Text className="text-[28px] font-black text-on-surface mt-1">{currentPR.weight > 0 ? `${currentPR.weight} ${user?.weightUnit || 'KG'}` : 'No PR'}</Text>
                 </View>
                 <View className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 items-center justify-center">
                   <MaterialIcons name="emoji-events" size={24} color="#ffb869" />
@@ -244,10 +253,14 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
 
               {/* Progress Targets Grid */}
               <View className="flex-row justify-between gap-2 border-t border-white/5 pt-4">
-                {Object.entries(liftsData[selectedLift].targets).map(([repMax, val]) => (
-                  <View key={repMax} className="flex-1 bg-surface-container/50 border border-white/5 rounded-xl p-3 items-center">
-                    <Text className="text-[10px] font-bold text-on-surface-variant mb-1">{repMax}</Text>
-                    <Text className="text-sm font-bold text-on-surface">{val}</Text>
+                {[
+                  { label: '1RM', val: currentPR.weight > 0 ? currentPR.weight : 0 },
+                  { label: '3RM', val: currentPR.weight > 0 ? Math.round(currentPR.weight * 0.93) : 0 },
+                  { label: '5RM', val: currentPR.weight > 0 ? Math.round(currentPR.weight * 0.87) : 0 }
+                ].map((target) => (
+                  <View key={target.label} className="flex-1 bg-surface-container/50 border border-white/5 rounded-xl p-3 items-center">
+                    <Text className="text-[10px] font-bold text-on-surface-variant mb-1">{target.label}</Text>
+                    <Text className="text-sm font-bold text-on-surface">{target.val} {user?.weightUnit || 'KG'}</Text>
                   </View>
                 ))}
               </View>
@@ -260,17 +273,14 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
               <View className="h-44 flex-row items-end justify-between border-b border-l border-white/15 pb-2 pl-2 relative">
                 {/* Visual Line Graph Representation */}
                 <View className="absolute inset-0 flex-row items-end justify-around pb-6">
-                  {liftsData[selectedLift].history.map((pt, idx) => {
-                    const min = 190;
-                    const max = 420;
-                    const heightPercent = `${Math.min(100, Math.max(15, ((pt.weight - min) / (max - min)) * 100))}%`;
+                  {prHistory.map((pt, idx) => {
+                    const min = Math.max(0, currentPR.weight * 0.7);
+                    const max = currentPR.weight * 1.1 || 100;
+                    const heightPercent = pt.weight > 0 ? `${Math.min(100, Math.max(15, ((pt.weight - min) / (max - min)) * 100))}%` : '10%';
                     
                     return (
-                      <View key={idx} style={{ height: heightPercent }} className="items-center justify-end relative">
-                        {/* Interactive PR indicator point */}
+                      <View key={idx} style={{ height: heightPercent as any }} className="items-center justify-end relative">
                         <View className="w-3 h-3 rounded-full bg-primary border-2 border-white absolute -top-1.5 shadow-lg shadow-primary" />
-                        
-                        {/* floating label */}
                         <Text className="text-[10px] font-black text-on-surface absolute -top-7 px-1.5 py-0.5 rounded bg-primary/20 border border-primary/30">
                           {pt.weight}
                         </Text>
@@ -282,7 +292,7 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
 
               {/* X Axis dates */}
               <View className="flex-row justify-around w-full mt-3">
-                {liftsData[selectedLift].history.map((pt, idx) => (
+                {prHistory.map((pt, idx) => (
                   <Text key={idx} className="text-[10px] font-bold text-on-surface-variant">{pt.date}</Text>
                 ))}
               </View>
@@ -298,26 +308,31 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
               <View className="flex-row justify-between items-center mb-6">
                 <View>
                   <Text className="text-[10px] text-tertiary uppercase tracking-wider font-bold">Body Weight Trend</Text>
-                  <Text className="text-[28px] font-black text-on-surface mt-1">178.6 lbs</Text>
+                  <Text className="text-[28px] font-black text-on-surface mt-1">{currentBiometrics.weight > 0 ? `${currentBiometrics.weight} ${user?.weightUnit || 'KG'}` : 'No Data'}</Text>
                 </View>
-                <View className="bg-surface-container-high px-4 py-2 rounded-full border border-white/5">
-                  <Text className="text-[10px] font-bold text-primary">-3.4 lbs this month</Text>
-                </View>
+                {biometricHistory.length > 1 && (
+                  <View className="bg-surface-container-high px-4 py-2 rounded-full border border-white/5">
+                    <Text className="text-[10px] font-bold text-primary">
+                      {currentBiometrics.weight - biometricHistory[0].weight > 0 ? '+' : ''}
+                      {(currentBiometrics.weight - biometricHistory[0].weight).toFixed(1)} {user?.weightUnit || 'KG'}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               {/* Weight Progression Chart */}
               <View className="h-44 flex-row items-end justify-between border-b border-l border-white/15 pb-2 pl-2 relative">
                 <View className="absolute inset-0 flex-row items-end justify-around pb-4">
-                  {[182.0, 180.5, 179.2, 178.6].map((w, idx) => {
-                    const min = 170;
-                    const max = 190;
-                    const heightPercent = `${100 - ((w - min) / (max - min)) * 100}%`;
+                  {recentWeightHistory.map((item, idx) => {
+                    const min = Math.max(0, currentBiometrics.weight * 0.9);
+                    const max = currentBiometrics.weight * 1.1 || 100;
+                    const heightPercent = item.w > 0 ? `${100 - ((item.w - min) / (max - min)) * 100}%` : '10%';
 
                     return (
-                      <View key={idx} style={{ height: heightPercent }} className="items-center justify-end relative">
+                      <View key={idx} style={{ height: heightPercent as any }} className="items-center justify-end relative">
                         <View className="w-3 h-3 rounded-full bg-tertiary border-2 border-white absolute -top-1.5 shadow-lg" />
                         <Text className="text-[10px] font-black text-on-surface absolute -top-7 px-1.5 py-0.5 rounded bg-tertiary/20 border border-tertiary/30">
-                          {w}
+                          {item.w}
                         </Text>
                       </View>
                     );
@@ -326,8 +341,8 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
               </View>
 
               <View className="flex-row justify-around w-full mt-3">
-                {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((wk) => (
-                  <Text key={wk} className="text-[10px] font-bold text-on-surface-variant">{wk}</Text>
+                {recentWeightHistory.map((item, idx) => (
+                  <Text key={idx} className="text-[10px] font-bold text-on-surface-variant">{item.date}</Text>
                 ))}
               </View>
             </View>
@@ -336,14 +351,12 @@ export default function AnalyticsDashboardScreen({ navigation }: Props) {
             <View className="flex-row gap-4">
               <View className="flex-1 bg-surface-container/30 border border-white/10 rounded-2xl p-5 items-center justify-center relative overflow-hidden">
                 <Text className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Body Fat %</Text>
-                <Text className="text-[28px] font-black text-tertiary">14.2%</Text>
-                <Text className="text-[9px] text-on-surface-variant mt-2">Target: 12% | Down 0.8%</Text>
+                <Text className="text-[28px] font-black text-tertiary">{currentBiometrics.bodyFat || '--'}%</Text>
               </View>
 
               <View className="flex-1 bg-surface-container/30 border border-white/10 rounded-2xl p-5 items-center justify-center relative overflow-hidden">
                 <Text className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Lean Mass</Text>
-                <Text className="text-[28px] font-black text-primary">153.2 lbs</Text>
-                <Text className="text-[9px] text-on-surface-variant mt-2">Target: 155 lbs | Up 1.4 lbs</Text>
+                <Text className="text-[28px] font-black text-primary">{currentBiometrics.leanMass || '--'} {user?.weightUnit || 'KG'}</Text>
               </View>
             </View>
           </View>

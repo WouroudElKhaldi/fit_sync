@@ -28,7 +28,7 @@ export default function EmailVerificationScreen({ navigation, route }: Props) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setTimeout>;
     if (countdown > 0) {
       interval = setInterval(() => {
         setCountdown((prev) => prev - 1);

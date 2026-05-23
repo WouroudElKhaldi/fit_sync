@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from './message.service';
+import { NotificationService } from '../notification/notification.service';
 import { prisma } from '@fitsync/database';
 
 @WebSocketGateway({
@@ -22,7 +23,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private activeConnections = new Map<string, Set<string>>();
 
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
@@ -137,10 +141,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         select: { fullName: true },
       });
       
+      const title = 'Connection Request';
+      const message = `${requester?.fullName || 'A user'} wants to connect with you.`;
+      
+      await this.notificationService.createNotification({
+        userId: payload.addresseeId,
+        title,
+        message,
+        type: 'CONNECTION_REQUEST',
+      });
+      
       this.server.to(payload.addresseeId).emit('new_notification', {
         type: 'CONNECTION_REQUEST',
         requesterId: payload.requesterId,
-        message: `${requester?.fullName || 'A user'} wants to connect with you.`,
+        message,
       });
     } catch (err) {
       console.error('Error emitting connection request notification:', err);
@@ -163,10 +177,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       ]);
 
+      const title = 'Group Invitation';
+      const message = `${inviter?.fullName || 'A trainer'} invited you to join the group "${group?.name || 'Group Chat'}"`;
+
+      await this.notificationService.createNotification({
+        userId: payload.inviteeId,
+        title,
+        message,
+        type: 'GROUP_INVITATION',
+      });
+
       this.server.to(payload.inviteeId).emit('new_notification', {
         type: 'GROUP_INVITATION',
         groupId: payload.groupId,
-        message: `${inviter?.fullName || 'A trainer'} invited you to join the group "${group?.name || 'Group Chat'}"`,
+        message,
       });
     } catch (err) {
       console.error('Error emitting group invite notification:', err);
@@ -203,11 +227,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // Emit to both sender and receiver personal rooms
         this.server.to(payload.senderId).to(payload.receiverId).emit('receive_message', message);
 
+        const title = 'New Message';
+        const msgText = `You have a new message from ${message.sender.fullName}`;
+
+        await this.notificationService.createNotification({
+          userId: payload.receiverId,
+          title,
+          message: msgText,
+          type: 'NEW_MESSAGE',
+        });
+
         // Also notify the receiver specifically
         this.server.to(payload.receiverId).emit('new_notification', {
           type: 'NEW_MESSAGE',
           senderId: payload.senderId,
-          message: `You have a new message from ${message.sender.fullName}`,
+          message: msgText,
         });
       }
     } catch (err: any) {
@@ -221,10 +255,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: { clientId: string; trainerId: string },
     @ConnectedSocket() client: Socket,
   ) {
+    const title = 'Trainer Request';
+    const message = 'A user wants to hire you!';
+
+    await this.notificationService.createNotification({
+      userId: payload.trainerId,
+      title,
+      message,
+      type: 'TRAINER_REQUEST',
+    });
+
     this.server.to(payload.trainerId).emit('new_notification', {
       type: 'TRAINER_REQUEST',
       clientId: payload.clientId,
-      message: 'A user wants to hire you!',
+      message,
     });
 
     console.log(

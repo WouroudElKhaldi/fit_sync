@@ -13,6 +13,7 @@ const ClientDetails: React.FC = () => {
 
   const [clientData, setClientData] = useState<any>(null);
   const [plans, setPlans] = useState<any[]>([]);
+  const [prs, setPrs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,9 +48,10 @@ const ClientDetails: React.FC = () => {
       };
 
       try {
-        const [progressRes, plansRes] = await Promise.all([
+        const [progressRes, plansRes, prsRes] = await Promise.all([
           fetch(`http://localhost:3000/trainers/clients/${id}/progress?trainerId=${user.id}`, { headers }),
           fetch(`http://localhost:3000/workouts/plans/trainer/${user.id}`, { headers }),
+          fetch(`http://localhost:3000/biometrics/${id}/prs`, { headers }),
         ]);
 
         if (!progressRes.ok || !plansRes.ok) {
@@ -58,9 +60,11 @@ const ClientDetails: React.FC = () => {
 
         const progressData = await progressRes.json();
         const plansData = await plansRes.json();
+        const prsData = prsRes.ok ? await prsRes.json() : [];
 
         setClientData(progressData);
         setPlans(plansData);
+        setPrs(prsData);
       } catch (err: any) {
         console.error(err);
         setError(err.message || 'An error occurred while fetching client details');
@@ -85,6 +89,18 @@ const ClientDetails: React.FC = () => {
     if (biometrics.length === 0) return 'N/A';
     const log = biometrics.find((b: any) => b.height);
     return log ? log.height : 'N/A';
+  }, [biometrics]);
+
+  const latestBodyFat = useMemo(() => {
+    if (biometrics.length === 0) return '--';
+    const log = [...biometrics].reverse().find((b: any) => b.bodyFat);
+    return log ? log.bodyFat : '--';
+  }, [biometrics]);
+
+  const latestLeanMass = useMemo(() => {
+    if (biometrics.length === 0) return '--';
+    const log = [...biometrics].reverse().find((b: any) => b.leanMass);
+    return log ? log.leanMass : '--';
   }, [biometrics]);
 
   const scheduledSessions = useMemo(() => {
@@ -280,7 +296,8 @@ const ClientDetails: React.FC = () => {
           <div className="space-y-6 relative z-10">
             {[
               { label: 'Current Mass', value: latestWeight, unit: client.weightUnit || 'KG', color: 'on-surface' },
-              { label: 'Verticality', value: latestHeight, unit: client.lengthUnit || 'CM', color: 'on-surface' },
+              { label: 'Body Fat %', value: latestBodyFat, unit: '%', color: 'tertiary' },
+              { label: 'Lean Mass', value: latestLeanMass, unit: client.weightUnit || 'KG', color: 'primary' },
               { label: 'Telemetry Logs', value: biometrics.length, unit: 'LOGS', color: 'primary' }
             ].map((stat, i) => (
               <div key={i} className="flex items-center justify-between p-6 bg-surface-container-high/40 rounded-3xl border border-secondary-container/5 group/row hover:bg-surface-container-high transition-all shadow-inner">
@@ -346,10 +363,50 @@ const ClientDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Workout Timeline */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      {/* Personal Records & Operational Timeline */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {/* Verified Personal Records */}
+        <div className="bg-surface-container-low border border-secondary-container/10 rounded-[40px] p-12 shadow-2xl hover-card-motion lg:col-span-1">
+          <div className="flex items-center gap-5 mb-12">
+            <div className="w-14 h-14 rounded-2xl bg-[#ffb869]/10 text-[#ffb869] flex items-center justify-center border border-[#ffb869]/20 shadow-inner">
+              <span className="material-symbols-outlined text-[32px] fill">emoji_events</span>
+            </div>
+            <div>
+               <h3 className="text-xl font-black text-on-surface uppercase tracking-tight leading-none mb-1">Personal Records</h3>
+               <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest">Verified Maximums</span>
+            </div>
+          </div>
+          <div className="space-y-4 max-h-80 overflow-y-auto pr-2 no-scrollbar">
+            {prs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-on-surface-variant/40">
+                <span className="material-symbols-outlined text-4xl mb-2">military_tech</span>
+                <span className="text-xs font-bold uppercase tracking-wider">No PRs recorded yet</span>
+              </div>
+            ) : (
+              prs.map((pr: any, i: number) => (
+                <div key={i} className="flex items-center justify-between p-6 rounded-3xl bg-surface-container-high/40 hover:bg-[#ffb869]/5 transition-all border border-transparent shadow-inner">
+                  <div className="flex items-center gap-6">
+                     <div className="w-2 h-10 bg-[#ffb869]/20 rounded-full"></div>
+                     <div>
+                      <h4 className="text-sm font-black text-on-surface uppercase tracking-tight text-[#ffb869]">
+                        {pr.exercise.name}
+                      </h4>
+                      <p className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest mt-1">
+                        {new Date(pr.achievedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xl font-black text-on-surface">
+                    {pr.weight} <span className="text-xs font-black opacity-30">{client.weightUnit || 'KG'}</span>
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Completed Workouts */}
-        <div className="bg-surface-container-low border border-secondary-container/10 rounded-[40px] p-12 shadow-2xl hover-card-motion">
+        <div className="bg-surface-container-low border border-secondary-container/10 rounded-[40px] p-12 shadow-2xl hover-card-motion lg:col-span-1">
           <div className="flex items-center gap-5 mb-12">
             <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20 shadow-inner">
               <span className="material-symbols-outlined text-[32px] fill">verified</span>

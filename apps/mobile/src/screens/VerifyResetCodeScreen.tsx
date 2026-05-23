@@ -27,7 +27,7 @@ export default function VerifyResetCodeScreen({ navigation, route }: Props) {
   const [countdown, setCountdown] = useState(30);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setTimeout>;
     if (countdown > 0) {
       interval = setInterval(() => {
         setCountdown((prev) => prev - 1);
@@ -132,7 +132,7 @@ export default function VerifyResetCodeScreen({ navigation, route }: Props) {
       )}
 
       <ScrollView 
-        contentContainerStyle={{ flexGrow: 1, justifycontent: 'center', paddingHorizontal: 20, paddingBottom: 60, paddingTop: 40 }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingBottom: 60, paddingTop: 40 }}
         showsVerticalScrollIndicator={false}
         className="z-10"
       >

@@ -8,12 +8,14 @@ export type RootStackParamList = {
   RoleSelection: undefined;
   MainTabs: undefined;
   WorkoutLogger: { planId: string };
-  WorkoutBuilder: { defaultDate?: string; addedExerciseNames?: string[] } | undefined;
+  WorkoutBuilder: { defaultDate?: string; addedExercises?: { id: string; name: string }[]; planId?: string } | undefined;
+  WorkoutDetails: { planId: string };
   ExerciseSelector: undefined;
-  PostWorkoutSummary: undefined;
-  ActiveChat: undefined;
+  PostWorkoutSummary: { sessionId?: string };
+  ActiveChat: { conversationId?: string; isGroup?: boolean; title?: string };
   Settings: undefined;
-  TrainerProfile: undefined;
+  Notifications: undefined;
+  TrainerProfile: { trainerId?: string };
 };
 
 export type MainTabParamList = {

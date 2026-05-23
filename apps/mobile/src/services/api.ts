@@ -25,45 +25,66 @@ export const apiService = {
    * Helper to perform POST HTTP requests to NestJS Auth backend.
    */
   post: async (path: string, body?: any) => {
-    const url = `${BASE_URL}${path}`;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    return apiRequest('POST', path, body);
+  },
 
-    try {
-      // Auto-inject JWT token if stored
-      const token = await AsyncStorage.getItem('fitsync_token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+  get: async (path: string) => {
+    return apiRequest('GET', path);
+  },
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
-      });
+  put: async (path: string, body?: any) => {
+    return apiRequest('PUT', path, body);
+  },
 
-      const data = await response.json().catch(() => null);
+  patch: async (path: string, body?: any) => {
+    return apiRequest('PATCH', path, body);
+  },
 
-      if (!response.ok) {
-        // Pass structured backend error payload
-        throw {
-          status: response.status,
-          message: data?.message || 'Network request failed',
-          code: data?.code || null,
-          email: data?.email || null,
-          errors: data?.errors || null,
-        };
-      }
-
-      return data;
-    } catch (error: any) {
-      if (error.status) {
-        throw error;
-      }
-      throw {
-        message: error.message || 'Unable to connect to the server',
-      };
-    }
+  delete: async (path: string, body?: any) => {
+    return apiRequest('DELETE', path, body);
   },
 };
+
+// Generic request helper
+async function apiRequest(method: string, path: string, body?: any) {
+  const url = `${BASE_URL}${path}`;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    // Auto-inject JWT token if stored
+    const token = await AsyncStorage.getItem('fitsync_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      // Pass structured backend error payload
+      throw {
+        status: response.status,
+        message: data?.message || 'Network request failed',
+        code: data?.code || null,
+        email: data?.email || null,
+        errors: data?.errors || null,
+      };
+    }
+
+    return data;
+  } catch (error: any) {
+    if (error.status) {
+      throw error;
+    }
+    throw {
+      message: error.message || 'Unable to connect to the server',
+    };
+  }
+}

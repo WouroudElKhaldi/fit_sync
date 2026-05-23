@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { RouteProp } from '@react-navigation/native';
 import { ConfirmModal } from '../components/ui/Modal';
-import { api } from '../../mocks/api';
+import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useAppTheme } from '../context/ThemeContext';
+import { AppHeader } from '../components/ui/AppHeader';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'WorkoutLogger'>;
@@ -13,8 +16,11 @@ type Props = {
 };
 
 export default function WorkoutLoggerScreen({ navigation, route }: Props) {
-  const { planId } = route.params || {};
+  const { user } = useAuth();
+  const { colors, isDark } = useAppTheme();
+  const { planId, templateId } = (route.params as any) || {};
   const [workout, setWorkout] = useState<any>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [setsData, setSetsData] = useState<{ [setId: string]: { reps: string; weight: string; completed: boolean } }>({});
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -27,30 +33,47 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     async function loadWorkout() {
-      const schedules = await api.getWorkoutSchedule();
-      const selected = schedules.find((s: any) => s.id === planId) || schedules[0];
-      setWorkout(selected);
+      try {
+        let session;
+        try {
+          session = await apiService.get(`/workouts/sessions/by-plan/${planId}`);
+        } catch (err: any) {
+          if (err.status === 404 || err.message?.includes('Not Found')) {
+            session = await apiService.post('/workouts/sessions/start', { workoutPlanId: planId });
+          } else {
+            throw err;
+          }
+        }
+        
+        setSessionId(session.id);
+        const plan = session.workoutPlan || session; // fallback in case structure varies
+        setWorkout(plan);
 
-      if (selected && selected.exercises) {
-        const initialData: any = {};
-        selected.exercises.forEach((ex: any) => {
-          ex.sets.forEach((set: any) => {
-            const isCompleted = set.status === 'COMPLETED';
-            initialData[set.id] = {
-              reps: isCompleted && set.actualReps !== null && set.actualReps !== undefined
-                ? set.actualReps.toString()
-                : (set.expectedReps?.toString() || ''),
-              weight: isCompleted && set.actualWeight !== null && set.actualWeight !== undefined
-                ? set.actualWeight.toString()
-                : (set.expectedWeight?.toString() || ''),
-              completed: isCompleted,
-            };
+        if (plan && plan.exercises) {
+          const initialData: any = {};
+          plan.exercises.forEach((ex: any) => {
+            ex.sets.forEach((set: any) => {
+              const isCompleted = set.status === 'COMPLETED';
+              initialData[set.id] = {
+                reps: isCompleted && set.actualReps !== null && set.actualReps !== undefined
+                  ? set.actualReps.toString()
+                  : (set.expectedReps?.toString() || ''),
+                weight: isCompleted && set.actualWeight !== null && set.actualWeight !== undefined
+                  ? set.actualWeight.toString()
+                  : (set.expectedWeight?.toString() || ''),
+                completed: isCompleted,
+              };
+            });
           });
-        });
-        setSetsData(initialData);
+          setSetsData(initialData);
+        }
+      } catch (err) {
+        console.error('Failed to load or start workout session', err);
       }
     }
-    loadWorkout();
+    if (planId) {
+      loadWorkout();
+    }
   }, [planId]);
 
   const formatTime = (seconds: number) => {
@@ -60,59 +83,65 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
   };
 
   return (
-    <View className="flex-1 bg-background">
-      {/* Header */}
-      <View className="flex-row justify-between items-center px-margin-mobile py-4 border-b border-white/10 bg-surface/90 pt-12">
-        <View className="flex-row items-center gap-4">
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: colors.background }}
+    >
+      <AppHeader />
+
+      {/* Session Status Bar */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 12, backgroundColor: colors.surfaceContainer, borderBottomWidth: 1, borderColor: colors.border }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <TouchableOpacity 
-            className="w-10 h-10 items-center justify-center rounded-full bg-surface-container border border-white/10"
+            style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
             onPress={() => setShowCancelModal(true)}
           >
-            <MaterialIcons name="close" size={24} color="#d9e3f6" />
+            <MaterialIcons name="close" size={20} color={colors.text} />
           </TouchableOpacity>
           <View>
-            <Text className="text-on-surface-variant text-label-caps uppercase">{workout?.title || 'Active Workout'}</Text>
-            <Text className="text-on-surface text-body-lg font-bold">{formatTime(timer)}</Text>
+            <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, color: colors.textMuted }}>{workout?.title || 'Active Workout'}</Text>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>⏱ {formatTime(timer)}</Text>
           </View>
         </View>
         <TouchableOpacity 
-          className="bg-primary px-4 py-2 rounded-lg"
+          style={{ backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 }}
           onPress={() => setShowFinishModal(true)}
         >
-          <Text className="text-on-primary font-bold">Finish</Text>
+          <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 14 }}>Finish</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1 px-margin-mobile pt-4" contentContainerStyle={{ paddingBottom: 40 }}>
         {workout?.exercises && workout.exercises.length > 0 ? (
           workout.exercises.map((ex: any, exIdx: number) => (
-            <View key={ex.id} className="bg-surface-container/30 border border-white/10 rounded-xl overflow-hidden mb-6">
-              <View className="p-4 flex-row justify-between items-center border-b border-white/10 bg-surface-container/50">
-                <View className="flex-1 pr-4">
-                  <Text className="text-tertiary text-label-caps font-bold">
+            <View key={ex.id} style={{ backgroundColor: colors.surfaceContainer, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, marginBottom: 24 }}>
+              {/* Exercise Header */}
+              <View style={{ padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerHigh }}>
+                <View style={{ flex: 1, paddingRight: 16 }}>
+                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, fontWeight: '700', color: colors.primary }}>
                     EXERCISE {exIdx + 1}/{workout.exercises.length}
                   </Text>
-                  <Text className="text-on-surface text-headline-md font-bold mt-1">
+                  <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginTop: 4 }}>
                     {ex.exercise?.name || 'Exercise'}
                   </Text>
                   {ex.notes && (
-                    <Text className="text-on-surface-variant text-xs mt-1 italic">
+                    <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 2, fontStyle: 'italic' }}>
                       Note: {ex.notes}
                     </Text>
                   )}
                 </View>
                 <TouchableOpacity>
-                  <MaterialIcons name="more-vert" size={24} color="#d9e3f6" />
+                  <MaterialIcons name="more-vert" size={24} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
 
               {/* Sets Header */}
-              <View className="flex-row p-4 border-b border-white/10 bg-white/[0.02]">
-                <Text className="text-on-surface-variant flex-[0.5] font-bold text-xs uppercase">Set</Text>
-                <Text className="text-on-surface-variant flex-1 text-center font-bold text-xs uppercase">Target</Text>
-                <Text className="text-on-surface-variant flex-1 text-center font-bold text-xs uppercase">Weight (kg)</Text>
-                <Text className="text-on-surface-variant flex-1 text-center font-bold text-xs uppercase">Reps</Text>
-                <Text className="text-on-surface-variant flex-[0.5] text-right font-bold text-xs uppercase">Log</Text>
+              <View style={{ flexDirection: 'row', padding: 12, borderBottomWidth: 1, borderColor: colors.border, backgroundColor: colors.background + '22' }}>
+                <Text style={{ flex: 0.5, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', color: colors.textMuted }}>Set</Text>
+                <Text style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', color: colors.textMuted }}>Target</Text>
+                <Text style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', color: colors.textMuted }}>Weight (kg)</Text>
+                <Text style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', color: colors.textMuted }}>Reps</Text>
+                <Text style={{ flex: 0.5, textAlign: 'right', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', color: colors.textMuted }}>Log</Text>
               </View>
 
               {/* Set Rows */}
@@ -175,7 +204,15 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
                           if (completed) {
                             const repsNum = parseInt(currentSet.reps) || set.expectedReps;
                             const weightNum = parseFloat(currentSet.weight) || set.expectedWeight;
-                            await api.logSetCompletion(set.id, repsNum, weightNum);
+                            await apiService.patch(`/workouts/sessions/set/${set.id}`, {
+                              actualReps: repsNum,
+                              actualWeight: weightNum,
+                              status: 'COMPLETED'
+                            });
+                          } else {
+                            await apiService.patch(`/workouts/sessions/set/${set.id}`, {
+                              status: 'PENDING'
+                            });
                           }
                         }}
                         className={`w-8 h-8 rounded border items-center justify-center transition-all ${isCompleted ? 'bg-primary border-primary' : 'bg-surface-container border-white/10'}`}
@@ -202,29 +239,7 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
             <TouchableOpacity 
               className="px-6 h-12 bg-primary rounded-xl items-center justify-center"
               onPress={() => {
-                const mockPlan = {
-                  ...workout,
-                  exercises: [
-                    {
-                      id: "we-freestyle",
-                      workoutPlanId: "freestyle",
-                      exerciseId: "e-freestyle",
-                      orderIndex: 1,
-                      restTimeSec: 90,
-                      notes: "Freestyle session",
-                      exercise: { id: "e-freestyle", name: "Freestyle Push-Ups" },
-                      sets: [
-                        { id: "ws-free-1", setIndex: 1, expectedReps: 15, expectedWeight: 0 },
-                        { id: "ws-free-2", setIndex: 2, expectedReps: 15, expectedWeight: 0 }
-                      ]
-                    }
-                  ]
-                };
-                setWorkout(mockPlan);
-                setSetsData({
-                  "ws-free-1": { reps: "15", weight: "0", completed: false },
-                  "ws-free-2": { reps: "15", weight: "0", completed: false }
-                });
+                navigation.navigate('ExerciseSelector');
               }}
             >
               <Text className="text-on-primary font-bold">Add Custom Exercise</Text>
@@ -246,10 +261,17 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
             if (data.completed) {
               const repsNum = parseInt(data.reps) || 0;
               const weightNum = parseFloat(data.weight) || 0;
-              await api.logSetCompletion(setId, repsNum, weightNum);
+              await apiService.patch(`/workouts/sessions/set/${setId}`, {
+                actualReps: repsNum,
+                actualWeight: weightNum,
+                status: 'COMPLETED'
+              });
             }
           }
-          navigation.navigate('PostWorkoutSummary' as any);
+          if (sessionId) {
+            await apiService.post(`/workouts/sessions/${sessionId}/complete`, {});
+          }
+          navigation.navigate('PostWorkoutSummary' as any, { sessionId });
         }}
         onCancel={() => setShowFinishModal(false)}
         confirmText="Save Workout"
@@ -266,6 +288,6 @@ export default function WorkoutLoggerScreen({ navigation, route }: Props) {
         onCancel={() => setShowCancelModal(false)}
         confirmText="Discard"
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
